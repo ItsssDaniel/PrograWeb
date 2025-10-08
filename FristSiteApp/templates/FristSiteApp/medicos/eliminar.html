@@ -1,0 +1,79 @@
+{% extends 'FristSiteApp/base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="container main-content">
+        <div class="section" id="eliminar-medicos">
+            <h2>Eliminar Médicos</h2>
+            <p>Selecciona un médico para eliminar:</p>
+            
+            <div class="contenedor-tabla">
+                <table class="tabla-datos">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Especialidad</th>
+                            <th>Cédula</th>
+                            <th>Activo</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>Dr. Juan Pérez</td>
+                            <td>Cardiología</td>
+                            <td>CP12345</td>
+                            <td>✅</td>
+                            <td>
+                                <button type="button" class="btn-eliminar-tabla" onclick="confirmarEliminacion(1)">
+                                    <span class="icono">×</span>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>Dra. María García</td>
+                            <td>Pediatría</td>
+                            <td>CP67890</td>
+                            <td>✅</td>
+                            <td>
+                                <button type="button" class="btn-eliminar-tabla" onclick="confirmarEliminacion(2)">
+                                    <span class="icono">×</span>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>Dr. Carlos López</td>
+                            <td>Dermatología</td>
+                            <td>CP11223</td>
+                            <td>❌</td>
+                            <td>
+                                <button type="button" class="btn-eliminar-tabla" onclick="confirmarEliminacion(3)">
+                                    <span class="icono">×</span>
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="botones-volver">
+                <button type="button" class="btn-volver" onclick="window.location.href='/registro/'">
+                    Volver al Registro
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        //<![CDATA[
+        function confirmarEliminacion(id) {
+            if (confirm('¿Estás seguro de que deseas eliminar este médico? Esta acción no se puede deshacer.')) {
+                alert('Médico con ID ' + id + ' eliminado');
+            }
+        }
+        //]]>
+    </script>
+{% endblock %}

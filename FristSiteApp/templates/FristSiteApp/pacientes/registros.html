@@ -1,0 +1,54 @@
+{% extends 'FristSiteApp/base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="container main-content">
+        <div class="section" id="registros-pacientes">
+            <h2>Registros de Pacientes</h2>
+            <p>Lista completa de pacientes registrados en el sistema:</p>
+            
+            <div class="contenedor-tabla">
+                <table class="tabla-datos">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Fecha Nacimiento</th>
+                            <th>Email</th>
+                            <th>Teléfono</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>Ana García López</td>
+                            <td>1990-05-15</td>
+                            <td>ana.garcia@email.com</td>
+                            <td>555-0101</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>Carlos Rodríguez</td>
+                            <td>1985-12-20</td>
+                            <td>c.rodriguez@email.com</td>
+                            <td>555-0102</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>María Fernández</td>
+                            <td>1978-08-30</td>
+                            <td>m.fernandez@email.com</td>
+                            <td>555-0103</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="botones-volver">
+                <button type="button" class="btn-volver" onclick="window.location.href='/registro/'">
+                    Volver al Registro
+                </button>
+            </div>
+        </div>
+    </div>
+{% endblock %}

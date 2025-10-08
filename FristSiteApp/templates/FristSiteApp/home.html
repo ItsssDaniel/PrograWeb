@@ -1,0 +1,155 @@
+{% extends 'FristSiteApp/base.html' %}
+{% load static %}
+
+{% block content %}
+    <div id="main-content" class="container">
+        <!-- Hero Section -->
+        <div id="hero-section" class="content-section">
+            <div class="hero-content">
+                <h1>SGCM MEDIC</h1>
+                <p>Tu salud, nuestra prioridad. Gestión médica simplificada y eficiente.</p>
+                <div class="hero-stats">
+                    <div class="stat-box">
+                        <span class="stat-icon">👨‍⚕️</span>
+                        <span class="stat-text">Gestión Médica</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-icon">📊</span>
+                        <span class="stat-text">Control Total</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-icon">⚡</span>
+                        <span class="stat-text">Rápido y Seguro</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Features Grid -->
+        <div class="features-container">
+            <div class="feature-box">
+                <div class="feature-img">🩺</div>
+                <h3>Atención Médica</h3>
+                <p>Gestión completa de profesionales de la salud</p>
+            </div>
+            <div class="feature-box">
+                <div class="feature-img">👥</div>
+                <h3>Gestión de Pacientes</h3>
+                <p>Control y seguimiento de historiales médicos</p>
+            </div>
+            <div class="feature-box">
+                <div class="feature-img">🔒</div>
+                <h3>Seguridad Garantizada</h3>
+                <p>Protección de datos con altos estándares</p>
+            </div>
+        </div>
+
+        <!-- Misión Visual -->
+        <div id="mision-section" class="content-section">
+            <h2>¿Qué Hacemos?</h2>
+            <div class="mission-container">
+                <div class="mission-box">
+                    <div class="mission-img">🎯</div>
+                    <h4>Simplificamos</h4>
+                    <p>Hacemos la gestión médica accesible para todos</p>
+                </div>
+                <div class="mission-box">
+                    <div class="mission-img">💡</div>
+                    <h4>Innovamos</h4>
+                    <p>Tecnología de vanguardia para tu salud</p>
+                </div>
+                <div class="mission-box">
+                    <div class="mission-img">❤️</div>
+                    <h4>Cuidamos</h4>
+                    <p>Experiencias centradas en las personas</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Valores Visual -->
+        <div id="valores-section" class="content-section">
+            <h2>Nuestros Principios</h2>
+            <div class="values-container">
+                <div class="value-box">
+                    <span class="value-img">🤝</span>
+                    <h4>Empatía</h4>
+                    <p>Personas primero</p>
+                </div>
+                <div class="value-box">
+                    <span class="value-img">🚀</span>
+                    <h4>Innovación</h4>
+                    <p>Siempre mejorando</p>
+                </div>
+                <div class="value-box">
+                    <span class="value-img">🛡️</span>
+                    <h4>Seguridad</h4>
+                    <p>Protección total</p>
+                </div>
+                <div class="value-box">
+                    <span class="value-img">⚡</span>
+                    <h4>Simplicidad</h4>
+                    <p>Fácil de usar</p>
+                </div>
+                <div class="value-box">
+                    <span class="value-img">⭐</span>
+                    <h4>Excelencia</h4>
+                    <p>Calidad superior</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        //<![CDATA[
+        document.addEventListener('DOMContentLoaded', function() {
+            // Efectos de animación al hacer scroll
+            var observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            var observer = new IntersectionObserver(function(entries) {
+                entries.forEach(function(entry) {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, observerOptions);
+
+            // Observar elementos para animación
+            var elements = document.querySelectorAll('.feature-box, .mission-box, .value-box');
+            for (var i = 0; i < elements.length; i++) {
+                elements[i].style.opacity = '0';
+                elements[i].style.transform = 'translateY(30px)';
+                elements[i].style.transition = 'all 0.6s ease';
+                observer.observe(elements[i]);
+            }
+        });
+
+        function verificarConexionBD() {
+            fetch('/dataBaseConexion/')
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    var dbStatus = document.getElementById('dbStatus');
+                    if (dbStatus) {
+                        if (data.conectado) {
+                            dbStatus.className = 'db-status conectado';
+                            dbStatus.innerHTML = '<span class="status-icon"></span> ✅ Base de Datos Conectada';
+                        } else {
+                            dbStatus.className = 'db-status error';
+                            dbStatus.innerHTML = '<span class="status-icon"></span> ❌ Error de Conexión';
+                        }
+                    }
+                })
+                .catch(function() {
+                    var dbStatus = document.getElementById('dbStatus');
+                    if (dbStatus) {
+                        dbStatus.className = 'db-status error';
+                        dbStatus.innerHTML = '<span class="status-icon"></span> ❌ Error de Conexión';
+                    }
+                });
+        }
+        //]]>
+    </script>
+{% endblock %}

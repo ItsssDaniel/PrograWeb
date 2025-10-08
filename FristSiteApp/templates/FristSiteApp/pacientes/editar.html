@@ -1,0 +1,148 @@
+{% extends 'FristSiteApp/base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="container main-content">
+        <div class="section" id="editar-paciente">
+            <h2>Modificar Paciente</h2>
+            <p>Editando paciente con ID: <strong>{{ paciente_id }}</strong></p>
+            
+            <form class="formulario" action="#" method="post" onsubmit="actualizarPaciente(event); return false;">
+                <div class="campo-formulario">
+                    <label for="id">ID (No editable):</label>
+                    <input type="text" id="id" name="id" value="{{ paciente_id }}" readonly="readonly" class="campo-readonly" />
+                    <span class="texto-ayuda">El ID no se puede modificar</span>
+                </div>
+                
+                <div class="campo-formulario">
+                    <label for="nombre">Nombre Completo:</label>
+                    <input type="text" id="nombre" name="nombre" value="{{ nombre }}" class="campo-requerido" />
+                    <span class="texto-ayuda">* Campo obligatorio</span>
+                </div>
+                
+                <div class="campo-formulario">
+                    <label for="fecha_nacimiento">Fecha de Nacimiento:</label>
+                    <input type="text" id="fecha_nacimiento" name="fecha_nacimiento" value="{{ fecha_nacimiento }}" class="campo-requerido fecha"/>
+                    <span class="texto-ayuda">* Formato: AAAA-MM-DD</span>
+                </div>
+                
+                <div class="campo-formulario">
+                    <label for="email">Email:</label>
+                    <input type="text" id="email" name="email" value="{{ email }}" class="campo-requerido email" />
+                    <span class="texto-ayuda">* Campo obligatorio</span>
+                </div>
+                
+                <div class="campo-formulario">
+                    <label for="telefono">Teléfono:</label>
+                    <input type="text" id="telefono" name="telefono" value="{{ telefono }}" class="campo-requerido telefono" />
+                    <span class="texto-ayuda">* Campo obligatorio</span>
+                </div>
+                
+                <div class="botones-formulario">
+                    <button type="submit" class="btn-actualizar">Actualizar Paciente</button>
+                    <button type="button" class="btn-volver" onclick="cancelarEdicion()">
+                        Cancelar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        //<![CDATA[
+        function validarEmail(email) {
+            var regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return regex.test(email);
+        }
+        
+        function validarFecha(fecha) {
+            var regex = /^\d{4}-\d{2}-\d{2}$/;
+            if (!regex.test(fecha)) return false;
+            
+            var partes = fecha.split('-');
+            var anio = parseInt(partes[0], 10);
+            var mes = parseInt(partes[1], 10);
+            var dia = parseInt(partes[2], 10);
+            
+            var fechaObj = new Date(anio, mes - 1, dia);
+            return fechaObj.getFullYear() === anio && 
+                   fechaObj.getMonth() === mes - 1 && 
+                   fechaObj.getDate() === dia;
+        }
+        
+        function validarFormularioPaciente() {
+            var nombre = document.getElementById('nombre');
+            var fechaNacimiento = document.getElementById('fecha_nacimiento');
+            var email = document.getElementById('email');
+            var telefono = document.getElementById('telefono');
+            var valido = true;
+            
+            [nombre, fechaNacimiento, email, telefono].forEach(function(campo) {
+                campo.className = campo.className.replace(' campo-error', '');
+            });
+            
+            if (nombre.value.trim() === '') {
+                nombre.className += ' campo-error';
+                valido = false;
+            }
+            
+            if (fechaNacimiento.value.trim() === '' || !validarFecha(fechaNacimiento.value)) {
+                fechaNacimiento.className += ' campo-error';
+                valido = false;
+            }
+            
+            if (email.value.trim() === '' || !validarEmail(email.value)) {
+                email.className += ' campo-error';
+                valido = false;
+            }
+            
+            if (telefono.value.trim() === '') {
+                telefono.className += ' campo-error';
+                valido = false;
+            }
+            
+            return valido;
+        }
+        
+        function actualizarPaciente(event) {
+            event.preventDefault();
+            
+            if (!validarFormularioPaciente()) {
+                alert('Por favor, complete todos los campos correctamente.');
+                return false;
+            }
+            
+            const id = document.getElementById('id').value;
+            const nombre = document.getElementById('nombre').value;
+            const fecha_nacimiento = document.getElementById('fecha_nacimiento').value;
+            const email = document.getElementById('email').value;
+            const telefono = document.getElementById('telefono').value;
+            
+            alert('Paciente actualizado con éxito!\n\n' +
+                  'ID: ' + id + '\n' +
+                  'Nombre: ' + nombre + '\n' +
+                  'Fecha Nacimiento: ' + fecha_nacimiento + '\n' +
+                  'Email: ' + email + '\n' +
+                  'Teléfono: ' + telefono);
+            
+            setTimeout(function() {
+                window.location.href = "{% url 'paciente_modificar' %}";
+            }, 1500);
+        }
+        
+        function cancelarEdicion() {
+            if (confirm('¿Estás seguro de que deseas cancelar? Los cambios no guardados se perderán.')) {
+                window.location.href = "{% url 'paciente_modificar' %}";
+            }
+        }
+        
+        document.getElementById('id').addEventListener('input', function(e) {
+            this.value = '{{ paciente_id }}';
+        });
+        
+        document.getElementById('id').addEventListener('keydown', function(e) {
+            e.preventDefault();
+        });
+        //]]>
+    </script>
+{% endblock %}

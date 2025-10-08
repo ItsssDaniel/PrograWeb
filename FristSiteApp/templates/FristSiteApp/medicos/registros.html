@@ -1,0 +1,54 @@
+{% extends 'FristSiteApp/base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="container main-content">
+        <div class="section" id="registros-medicos">
+            <h2>Registros de Médicos</h2>
+            <p>Lista completa de médicos registrados en el sistema:</p>
+            
+            <div class="contenedor-tabla">
+                <table class="tabla-datos">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Especialidad</th>
+                            <th>Cédula</th>
+                            <th>Activo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>Dr. Juan Pérez</td>
+                            <td>Cardiología</td>
+                            <td>CP12345</td>
+                            <td>✅</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>Dra. María García</td>
+                            <td>Pediatría</td>
+                            <td>CP67890</td>
+                            <td>✅</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>Dr. Carlos López</td>
+                            <td>Dermatología</td>
+                            <td>CP11223</td>
+                            <td>❌</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="botones-volver">
+                <button type="button" class="btn-volver" onclick="window.location.href='/registro/'">
+                 Volver al Registro
+                </button>
+            </div>
+        </div>
+    </div>
+{% endblock %}

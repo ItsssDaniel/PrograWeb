@@ -1,0 +1,92 @@
+{% extends 'FristSiteApp/base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="container main-content">
+        <div class="section" id="formulario-medico">
+            <h2>Agregar Nuevo Médico</h2>
+            
+            <form class="formulario" action="#" method="post" onsubmit="guardarMedico(event); return false;">
+                <div class="campo-formulario">
+                    <label for="nombre">Nombre Completo:</label>
+                    <input type="text" id="nombre" name="nombre" class="campo-requerido" />
+                    <span class="texto-ayuda">* Campo obligatorio</span>
+                </div>
+                
+                <div class="campo-formulario">
+                    <label for="especialidad">Especialidad:</label>
+                    <input type="text" id="especialidad" name="especialidad" class="campo-requerido" />
+                    <span class="texto-ayuda">* Campo obligatorio</span>
+                </div>
+                
+                <div class="campo-formulario">
+                    <label for="cedula">Cédula Profesional:</label>
+                    <input type="text" id="cedula" name="cedula" class="campo-requerido" />
+                    <span class="texto-ayuda">* Campo obligatorio</span>
+                </div>
+                
+                <div class="campo-formulario">
+                    <label for="activo">Estado:</label>
+                    <select id="activo" name="activo">
+                        <option value="true">Activo</option>
+                        <option value="false">Inactivo</option>
+                    </select>
+                </div>
+                
+                <div class="botones-formulario">
+                    <button type="submit" class="btn-guardar">Guardar Médico</button>
+                    <button type="button" class="btn-volver" onclick="window.location.href='/registro/'">
+                        Volver al Registro
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        //<![CDATA[
+        function validarFormularioMedico() {
+            var nombre = document.getElementById('nombre');
+            var especialidad = document.getElementById('especialidad');
+            var cedula = document.getElementById('cedula');
+            var valido = true;
+            
+            // Remover estilos de error previos
+            [nombre, especialidad, cedula].forEach(function(campo) {
+                campo.className = campo.className.replace(' campo-error', '');
+            });
+            
+            // Validar campos
+            if (nombre.value.trim() === '') {
+                nombre.className += ' campo-error';
+                valido = false;
+            }
+            if (especialidad.value.trim() === '') {
+                especialidad.className += ' campo-error';
+                valido = false;
+            }
+            if (cedula.value.trim() === '') {
+                cedula.className += ' campo-error';
+                valido = false;
+            }
+            
+            return valido;
+        }
+        
+        function guardarMedico(event) {
+            event.preventDefault();
+            
+            if (!validarFormularioMedico()) {
+                alert('Por favor, complete todos los campos obligatorios.');
+                return false;
+            }
+            
+            alert('Médico guardado con éxito!');
+            
+            setTimeout(function() {
+                window.location.href = "{% url 'medico_registros' %}";
+            }, 1000);
+        }
+        //]]>
+    </script>
+{% endblock %}

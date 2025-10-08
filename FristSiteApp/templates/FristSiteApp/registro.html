@@ -1,0 +1,145 @@
+{% extends 'FristSiteApp/base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="container main-content">
+        <div class="section" id="registro">
+            <h2>Registro de Usuarios</h2>
+            <p>Selecciona el tipo de usuario que deseas registrar:</p>
+            
+            <div class="opciones-registro">
+                <div class="fila-usuarios">
+                    <div class="tarjeta-usuario">
+                        <div class="imagen-usuario">
+                            <img src="{% static 'FristSiteApp/img/medico.png' %}" alt="Médico" />
+                        </div>
+                        <h3>Médico</h3>
+                        <div class="botones-accion">
+                            <button class="btn-accion btn-registros" title="Registros" type="button" onclick="abrirFormulario('medico', 'registros')">
+                                <span class="icono">📋</span>
+                            </button>
+                            <button class="btn-accion btn-agregar" title="Agregar" type="button" onclick="abrirFormulario('medico', 'agregar')">
+                                <span class="icono">+</span>
+                            </button>
+                            <button class="btn-accion btn-modificar" title="Modificar" type="button" onclick="abrirFormulario('medico', 'modificar')">
+                                <span class="icono">✎</span>
+                            </button>
+                            <button class="btn-accion btn-eliminar" title="Eliminar" type="button" onclick="abrirFormulario('medico', 'eliminar')">
+                                <span class="icono">×</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="tarjeta-usuario">
+                        <div class="imagen-usuario">
+                            <img src="{% static 'FristSiteApp/img/paciente.png' %}" alt="Paciente" />
+                        </div>
+                        <h3>Paciente</h3>
+                        <div class="botones-accion">
+                            <button class="btn-accion btn-registros" title="Registros" type="button" onclick="abrirFormulario('paciente', 'registros')">
+                                <span class="icono">📋</span>
+                            </button>
+                            <button class="btn-accion btn-agregar" title="Agregar" type="button" onclick="abrirFormulario('paciente', 'agregar')">
+                                <span class="icono">+</span>
+                            </button>
+                            <button class="btn-accion btn-modificar" title="Modificar" type="button" onclick="abrirFormulario('paciente', 'modificar')">
+                                <span class="icono">✎</span>
+                            </button>
+                            <button class="btn-accion btn-eliminar" title="Eliminar" type="button" onclick="abrirFormulario('paciente', 'eliminar')">
+                                <span class="icono">×</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="fila-usuarios">
+                    <div class="tarjeta-usuario">
+                        <div class="imagen-usuario">
+                            <img src="{% static 'FristSiteApp/img/recepcionista.png' %}" alt="Recepcionista" />
+                        </div>
+                        <h3>Recepcionista</h3>
+                        <div class="botones-accion">
+                            <button class="btn-accion btn-registros" title="Registros" type="button" onclick="abrirFormulario('recepcionista', 'registros')">
+                                <span class="icono">📋</span>
+                            </button>
+                            <button class="btn-accion btn-agregar" title="Agregar" type="button" onclick="abrirFormulario('recepcionista', 'agregar')">
+                                <span class="icono">+</span>
+                            </button>
+                            <button class="btn-accion btn-modificar" title="Modificar" type="button" onclick="abrirFormulario('recepcionista', 'modificar')">
+                                <span class="icono">✎</span>
+                            </button>
+                            <button class="btn-accion btn-eliminar" title="Eliminar" type="button" onclick="abrirFormulario('recepcionista', 'eliminar')">
+                                <span class="icono">×</span>
+                            </button>
+                        </div>
+                    </div>
+                
+                    <div class="tarjeta-usuario">
+                        <div class="imagen-usuario">
+                            <img src="{% static 'FristSiteApp/img/otro.png' %}" alt="Personal Extra" />
+                        </div>
+                        <h3>Personal Extra</h3>
+                        <div class="botones-accion">
+                            <button class="btn-accion btn-registros" title="Registros" type="button" onclick="abrirFormulario('personal_extra', 'registros')">
+                                <span class="icono">📋</span>
+                            </button>
+                            <button class="btn-accion btn-agregar" title="Agregar" type="button" onclick="abrirFormulario('personal_extra', 'agregar')">
+                                <span class="icono">+</span>
+                            </button>
+                            <button class="btn-accion btn-modificar" title="Modificar" type="button" onclick="abrirFormulario('personal_extra', 'modificar')">
+                                <span class="icono">✎</span>
+                            </button>
+                            <button class="btn-accion btn-eliminar" title="Eliminar" type="button" onclick="abrirFormulario('personal_extra', 'eliminar')">
+                                <span class="icono">×</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        //<![CDATA[
+        function abrirFormulario(tipoUsuario, accion) {
+            var url = '';
+            
+            if (tipoUsuario === 'medico') {
+                switch(accion) {
+                    case 'agregar':
+                        url = "{% url 'medico_agregar' %}";
+                        break;
+                    case 'modificar':
+                        url = "{% url 'medico_modificar' %}";
+                        break;
+                    case 'eliminar':
+                        url = "{% url 'medico_eliminar' %}";
+                        break;
+                    case 'registros':
+                        url = "{% url 'medico_registros' %}";
+                        break;
+                }
+            } else if (tipoUsuario === 'paciente') {
+                switch(accion) {
+                    case 'agregar':
+                        url = "{% url 'paciente_agregar' %}";
+                        break;
+                    case 'modificar':
+                        url = "{% url 'paciente_modificar' %}";
+                        break;
+                    case 'eliminar':
+                        url = "{% url 'paciente_eliminar' %}";
+                        break;
+                    case 'registros':
+                        url = "{% url 'paciente_registros' %}";
+                        break;
+                }
+            }
+            
+            if (url) {
+                window.location.href = url;
+            } else {
+                alert('Funcionalidad en desarrollo para ' + tipoUsuario);
+            }
+        }
+        //]]>
+    </script>
+{% endblock %}

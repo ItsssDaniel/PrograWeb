@@ -1,0 +1,159 @@
+{% load static %}
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="es" lang="es">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SGCM MEDIC - Sistema de Gestión de Citas Médicas</title>
+    
+    <link rel="stylesheet" href="{% static 'FristSiteApp/css/style.css' %}?v=7.0" type="text/css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/ItsssDaniel/Projects@SGCM/FristSiteApp/static/FristSiteApp/css/views.css" type="text/css" />
+    
+</head>
+<body>
+    <div id="header">
+        <div class="container header-content">
+            <div class="logo">
+                <h1>SGCM MEDIC</h1>
+            </div>
+            <div class="header-controls">
+                <div class="nav">
+                    <ul>
+                        <li><a href="{% url 'home' %}">Inicio</a></li>
+                        <li><a href="#citas">Citas</a></li>
+                        <li><a href="{% url 'registro' %}">Registro</a></li>
+                        <li><a href="#contacto">Contacto</a></li>
+                    </ul>
+                </div>
+                <button id="btn-login" class="btn-login" title="Iniciar Sesión" type="button">
+                    <span class="icono-login">🔑</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    {% block content %}
+    {% endblock %}
+
+    <div id="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-controls">
+                    <div class="footer-left">
+                        <button id="btn-modo-oscuro" class="btn-modo-oscuro" title="Modo Oscuro" type="button">
+                            <span class="icono-modo">🌙</span>
+                        </button>
+                    </div>
+                    
+                    <div class="footer-center">
+                        <div class="validadores-w3c">
+                            <a href="https://validator.w3.org/#validate_by_upload" 
+                               rel="noopener noreferrer" 
+                               title="Validar XHTML con W3C"
+                               class="validador-link">
+                                <img src="https://www.w3.org/Icons/valid-xhtml10" 
+                                     alt="XHTML Válido" 
+                                     class="validador-img" />
+                                XHTML
+                            </a>
+                            <a href="https://jigsaw.w3.org/css-validator/#validate_by_upload" 
+                               rel="noopener noreferrer" 
+                               title="Validar CSS con W3C"
+                               class="validador-link">
+                                <img src="https://jigsaw.w3.org/css-validator/images/vcss-blue" 
+                                     alt="CSS Válido" 
+                                     class="validador-img" />
+                                CSS3
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="footer-right">
+                        <div id="dbStatus" class="db-status">
+                            <span class="status-icon"></span>
+                            Verificando conexión...
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="copyright">
+                    &copy; 2024 SGCM MEDIC. Todos los derechos reservados.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        //<![CDATA[
+        function verificarConexionBD() {
+            fetch('/dataBaseConexion/')
+                .then(function(response) {
+                    return response.json();
+                })
+                .then(function(data) {
+                    var dbStatus = document.getElementById('dbStatus');
+                    if (dbStatus) {
+                        if (data.conectado) {
+                            dbStatus.className = 'db-status conectado';
+                            dbStatus.innerHTML = '<span class="status-icon"></span> ✅ Base de Datos Conectada';
+                        } else {
+                            dbStatus.className = 'db-status error';
+                            dbStatus.innerHTML = '<span class="status-icon"></span> ❌ Error de Conexión';
+                        }
+                    }
+                })
+                .catch(function(error) {
+                    var dbStatus = document.getElementById('dbStatus');
+                    if (dbStatus) {
+                        dbStatus.className = 'db-status error';
+                        dbStatus.innerHTML = '<span class="status-icon"></span> ❌ Error de Conexión';
+                    }
+                    console.error('Error verificando BD:', error);
+                });
+        }
+
+        var modoOscuroBtn = document.getElementById('btn-modo-oscuro');
+        var iconoModo = document.querySelector('.icono-modo');
+        
+        if (localStorage.getItem('modoOscuro') === 'activado') {
+            document.documentElement.setAttribute('data-tema', 'oscuro');
+            iconoModo.textContent = '☀️';
+        }
+        
+        if (modoOscuroBtn) {
+            modoOscuroBtn.addEventListener('click', function() {
+                var temaActual = document.documentElement.getAttribute('data-tema');
+                
+                if (temaActual === 'oscuro') {
+                    document.documentElement.removeAttribute('data-tema');
+                    localStorage.setItem('modoOscuro', 'desactivado');
+                    iconoModo.textContent = '🌙';
+                } else {
+                    document.documentElement.setAttribute('data-tema', 'oscuro');
+                    localStorage.setItem('modoOscuro', 'activado');
+                    iconoModo.textContent = '☀️';
+                }
+            });
+        }
+
+        var anchors = document.querySelectorAll('a[href^="#"]');
+        for (var i = 0; i < anchors.length; i++) {
+            anchors[i].addEventListener('click', function (e) {
+                e.preventDefault();
+                var target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            verificarConexionBD();
+        });
+        //]]>
+    </script>
+</body>
+</html>

@@ -1,0 +1,118 @@
+{% extends 'FristSiteApp/base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="container main-content">
+        <div class="section" id="formulario-paciente">
+            <h2>Agregar Nuevo Paciente</h2>
+            
+            <form class="formulario" action="#" method="post" onsubmit="guardarPaciente(event); return false;">
+                <div class="campo-formulario">
+                    <label for="nombre">Nombre Completo:</label>
+                    <input type="text" id="nombre" name="nombre" class="campo-requerido" />
+                    <span class="texto-ayuda">* Campo obligatorio</span>
+                </div>
+                
+                <div class="campo-formulario">
+                    <label for="fecha_nacimiento">Fecha de Nacimiento:</label>
+                    <input type="text" id="fecha_nacimiento" name="fecha_nacimiento" class="campo-requerido fecha" />
+                    <span class="texto-ayuda">* Formato: AAAA-MM-DD</span>
+                </div>
+                
+                <div class="campo-formulario">
+                    <label for="email">Email:</label>
+                    <input type="text" id="email" name="email" class="campo-requerido email" />
+                    <span class="texto-ayuda">* Campo obligatorio</span>
+                </div>
+                
+                <div class="campo-formulario">
+                    <label for="telefono">Teléfono:</label>
+                    <input type="text" id="telefono" name="telefono" class="campo-requerido telefono" />
+                    <span class="texto-ayuda">* Campo obligatorio</span>
+                </div>
+                
+                <div class="botones-formulario">
+                    <button type="submit" class="btn-guardar">Guardar Paciente</button>
+                    <button type="button" class="btn-volver" onclick="window.location.href='/registro/'">
+                        Volver al Registro
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        //<![CDATA[
+        function validarEmail(email) {
+            var regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return regex.test(email);
+        }
+        
+        function validarFecha(fecha) {
+            var regex = /^\d{4}-\d{2}-\d{2}$/;
+            if (!regex.test(fecha)) return false;
+            
+            var partes = fecha.split('-');
+            var anio = parseInt(partes[0], 10);
+            var mes = parseInt(partes[1], 10);
+            var dia = parseInt(partes[2], 10);
+            
+            var fechaObj = new Date(anio, mes - 1, dia);
+            return fechaObj.getFullYear() === anio && 
+                   fechaObj.getMonth() === mes - 1 && 
+                   fechaObj.getDate() === dia;
+        }
+        
+        function validarFormularioPaciente() {
+            var nombre = document.getElementById('nombre');
+            var fechaNacimiento = document.getElementById('fecha_nacimiento');
+            var email = document.getElementById('email');
+            var telefono = document.getElementById('telefono');
+            var valido = true;
+            
+            // Remover estilos de error previos
+            [nombre, fechaNacimiento, email, telefono].forEach(function(campo) {
+                campo.className = campo.className.replace(' campo-error', '');
+            });
+            
+            // Validar campos
+            if (nombre.value.trim() === '') {
+                nombre.className += ' campo-error';
+                valido = false;
+            }
+            
+            if (fechaNacimiento.value.trim() === '' || !validarFecha(fechaNacimiento.value)) {
+                fechaNacimiento.className += ' campo-error';
+                valido = false;
+            }
+            
+            if (email.value.trim() === '' || !validarEmail(email.value)) {
+                email.className += ' campo-error';
+                valido = false;
+            }
+            
+            if (telefono.value.trim() === '') {
+                telefono.className += ' campo-error';
+                valido = false;
+            }
+            
+            return valido;
+        }
+        
+        function guardarPaciente(event) {
+            event.preventDefault();
+
+            if (!validarFormularioPaciente()) {
+                alert('Por favor, complete todos los campos correctamente.');
+                return false;
+            }
+            
+            alert('Paciente guardado con éxito!');
+        
+            setTimeout(function() {
+                window.location.href = "{% url 'paciente_registros' %}";
+            }, 1000);
+        }
+        //]]>
+    </script>
+{% endblock %}

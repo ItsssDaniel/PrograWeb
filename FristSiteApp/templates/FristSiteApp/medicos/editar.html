@@ -1,0 +1,122 @@
+{% extends 'FristSiteApp/base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="container main-content">
+        <div class="section" id="editar-medico">
+            <h2>Modificar Médico</h2>
+            <p>Editando médico con ID: <strong>{{ medico_id }}</strong></p>
+            
+            <form class="formulario" action="#" method="post" onsubmit="actualizarMedico(event); return false;">
+                <div class="campo-formulario">
+                    <label for="id">ID (No editable):</label>
+                    <input type="text" id="id" name="id" value="{{ medico_id }}" readonly="readonly" class="campo-readonly" />
+                    <span class="texto-ayuda">El ID no se puede modificar</span>
+                </div>
+                
+                <div class="campo-formulario">
+                    <label for="nombre">Nombre Completo:</label>
+                    <input type="text" id="nombre" name="nombre" value="{{ nombre }}" class="campo-requerido" />
+                    <span class="texto-ayuda">* Campo obligatorio</span>
+                </div>
+                
+                <div class="campo-formulario">
+                    <label for="especialidad">Especialidad:</label>
+                    <input type="text" id="especialidad" name="especialidad" value="{{ especialidad }}" class="campo-requerido" />
+                    <span class="texto-ayuda">* Campo obligatorio</span>
+                </div>
+                
+                <div class="campo-formulario">
+                    <label for="cedula">Cédula Profesional:</label>
+                    <input type="text" id="cedula" name="cedula" value="{{ cedula }}" class="campo-requerido" />
+                    <span class="texto-ayuda">* Campo obligatorio</span>
+                </div>
+                
+                <div class="campo-formulario">
+                    <label for="activo">Estado:</label>
+                    <select id="activo" name="activo">
+                        <option value="true" {% if activo == 'true' %}selected="selected"{% endif %}>Activo</option>
+                        <option value="false" {% if activo == 'false' %}selected="selected"{% endif %}>Inactivo</option>
+                    </select>
+                </div>
+                
+                <div class="botones-formulario">
+                    <button type="submit" class="btn-actualizar">Actualizar Médico</button>
+                    <button type="button" class="btn-volver" onclick="cancelarEdicion()">
+                        Cancelar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        //<![CDATA[
+        function validarFormularioMedico() {
+            var nombre = document.getElementById('nombre');
+            var especialidad = document.getElementById('especialidad');
+            var cedula = document.getElementById('cedula');
+            var valido = true;
+            
+            [nombre, especialidad, cedula].forEach(function(campo) {
+                campo.className = campo.className.replace(' campo-error', '');
+            });
+            
+            if (nombre.value.trim() === '') {
+                nombre.className += ' campo-error';
+                valido = false;
+            }
+            if (especialidad.value.trim() === '') {
+                especialidad.className += ' campo-error';
+                valido = false;
+            }
+            if (cedula.value.trim() === '') {
+                cedula.className += ' campo-error';
+                valido = false;
+            }
+            
+            return valido;
+        }
+        
+        function actualizarMedico(event) {
+            event.preventDefault();
+            
+            if (!validarFormularioMedico()) {
+                alert('Por favor, complete todos los campos obligatorios.');
+                return false;
+            }
+            
+            const id = document.getElementById('id').value;
+            const nombre = document.getElementById('nombre').value;
+            const especialidad = document.getElementById('especialidad').value;
+            const cedula = document.getElementById('cedula').value;
+            const activo = document.getElementById('activo').value;
+            
+            alert('Médico actualizado con éxito!\n\n' +
+                  'ID: ' + id + '\n' +
+                  'Nombre: ' + nombre + '\n' +
+                  'Especialidad: ' + especialidad + '\n' +
+                  'Cédula: ' + cedula + '\n' +
+                  'Estado: ' + (activo === 'true' ? 'Activo' : 'Inactivo'));
+            
+            setTimeout(function() {
+                window.location.href = "{% url 'medico_modificar' %}";
+            }, 1500);
+        }
+        
+        function cancelarEdicion() {
+            if (confirm('¿Estás seguro de que deseas cancelar? Los cambios no guardados se perderán.')) {
+                window.location.href = "{% url 'medico_modificar' %}";
+            }
+        }
+        
+        document.getElementById('id').addEventListener('input', function(e) {
+            this.value = '{{ medico_id }}';
+        });
+        
+        document.getElementById('id').addEventListener('keydown', function(e) {
+            e.preventDefault();
+        });
+        //]]>
+    </script>
+{% endblock %}

@@ -6,8 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SGCM MEDIC - Sistema de Gestión de Citas Médicas</title>
     
-    <link rel="stylesheet" href="{% static 'FristSiteApp/css/style.css' %}?v=7.0" type="text/css" />
-    <!-- <link rel="stylesheet" href="{% static 'FristSiteApp/css/style.css' %}?v=7.0" type="text/css" /> -->
+    <link rel="stylesheet" href="{% static 'FristSiteApp/css/style.css' %}" type="text/css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/ItsssDaniel/PrograWeb@main/FristSiteApp/static/FristSiteApp/css/views.css" type="text/css" />
     
 </head>
@@ -85,7 +84,6 @@
     </div>
 
     <script type="text/javascript">
-        //<![CDATA[
         function verificarConexionBD() {
             fetch('/dataBaseConexion/')
                 .then(function(response) {
@@ -154,7 +152,6 @@
         document.addEventListener('DOMContentLoaded', function() {
             verificarConexionBD();
         });
-        //]]>
     </script>
 </body>
 </html>

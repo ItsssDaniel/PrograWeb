@@ -494,7 +494,7 @@ input.telefono {
     }
 }
 
-/* ===== ESTILOS PARA TÍTULOS Y DESCRIPCIONES ===== */
+/* =====TÍTULOS Y DESCRIPCIONE===== */
 .section h2 {
     color: #2c5282;
     margin-bottom: 1.5rem;
@@ -528,3 +528,144 @@ input.telefono {
     margin-right: auto;
 }
 
+/* ===== MODO OSCURO EN VIEWS.CSS ===== */
+[data-tema="oscuro"] .value-card {
+    background-color: var(--background-alt);
+    border-left-color: var(--accent);
+}
+
+[data-tema="oscuro"] .value-card h3 {
+    color: var(--accent);
+}
+
+[data-tema="oscuro"] .tarjeta-usuario {
+    background-color: var(--background);
+    border-color: var(--border);
+}
+
+[data-tema="oscuro"] .tarjeta-usuario:hover {
+    border-color: var(--primary);
+}
+
+[data-tema="oscuro"] .tarjeta-usuario h3 {
+    color: var(--primary);
+}
+
+[data-tema="oscuro"] .btn-accion {
+    background: var(--background-alt);
+}
+
+[data-tema="oscuro"] .btn-agregar {
+    border-color: #68d391;
+    color: #68d391;
+    background-color: rgba(104, 211, 145, 0.1);
+}
+
+[data-tema="oscuro"] .btn-agregar:hover {
+    background-color: #68d391;
+    color: var(--background);
+}
+
+[data-tema="oscuro"] .btn-modificar {
+    border-color: #63b3ed;
+    color: #63b3ed;
+    background-color: rgba(99, 179, 237, 0.1);
+}
+
+[data-tema="oscuro"] .btn-modificar:hover {
+    background-color: #63b3ed;
+    color: var(--background);
+}
+
+[data-tema="oscuro"] .btn-eliminar {
+    border-color: #fc8181;
+    color: #fc8181;
+    background-color: rgba(252, 129, 129, 0.1);
+}
+
+[data-tema="oscuro"] .btn-eliminar:hover {
+    background-color: #fc8181;
+    color: var(--background);
+}
+
+[data-tema="oscuro"] .btn-registros {
+    border-color: #b794f4;
+    color: #b794f4;
+    background-color: rgba(183, 148, 244, 0.1);
+}
+
+[data-tema="oscuro"] .btn-registros:hover {
+    background-color: #b794f4;
+    color: var(--background);
+}
+
+[data-tema="oscuro"] .campo-formulario label {
+    color: var(--text);
+}
+
+[data-tema="oscuro"] .campo-formulario input,
+[data-tema="oscuro"] .campo-formulario select,
+[data-tema="oscuro"] .campo-formulario textarea {
+    background-color: var(--background-alt);
+    color: var(--text);
+    border-color: var(--border);
+}
+
+[data-tema="oscuro"] .campo-formulario input:focus,
+[data-tema="oscuro"] .campo-formulario select:focus,
+[data-tema="oscuro"] .campo-formulario textarea:focus {
+    border-color: var(--primary);
+}
+
+[data-tema="oscuro"] .tabla-datos {
+    background-color: var(--background);
+}
+
+[data-tema="oscuro"] .tabla-datos th,
+[data-tema="oscuro"] .tabla-datos td {
+    border-bottom-color: var(--border);
+}
+
+[data-tema="oscuro"] .tabla-datos th {
+    background-color: var(--primary-light);
+    color: var(--primary);
+}
+
+[data-tema="oscuro"] .tabla-datos tr:hover {
+    background-color: var(--background-alt);
+}
+
+[data-tema="oscuro"] .btn-modificar-tabla,
+[data-tema="oscuro"] .btn-eliminar-tabla {
+    background: var(--background-alt);
+}
+
+[data-tema="oscuro"] .btn-modificar-tabla {
+    border-color: #63b3ed;
+    color: #63b3ed;
+}
+
+[data-tema="oscuro"] .btn-modificar-tabla:hover {
+    background-color: #63b3ed;
+    color: var(--background);
+}
+
+[data-tema="oscuro"] .btn-eliminar-tabla {
+    border-color: #fc8181;
+    color: #fc8181;
+}
+
+[data-tema="oscuro"] .btn-eliminar-tabla:hover {
+    background-color: #fc8181;
+    color: var(--background);
+}
+
+[data-tema="oscuro"] .section h2 {
+    color: var(--primary);
+    border-bottom-color: var(--primary-light);
+}
+
+[data-tema="oscuro"] .section p,
+[data-tema="oscuro"] #registro p {
+    color: var(--text-light);
+}

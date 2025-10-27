@@ -1,0 +1,88 @@
+{% extends 'FristSiteApp/base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="container main-content">
+        <div class="section" id="eliminar-recepcionistas">
+            <h2>Eliminar Recepcionistas</h2>
+            <p>Selecciona un recepcionista para eliminar:</p>
+            
+            <div class="contenedor-tabla">
+                <table class="tabla-datos">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Email</th>
+                            <th>Teléfono</th>
+                            <th>Turno</th>
+                            <th>Estado</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>REC-001</td>
+                            <td>Ana García López</td>
+                            <td>ana.garcia@clinica.com</td>
+                            <td>555-123-4567</td>
+                            <td>Matutino</td>
+                            <td>Activo</td>
+                            <td>
+                                <button type="button" class="btn-eliminar-tabla" onclick="confirmarEliminacionRecepcionista('REC-001', 'Ana García López')">
+                                    <span class="icono">×</span>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>REC-002</td>
+                            <td>Carlos Rodríguez</td>
+                            <td>c.rodriguez@clinica.com</td>
+                            <td>555-987-6543</td>
+                            <td>Vespertino</td>
+                            <td>Activo</td>
+                            <td>
+                                <button type="button" class="btn-eliminar-tabla" onclick="confirmarEliminacionRecepcionista('REC-002', 'Carlos Rodríguez')">
+                                    <span class="icono">×</span>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>REC-003</td>
+                            <td>María Fernández</td>
+                            <td>m.fernandez@clinica.com</td>
+                            <td>555-456-7890</td>
+                            <td>Nocturno</td>
+                            <td>Activo</td>
+                            <td>
+                                <button type="button" class="btn-eliminar-tabla" onclick="confirmarEliminacionRecepcionista('REC-003', 'María Fernández')">
+                                    <span class="icono">×</span>
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="botones-volver">
+                <button type="button" class="btn-volver" onclick="window.location.href='/registro/'">
+                    Volver al Registro
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        //<![CDATA[
+        function confirmarEliminacionRecepcionista(id, nombre) {
+            if (confirm('¿Estás seguro de que deseas eliminar al recepcionista ' + nombre + ' (ID: ' + id + ')?\n\nEsta acción no se puede deshacer.')) {
+                alert('Recepcionista ' + nombre + ' (ID: ' + id + ') eliminado exitosamente');
+                // Aquí iría la lógica para eliminar de la base de datos
+                setTimeout(function() {
+                    window.location.reload();
+                }, 1000);
+            }
+        }
+        //]]>
+    </script>
+{% endblock %}

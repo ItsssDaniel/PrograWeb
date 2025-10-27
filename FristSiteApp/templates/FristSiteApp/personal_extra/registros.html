@@ -1,0 +1,62 @@
+{% extends 'FristSiteApp/base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="container main-content">
+        <div class="section" id="registros-personal-extra">
+            <h2>Registros de Personal Extra</h2>
+            <p>Lista completa de personal extra registrado en el sistema:</p>
+            
+            <div class="contenedor-tabla">
+                <table class="tabla-datos">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Puesto</th>
+                            <th>Categoría</th>
+                            <th>Teléfono</th>
+                            <th>Horario</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>PE-001</td>
+                            <td>María González</td>
+                            <td>Auxiliar de Limpieza</td>
+                            <td>Limpieza</td>
+                            <td>555-456-7890</td>
+                            <td>L-V 8:00-16:00</td>
+                            <td>Activo</td>
+                        </tr>
+                        <tr>
+                            <td>PE-002</td>
+                            <td>Roberto Sánchez</td>
+                            <td>Guardia de Seguridad</td>
+                            <td>Seguridad</td>
+                            <td>555-789-1234</td>
+                            <td>Nocturno</td>
+                            <td>Activo</td>
+                        </tr>
+                        <tr>
+                            <td>PE-003</td>
+                            <td>Jorge Martínez</td>
+                            <td>Técnico de Mantenimiento</td>
+                            <td>Mantenimiento</td>
+                            <td>555-321-9876</td>
+                            <td>L-S 7:00-15:00</td>
+                            <td>Activo</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="botones-volver">
+                <button type="button" class="btn-volver" onclick="window.location.href='/registro/'">
+                    Volver al Registro
+                </button>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,124 @@
+{% extends 'FristSiteApp/base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="container main-content">
+        <div class="section" id="agendar-cita">
+            <h2>Agendar Nueva Cita</h2>
+            <p>Complete los datos para programar una nueva cita médica</p>
+            
+            <form class="formulario" onsubmit="agendarCita(event); return false;">
+                <div class="campos-duales">
+                    <div class="campo-formulario">
+                        <label for="paciente">Seleccionar Paciente:</label>
+                        <select id="paciente" name="paciente" required="required">
+                            <option value="">Seleccionar paciente</option>
+                            <option value="1">Ana García López</option>
+                            <option value="2">Carlos Rodríguez</option>
+                            <option value="3">María Fernández</option>
+                            <option value="4">Roberto Sánchez</option>
+                        </select>
+                    </div>
+                    
+                    <div class="campo-formulario">
+                        <label for="medico">Seleccionar Médico:</label>
+                        <select id="medico" name="medico" required="required">
+                            <option value="">Seleccionar médico</option>
+                            <option value="1">Dr. Juan Pérez - Cardiología</option>
+                            <option value="2">Dra. María López - Pediatría</option>
+                            <option value="3">Dr. Roberto Sánchez - Medicina General</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="campos-duales">
+                    <div class="campo-formulario">
+                        <label for="recepcionista">Recepcionista:</label>
+                        <select id="recepcionista" name="recepcionista" required="required">
+                            <option value="">Seleccionar recepcionista</option>
+                            <option value="1">Ana García López</option>
+                            <option value="2">Carlos Rodríguez</option>
+                        </select>
+                    </div>
+                    
+                    <div class="campo-formulario">
+                        <label for="tipo_cita">Tipo de Cita:</label>
+                        <select id="tipo_cita" name="tipo_cita" required="required">
+                            <option value="">Seleccionar tipo</option>
+                            <option value="consulta">Consulta General</option>
+                            <option value="especialidad">Especialidad</option>
+                            <option value="emergencia">Emergencia</option>
+                            <option value="seguimiento">Seguimiento</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="campos-duales">
+                    <div class="campo-formulario">
+                        <label for="fecha_cita">Fecha de la Cita:</label>
+                        <input type="date" id="fecha_cita" name="fecha_cita" required="required" />
+                    </div>
+                    
+                    <div class="campo-formulario">
+                        <label for="hora_cita">Hora de la Cita:</label>
+                        <input type="time" id="hora_cita" name="hora_cita" required="required" />
+                    </div>
+                </div>
+                
+                <div class="campo-formulario">
+                    <label for="motivo">Motivo de la Consulta:</label>
+                    <textarea id="motivo" name="motivo" rows="4" required="required" placeholder="Describa el motivo de la consulta..."></textarea>
+                </div>
+                
+                <div class="campo-formulario">
+                    <label for="notas">Notas Adicionales:</label>
+                    <textarea id="notas" name="notas" rows="3" placeholder="Notas adicionales (opcional)..."></textarea>
+                </div>
+                
+                <div class="botones-formulario">
+                    <button type="submit" class="btn-guardar">Agendar Cita</button>
+                    <button type="button" class="btn-volver" onclick="window.location.href='/citas/'">
+                        Cancelar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        //<![CDATA[
+        function agendarCita(event) {
+            event.preventDefault();
+            
+            // Validar que todos los campos estén llenos
+            const campos = ['paciente', 'medico', 'recepcionista', 'tipo_cita', 'fecha_cita', 'hora_cita', 'motivo'];
+            let valido = true;
+            
+            campos.forEach(campo => {
+                const elemento = document.getElementById(campo);
+                if (!elemento.value) {
+                    elemento.className += ' campo-error';
+                    valido = false;
+                } else {
+                    elemento.className = elemento.className.replace(' campo-error', '');
+                }
+            });
+            
+            if (!valido) {
+                alert('Por favor, complete todos los campos obligatorios.');
+                return false;
+            }
+            
+            // Simular agendado exitoso
+            alert('¡Cita agendada exitosamente!\n\nSe ha programado la cita y se notificará a los involucrados.');
+            
+            setTimeout(function() {
+                window.location.href = "{% url 'citas' %}";
+            }, 1500);
+        }
+        
+        // Establecer fecha mínima como hoy
+        document.getElementById('fecha_cita').min = new Date().toISOString().split('T')[0];
+        //]]>
+    </script>
+{% endblock %}

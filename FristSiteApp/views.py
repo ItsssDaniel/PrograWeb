@@ -80,3 +80,97 @@ def paciente_editar(request):
     }
     
     return render(request, 'FristSiteApp/pacientes/editar.html', context)
+
+
+# Vistas para Recepcionista
+def recepcionista_agregar(request):
+    return render(request, 'FristSiteApp/recepcionista/agregar.html')
+
+def recepcionista_modificar(request):
+    return render(request, 'FristSiteApp/recepcionista/modificar.html')
+
+def recepcionista_eliminar(request):
+    return render(request, 'FristSiteApp/recepcionista/eliminar.html')
+
+def recepcionista_registros(request):
+    return render(request, 'FristSiteApp/recepcionista/registros.html')
+
+def recepcionista_editar(request):
+    # Obtener los datos del recepcionista desde los parámetros GET
+    recepcionista_id = request.GET.get('id', '')
+    nombre = request.GET.get('nombre', '')
+    email = request.GET.get('email', '')
+    telefono = request.GET.get('telefono', '')
+    turno = request.GET.get('turno', '')
+    fecha_contratacion = request.GET.get('fecha_contratacion', '')
+    activo = request.GET.get('activo', 'true')
+    
+    context = {
+        'recepcionista_id': recepcionista_id,
+        'nombre': nombre,
+        'email': email,
+        'telefono': telefono,
+        'turno': turno,
+        'fecha_contratacion': fecha_contratacion,
+        'activo': activo,
+    }
+    
+    return render(request, 'FristSiteApp/recepcionista/editar.html', context)
+
+# Vistas para Personal Extra
+def personal_extra_agregar(request):
+    return render(request, 'FristSiteApp/personal_extra/agregar.html')
+
+def personal_extra_modificar(request):
+    return render(request, 'FristSiteApp/personal_extra/modificar.html')
+
+def personal_extra_eliminar(request):
+    return render(request, 'FristSiteApp/personal_extra/eliminar.html')
+
+def personal_extra_registros(request):
+    return render(request, 'FristSiteApp/personal_extra/registros.html')
+
+def personal_extra_editar(request):
+    # Obtener los datos del personal extra desde los parámetros GET
+    personal_id = request.GET.get('id', '')
+    nombre = request.GET.get('nombre', '')
+    puesto = request.GET.get('puesto', '')
+    categoria = request.GET.get('categoria', '')
+    telefono = request.GET.get('telefono', '')
+    fecha_contratacion = request.GET.get('fecha_contratacion', '')
+    horario = request.GET.get('horario', '')
+    activo = request.GET.get('activo', 'true')
+    
+    context = {
+        'personal_id': personal_id,
+        'nombre': nombre,
+        'puesto': puesto,
+        'categoria': categoria,
+        'telefono': telefono,
+        'fecha_contratacion': fecha_contratacion,
+        'horario': horario,
+        'activo': activo,
+    }
+    
+    return render(request, 'FristSiteApp/personal_extra/editar.html', context)
+
+def login_view(request):
+    return render(request, 'FristSiteApp/login.html')
+
+def citas_view(request):
+    return render(request, 'FristSiteApp/citas.html')
+
+def contacto_view(request):
+    return render(request, 'FristSiteApp/contacto.html')
+
+def citas_agendar(request):
+    return render(request, 'FristSiteApp/citas/agendar.html')
+
+def citas_consultar(request):
+    return render(request, 'FristSiteApp/citas/consultar.html')
+
+def citas_modificar(request):
+    return render(request, 'FristSiteApp/citas/modificar.html')
+
+def citas_cancelar(request):
+    return render(request, 'FristSiteApp/citas/cancelar.html')

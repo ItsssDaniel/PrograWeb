@@ -98,46 +98,76 @@
     </div>
 
     <script type="text/javascript">
-        function abrirFormulario(tipoUsuario, accion) {
-            var url = '';
-            
-            if (tipoUsuario === 'medico') {
-                switch(accion) {
-                    case 'agregar':
-                        url = "{% url 'medico_agregar' %}";
-                        break;
-                    case 'modificar':
-                        url = "{% url 'medico_modificar' %}";
-                        break;
-                    case 'eliminar':
-                        url = "{% url 'medico_eliminar' %}";
-                        break;
-                    case 'registros':
-                        url = "{% url 'medico_registros' %}";
-                        break;
-                }
-            } else if (tipoUsuario === 'paciente') {
-                switch(accion) {
-                    case 'agregar':
-                        url = "{% url 'paciente_agregar' %}";
-                        break;
-                    case 'modificar':
-                        url = "{% url 'paciente_modificar' %}";
-                        break;
-                    case 'eliminar':
-                        url = "{% url 'paciente_eliminar' %}";
-                        break;
-                    case 'registros':
-                        url = "{% url 'paciente_registros' %}";
-                        break;
-                }
+    function abrirFormulario(tipoUsuario, accion) {
+        var url = '';
+        
+        if (tipoUsuario === 'medico') {
+            switch(accion) {
+                case 'agregar':
+                    url = "{% url 'medico_agregar' %}";
+                    break;
+                case 'modificar':
+                    url = "{% url 'medico_modificar' %}";
+                    break;
+                case 'eliminar':
+                    url = "{% url 'medico_eliminar' %}";
+                    break;
+                case 'registros':
+                    url = "{% url 'medico_registros' %}";
+                    break;
             }
-            
-            if (url) {
-                window.location.href = url;
-            } else {
-                alert('Funcionalidad en desarrollo para ' + tipoUsuario);
+        } else if (tipoUsuario === 'paciente') {
+            switch(accion) {
+                case 'agregar':
+                    url = "{% url 'paciente_agregar' %}";
+                    break;
+                case 'modificar':
+                    url = "{% url 'paciente_modificar' %}";
+                    break;
+                case 'eliminar':
+                    url = "{% url 'paciente_eliminar' %}";
+                    break;
+                case 'registros':
+                    url = "{% url 'paciente_registros' %}";
+                    break;
+            }
+        } else if (tipoUsuario === 'recepcionista') {
+            switch(accion) {
+                case 'agregar':
+                    url = "{% url 'recepcionista_agregar' %}";
+                    break;
+                case 'modificar':
+                    url = "{% url 'recepcionista_modificar' %}";
+                    break;
+                case 'eliminar':
+                    url = "{% url 'recepcionista_eliminar' %}";
+                    break;
+                case 'registros':
+                    url = "{% url 'recepcionista_registros' %}";
+                    break;
+            }
+        } else if (tipoUsuario === 'personal_extra') {
+            switch(accion) {
+                case 'agregar':
+                    url = "{% url 'personal_extra_agregar' %}";
+                    break;
+                case 'modificar':
+                    url = "{% url 'personal_extra_modificar' %}";
+                    break;
+                case 'eliminar':
+                    url = "{% url 'personal_extra_eliminar' %}";
+                    break;
+                case 'registros':
+                    url = "{% url 'personal_extra_registros' %}";
+                    break;
             }
         }
-    </script>
+        
+        if (url) {
+            window.location.href = url;
+        } else {
+            alert('Funcionalidad en desarrollo para ' + tipoUsuario);
+        }
+    }
+</script>
 {% endblock %}

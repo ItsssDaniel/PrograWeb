@@ -1,0 +1,137 @@
+{% extends 'FristSiteApp/base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="container main-content">
+        <div class="section" id="cancelar-cita">
+            <h2>Cancelar Cita</h2>
+            <p>Busque y cancele una cita médica programada</p>
+            
+            <!-- Búsqueda de cita a cancelar -->
+            <div class="busqueda-cita">
+                <div class="campo-formulario">
+                    <label for="buscar_cita_cancelar">Buscar Cita por ID:</label>
+                    <input type="text" id="buscar_cita_cancelar" placeholder="Ej: CIT-001" />
+                    <button type="button" class="btn-guardar" onclick="buscarCitaCancelar()" style="margin-top: 0.5rem;">
+                        Buscar Cita
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Información de la cita (inicialmente oculta) -->
+            <div id="info-cita" style="display: none;">
+                <h3>Información de la Cita</h3>
+                <div class="info-cita-detalles">
+                    <div class="info-item">
+                        <strong>ID Cita:</strong> <span id="info_id"></span>
+                    </div>
+                    <div class="info-item">
+                        <strong>Paciente:</strong> <span id="info_paciente"></span>
+                    </div>
+                    <div class="info-item">
+                        <strong>Médico:</strong> <span id="info_medico"></span>
+                    </div>
+                    <div class="info-item">
+                        <strong>Recepcionista:</strong> <span id="info_recepcionista"></span>
+                    </div>
+                    <div class="info-item">
+                        <strong>Fecha y Hora:</strong> <span id="info_fecha_hora"></span>
+                    </div>
+                    <div class="info-item">
+                        <strong>Motivo:</strong> <span id="info_motivo"></span>
+                    </div>
+                </div>
+                
+                <div class="campo-formulario">
+                    <label for="razon_cancelacion">Razón de Cancelación:</label>
+                    <textarea id="razon_cancelacion" rows="3" required="required" placeholder="Describa la razón de la cancelación..."></textarea>
+                </div>
+                
+                <div class="campo-formulario">
+                    <label for="confirmar_cancelacion">Confirmar Cancelación:</label>
+                    <input type="text" id="confirmar_cancelacion" required="required" placeholder="Escriba 'CANCELAR' para confirmar" />
+                </div>
+                
+                <div class="botones-formulario">
+                    <button type="button" class="btn-eliminar" style="background-color: #e53e3e;" onclick="confirmarCancelacion()">
+                        Cancelar Cita
+                    </button>
+                    <button type="button" class="btn-volver" onclick="window.location.href='/citas/'">
+                        Volver
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style type="text/css">
+        .info-cita-detalles {
+            background: var(--background-alt);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            border-left: 4px solid var(--primary);
+        }
+        
+        .info-item {
+            margin-bottom: 0.75rem;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .info-item:last-child {
+            border-bottom: none;
+        }
+        
+        .info-item strong {
+            color: var(--primary);
+            min-width: 120px;
+            display: inline-block;
+        }
+    </style>
+
+    <script type="text/javascript">
+        //<![CDATA[
+        function buscarCitaCancelar() {
+            const idBuscar = document.getElementById('buscar_cita_cancelar').value;
+            
+            if (!idBuscar) {
+                alert('Por favor, ingrese un ID de cita.');
+                return;
+            }
+            
+            // Simular búsqueda exitosa
+            document.getElementById('info-cita').style.display = 'block';
+            document.getElementById('info_id').textContent = idBuscar;
+            document.getElementById('info_paciente').textContent = 'Ana García López';
+            document.getElementById('info_medico').textContent = 'Dr. Juan Pérez';
+            document.getElementById('info_recepcionista').textContent = 'Ana García López';
+            document.getElementById('info_fecha_hora').textContent = '2024-01-15 10:00 AM';
+            document.getElementById('info_motivo').textContent = 'Consulta de seguimiento por tratamiento médico';
+        }
+        
+        function confirmarCancelacion() {
+            const confirmacion = document.getElementById('confirmar_cancelacion').value;
+            const razon = document.getElementById('razon_cancelacion').value;
+            
+            if (confirmacion !== 'CANCELAR') {
+                alert('Por favor escriba "CANCELAR" para confirmar la cancelación.');
+                return;
+            }
+            
+            if (!razon) {
+                alert('Por favor, describa la razón de la cancelación.');
+                return;
+            }
+            
+            if (confirm('¿Está seguro de que desea cancelar esta cita? Esta acción no se puede deshacer.')) {
+                alert('Cita cancelada exitosamente.\nRazón: ' + razon);
+                
+                setTimeout(function() {
+                    window.location.href = "{% url 'citas' %}";
+                }, 1500);
+            }
+        }
+        //]]>
+    </script>
+{% endblock %}

@@ -1,0 +1,58 @@
+{% extends 'FristSiteApp/base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="container main-content">
+        <div class="section" id="registros-recepcionistas">
+            <h2>Registros de Recepcionistas</h2>
+            <p>Lista completa de recepcionistas registrados en el sistema:</p>
+            
+            <div class="contenedor-tabla">
+                <table class="tabla-datos">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Email</th>
+                            <th>Teléfono</th>
+                            <th>Turno</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>REC-001</td>
+                            <td>Ana García López</td>
+                            <td>ana.garcia@clinica.com</td>
+                            <td>555-123-4567</td>
+                            <td>Matutino</td>
+                            <td>Activo</td>
+                        </tr>
+                        <tr>
+                            <td>REC-002</td>
+                            <td>Carlos Rodríguez</td>
+                            <td>c.rodriguez@clinica.com</td>
+                            <td>555-987-6543</td>
+                            <td>Vespertino</td>
+                            <td>Activo</td>
+                        </tr>
+                        <tr>
+                            <td>REC-003</td>
+                            <td>María Fernández</td>
+                            <td>m.fernandez@clinica.com</td>
+                            <td>555-456-7890</td>
+                            <td>Nocturno</td>
+                            <td>Activo</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="botones-volver">
+                <button type="button" class="btn-volver" onclick="window.location.href='/registro/'">
+                    Volver al Registro
+                </button>
+            </div>
+        </div>
+    </div>
+{% endblock %}

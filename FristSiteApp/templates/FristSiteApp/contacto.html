@@ -1,0 +1,412 @@
+{% extends 'FristSiteApp/base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="container main-content">
+        <div class="section" id="contacto-section">
+            <h2>Contacto</h2>
+            <p>Estamos aquí para ayudarte. Contáctanos por cualquier consulta o solicitud.</p>
+            
+            <!-- Mapa grande en la parte superior -->
+            <div class="mapa-grande">
+                <h3>Nuestra Ubicación</h3>
+                <div class="mapa-container">
+                    <iframe 
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3755.888635566206!2d-101.193388924679!3d19.70130853149913!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x842d0d5eb46c0641%3A0x7c0d2984b74e4c05!2sTecnol%C3%B3gico%20Nacional%20de%20M%C3%A9xico%20Campus%20Morelia!5e0!3m2!1ses!2smx!4v1700000000000!5m2!1ses!2smx"
+                        width="100%" 
+                        height="500" 
+                        style="border:0; border-radius: 12px;" 
+                        allowfullscreen="" 
+                        loading="lazy" 
+                        referrerpolicy="no-referrer-when-downgrade">
+                    </iframe>
+                    <div class="mapa-info">
+                        <div class="ubicacion-destacada">
+                            <span class="pin-icon">📍</span>
+                            <div class="ubicacion-texto">
+                                <h4>Tecnológico Nacional de México, Campus Morelia</h4>
+                                <p>Lugar de desarrollo de SGCM MEDIC</p>
+                                <p class="direccion-completa">
+                                    Av. Tecnológico #1500, Col. Lomas de Santiaguito, Morelia, Michoacán, México. C.P. 58120
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Información de contacto abajo -->
+            <div class="contacto-info-completa">
+                <h3>Información de Contacto</h3>
+                
+                <div class="contacto-grid">
+                    <div class="contacto-item grande">
+                        <div class="contacto-icon">🏢</div>
+                        <div class="contacto-details">
+                            <h4>Dirección</h4>
+                            <p>Instituto Tecnológico de Morelia<br>
+                            Av. Tecnológico #1500<br>
+                            Col. Lomas de Santiaguito<br>
+                            Morelia, Michoacán, México<br>
+                            C.P. 58120</p>
+                        </div>
+                    </div>
+                    
+                    <div class="contacto-item">
+                        <div class="contacto-icon">📞</div>
+                        <div class="contacto-details">
+                            <h4>Teléfonos</h4>
+                            <p>+52 (443) 312 1570<br>
+                            +52 (443) 312 1571</p>
+                        </div>
+                    </div>
+                    
+                    <div class="contacto-item">
+                        <div class="contacto-icon">📧</div>
+                        <div class="contacto-details">
+                            <h4>Correo Electrónico</h4>
+                            <p>sgcm.medic@tecnm.mx<br>
+                            soporte.sgcm@tecnm.mx</p>
+                        </div>
+                    </div>
+                    
+                    <div class="contacto-item">
+                        <div class="contacto-icon">🕒</div>
+                        <div class="contacto-details">
+                            <h4>Horarios de Atención</h4>
+                            <p>Lunes a Viernes: 8:00 AM - 6:00 PM<br>
+                            Sábados: 9:00 AM - 1:00 PM<br>
+                            Domingos: Cerrado</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mensaje-institucional">
+                    <div class="institucional-icon">🎓</div>
+                    <div class="institucional-texto">
+                        <h4>SGCM MEDIC - Proyecto Académico</h4>
+                        <p>Este sistema fue desarrollado como parte de los proyectos académicos del <strong>Tecnológico Nacional de México, Campus Morelia</strong>, demostrando el compromiso con la innovación tecnológica y la excelencia educativa.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Formulario de contacto -->
+            <div class="formulario-contacto">
+                <h3>Envíanos un Mensaje</h3>
+                <form class="formulario" onsubmit="enviarMensaje(event); return false;">
+                    <div class="campos-duales">
+                        <div class="campo-formulario">
+                            <label for="nombre">Nombre Completo:</label>
+                            <input type="text" id="nombre" name="nombre" required="required" />
+                        </div>
+                        <div class="campo-formulario">
+                            <label for="email">Correo Electrónico:</label>
+                            <input type="email" id="email" name="email" required="required" />
+                        </div>
+                    </div>
+                    
+                    <div class="campo-formulario">
+                        <label for="asunto">Asunto:</label>
+                        <input type="text" id="asunto" name="asunto" required="required" />
+                    </div>
+                    
+                    <div class="campo-formulario">
+                        <label for="mensaje">Mensaje:</label>
+                        <textarea id="mensaje" name="mensaje" rows="6" required="required" placeholder="Escribe tu mensaje aquí..."></textarea>
+                    </div>
+                    
+                    <div class="botones-formulario">
+                        <button type="submit" class="btn-guardar">Enviar Mensaje</button>
+                        <button type="button" class="btn-volver" onclick="limpiarFormulario()">
+                            Limpiar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <style type="text/css">
+        .mapa-grande {
+            margin: 3rem 0;
+        }
+        
+        .mapa-grande h3 {
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+            text-align: center;
+        }
+        
+        .mapa-container {
+            background: var(--background);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px var(--shadow);
+            border: 1px solid var(--border);
+        }
+        
+        .mapa-info {
+            padding: 1.5rem;
+            background: linear-gradient(135deg, var(--primary-light) 0%, var(--background) 100%);
+            border-top: 1px solid var(--border);
+        }
+        
+        .ubicacion-destacada {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .pin-icon {
+            font-size: 2.5rem;
+            flex-shrink: 0;
+        }
+        
+        .ubicacion-texto h4 {
+            color: var(--primary);
+            margin: 0 0 0.5rem 0;
+            font-size: 1.3rem;
+        }
+        
+        .ubicacion-texto p {
+            margin: 0.25rem 0;
+            color: var(--text);
+        }
+        
+        .direccion-completa {
+            font-size: 0.95rem;
+            color: var(--text-light) !important;
+            font-style: italic;
+        }
+        
+        .contacto-info-completa {
+            margin: 4rem 0;
+        }
+        
+        .contacto-info-completa h3 {
+            color: var(--primary);
+            margin-bottom: 2rem;
+            font-size: 1.8rem;
+            text-align: center;
+            border-bottom: 3px solid var(--primary-light);
+            padding-bottom: 0.75rem;
+        }
+        
+        .contacto-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+        
+        .contacto-item {
+            background: var(--background);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px var(--shadow);
+        }
+        
+        .contacto-item.grande {
+            grid-column: 1 / -1;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+        
+        .contacto-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px var(--shadow);
+            border-color: var(--primary);
+        }
+        
+        .contacto-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        
+        .contacto-item.grande .contacto-icon {
+            font-size: 4rem;
+            margin-bottom: 0;
+        }
+        
+        .contacto-details h4 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+        
+        .contacto-details p {
+            color: var(--text);
+            line-height: 1.6;
+            margin: 0;
+        }
+        
+        .contacto-item.grande .contacto-details {
+            flex: 1;
+        }
+        
+        .contacto-item.grande .contacto-details h4 {
+            font-size: 1.4rem;
+        }
+        
+        .mensaje-institucional {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            color: white;
+            padding: 2.5rem;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .institucional-icon {
+            font-size: 4rem;
+            flex-shrink: 0;
+        }
+        
+        .institucional-texto h4 {
+            margin: 0 0 1rem 0;
+            font-size: 1.4rem;
+        }
+        
+        .institucional-texto p {
+            margin: 0;
+            line-height: 1.6;
+            opacity: 0.9;
+        }
+        
+        .formulario-contacto {
+            margin-top: 4rem;
+            padding-top: 3rem;
+            border-top: 3px solid var(--border);
+        }
+        
+        .formulario-contacto h3 {
+            color: var(--primary);
+            margin-bottom: 2rem;
+            font-size: 1.8rem;
+            text-align: center;
+        }
+        
+        .campos-duales {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+        
+        textarea {
+            resize: vertical;
+            min-height: 150px;
+            font-family: inherit;
+        }
+        
+        /* Modo oscuro */
+        [data-tema="oscuro"] .mapa-container {
+            background: var(--background-alt);
+        }
+        
+        [data-tema="oscuro"] .contacto-item {
+            background: var(--background-alt);
+        }
+        
+        [data-tema="oscuro"] .mensaje-institucional {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .mapa-container iframe {
+                height: 400px;
+            }
+            
+            .contacto-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+            
+            .contacto-item.grande {
+                grid-column: auto;
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .campos-duales {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            
+            .mensaje-institucional {
+                flex-direction: column;
+                text-align: center;
+                padding: 2rem;
+            }
+            
+            .ubicacion-destacada {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .mapa-container iframe {
+                height: 300px;
+            }
+            
+            .contacto-item {
+                padding: 1.5rem;
+            }
+            
+            .contacto-icon {
+                font-size: 2.5rem;
+            }
+            
+            .contacto-item.grande .contacto-icon {
+                font-size: 3rem;
+            }
+        }
+    </style>
+
+    <script type="text/javascript">
+        //<![CDATA[
+        function enviarMensaje(event) {
+            event.preventDefault();
+            
+            var nombre = document.getElementById('nombre').value;
+            var email = document.getElementById('email').value;
+            var asunto = document.getElementById('asunto').value;
+            var mensaje = document.getElementById('mensaje').value;
+            
+            if (!nombre || !email || !asunto || !mensaje) {
+                alert('Por favor, complete todos los campos del formulario.');
+                return false;
+            }
+            
+            if (!validarEmail(email)) {
+                alert('Por favor, ingrese un correo electrónico válido.');
+                return false;
+            }
+            
+            // Simular envío de mensaje
+            alert('¡Mensaje enviado con éxito!\n\nGracias ' + nombre + ', nos pondremos en contacto contigo pronto.');
+            limpiarFormulario();
+        }
+        
+        function validarEmail(email) {
+            var regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return regex.test(email);
+        }
+        
+        function limpiarFormulario() {
+            document.getElementById('nombre').value = '';
+            document.getElementById('email').value = '';
+            document.getElementById('asunto').value = '';
+            document.getElementById('mensaje').value = '';
+        }
+        //]]>
+    </script>
+{% endblock %}

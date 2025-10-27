@@ -1,0 +1,64 @@
+{% extends 'FristSiteApp/base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="container main-content">
+        <div class="section" id="formulario-recepcionista">
+            <h2>Agregar Nuevo Recepcionista</h2>
+            
+            <form class="formulario" onsubmit="guardarRecepcionista(event); return false;">
+                <div class="campo-formulario">
+                    <label for="nombre">Nombre Completo:</label>
+                    <input type="text" id="nombre" name="nombre" required="required" />
+                </div>
+                
+                <div class="campo-formulario">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" required="required" />
+                </div>
+                
+                <div class="campo-formulario">
+                    <label for="telefono">Teléfono:</label>
+                    <input type="tel" id="telefono" name="telefono" required="required" />
+                </div>
+                
+                <div class="campo-formulario">
+                    <label for="turno">Turno:</label>
+                    <select id="turno" name="turno" required="required">
+                        <option value="">Seleccionar turno</option>
+                        <option value="matutino">Matutino</option>
+                        <option value="vespertino">Vespertino</option>
+                        <option value="nocturno">Nocturno</option>
+                        <option value="completo">Tiempo Completo</option>
+                    </select>
+                </div>
+                
+                <div class="campo-formulario">
+                    <label for="fecha_contratacion">Fecha de Contratación:</label>
+                    <input type="date" id="fecha_contratacion" name="fecha_contratacion" required="required" />
+                </div>
+                
+                <div class="botones-formulario">
+                    <button type="submit" class="btn-guardar">Guardar Recepcionista</button>
+                    <button type="button" class="btn-volver" onclick="window.location.href='/registro/'">
+                        Volver al Registro
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        //<![CDATA[
+        function guardarRecepcionista(event) {
+            event.preventDefault();
+            
+            alert('Recepcionista guardado con éxito!');
+            
+            setTimeout(function() {
+                window.location.href = "{% url 'recepcionista_registros' %}";
+            }, 1000);
+        }
+        //]]>
+    </script>
+{% endblock %}

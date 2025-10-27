@@ -1,0 +1,195 @@
+{% extends 'FristSiteApp/base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="container main-content">
+        <div class="section" id="citas-section">
+            <h2>Gestión de Citas Médicas</h2>
+            <p>Programa y gestiona tus citas médicas de manera eficiente</p>
+            
+            <div class="citas-actions">
+                <div class="action-card">
+                    <div class="action-icon">📅</div>
+                    <h3>Nueva Cita</h3>
+                    <p>Agenda una nueva cita médica</p>
+                    <button class="btn-action" onclick="agendarCita()">Agendar</button>
+                </div>
+                
+                <div class="action-card">
+                    <div class="action-icon">👁️</div>
+                    <h3>Ver Citas</h3>
+                    <p>Consulta tus citas programadas</p>
+                    <button class="btn-action" onclick="verCitas()">Consultar</button>
+                </div>
+                
+                <div class="action-card">
+                    <div class="action-icon">✏️</div>
+                    <h3>Modificar Cita</h3>
+                    <p>Cambia fecha o hora de tu cita</p>
+                    <button class="btn-action" onclick="modificarCita()">Modificar</button>
+                </div>
+                
+                <div class="action-card">
+                    <div class="action-icon">❌</div>
+                    <h3>Cancelar Cita</h3>
+                    <p>Cancela una cita existente</p>
+                    <button class="btn-action" onclick="cancelarCita()">Cancelar</button>
+                </div>
+            </div>
+
+            <!-- Sección de citas recientes -->
+            <div class="citas-recientes">
+                <h3>Citas Programadas</h3>
+                <div class="contenedor-tabla">
+                    <table class="tabla-datos">
+                        <thead>
+                            <tr>
+                                <th>ID Cita</th>
+                                <th>Paciente</th>
+                                <th>Médico</th>
+                                <th>Fecha</th>
+                                <th>Hora</th>
+                                <th>Estado</th>
+                                <!-- Columna de Acciones eliminada -->
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>CIT-001</td>
+                                <td>Ana García López</td>
+                                <td>Dr. Juan Pérez</td>
+                                <td>2024-01-15</td>
+                                <td>10:00 AM</td>
+                                <td>Confirmada</td>
+                            </tr>
+                            <tr>
+                                <td>CIT-002</td>
+                                <td>Carlos Rodríguez</td>
+                                <td>Dra. María López</td>
+                                <td>2024-01-16</td>
+                                <td>03:30 PM</td>
+                                <td>Pendiente</td>
+                            </tr>
+                            <tr>
+                                <td>CIT-003</td>
+                                <td>María Fernández</td>
+                                <td>Dr. Roberto Sánchez</td>
+                                <td>2024-01-17</td>
+                                <td>09:15 AM</td>
+                                <td>Confirmada</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="botones-volver">
+                <button type="button" class="btn-volver" onclick="window.location.href='/registro/'">
+                    Volver al Registro
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <style type="text/css">
+        .citas-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+        
+        .action-card {
+            background: var(--background);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px var(--shadow);
+        }
+        
+        .action-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px var(--shadow);
+            border-color: var(--primary);
+        }
+        
+        .action-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        .action-card h3 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+        
+        .action-card p {
+            color: var(--text-light);
+            margin-bottom: 1.5rem;
+            line-height: 1.5;
+        }
+        
+        .btn-action {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.8rem 2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+        
+        .btn-action:hover {
+            background: var(--accent);
+            transform: translateY(-2px);
+        }
+        
+        .citas-recientes {
+            margin-top: 4rem;
+        }
+        
+        .citas-recientes h3 {
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+            border-bottom: 2px solid var(--primary-light);
+            padding-bottom: 0.5rem;
+        }
+        
+        @media (max-width: 768px) {
+            .citas-actions {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+            
+            .action-card {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+
+    <script type="text/javascript">
+        //<![CDATA[
+        function agendarCita() {
+            window.location.href = "{% url 'citas_agendar' %}";
+        }
+        
+        function verCitas() {
+            window.location.href = "{% url 'citas_consultar' %}";
+        }
+        
+        function modificarCita() {
+            window.location.href = "{% url 'citas_modificar' %}";
+        }
+        
+        function cancelarCita() {
+            window.location.href = "{% url 'citas_cancelar' %}";
+        }
+        //]]>
+    </script>
+{% endblock %}

@@ -1,0 +1,70 @@
+{% extends 'FristSiteApp/base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="container main-content">
+        <div class="section" id="formulario-personal-extra">
+            <h2>Agregar Nuevo Personal Extra</h2>
+            
+            <form class="formulario" onsubmit="guardarPersonalExtra(event); return false;">
+                <div class="campo-formulario">
+                    <label for="nombre">Nombre Completo:</label>
+                    <input type="text" id="nombre" name="nombre" required="required" />
+                </div>
+                
+                <div class="campo-formulario">
+                    <label for="puesto">Puesto:</label>
+                    <input type="text" id="puesto" name="puesto" required="required" placeholder="Ej: Auxiliar de Limpieza" />
+                </div>
+                
+                <div class="campo-formulario">
+                    <label for="categoria">Categoría:</label>
+                    <select id="categoria" name="categoria" required="required">
+                        <option value="">Seleccionar categoría</option>
+                        <option value="limpieza">Limpieza</option>
+                        <option value="seguridad">Seguridad</option>
+                        <option value="mantenimiento">Mantenimiento</option>
+                        <option value="administrativo">Administrativo</option>
+                        <option value="otros">Otros</option>
+                    </select>
+                </div>
+                
+                <div class="campo-formulario">
+                    <label for="telefono">Teléfono:</label>
+                    <input type="tel" id="telefono" name="telefono" required="required" />
+                </div>
+                
+                <div class="campo-formulario">
+                    <label for="fecha_contratacion">Fecha de Contratación:</label>
+                    <input type="date" id="fecha_contratacion" name="fecha_contratacion" required="required" />
+                </div>
+                
+                <div class="campo-formulario">
+                    <label for="horario">Horario de Trabajo:</label>
+                    <input type="text" id="horario" name="horario" required="required" placeholder="Ej: Lunes a Viernes 8:00-16:00" />
+                </div>
+                
+                <div class="botones-formulario">
+                    <button type="submit" class="btn-guardar">Guardar Personal</button>
+                    <button type="button" class="btn-volver" onclick="window.location.href='/registro/'">
+                        Volver al Registro
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        //<![CDATA[
+        function guardarPersonalExtra(event) {
+            event.preventDefault();
+            
+            alert('Personal extra guardado con éxito!');
+            
+            setTimeout(function() {
+                window.location.href = "{% url 'personal_extra_registros' %}";
+            }, 1000);
+        }
+        //]]>
+    </script>
+{% endblock %}

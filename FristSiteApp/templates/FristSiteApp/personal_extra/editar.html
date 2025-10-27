@@ -1,0 +1,187 @@
+{% extends 'FristSiteApp/base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="container main-content">
+        <div class="section" id="editar-personal-extra">
+            <h2>Modificar Personal Extra</h2>
+            <p>Editando personal con ID: <strong>{{ personal_id }}</strong></p>
+            
+            <form class="formulario" action="#" method="post" onsubmit="actualizarPersonalExtra(event); return false;">
+                <div class="campo-formulario">
+                    <label for="id">ID (No editable):</label>
+                    <input type="text" id="id" name="id" value="{{ personal_id }}" readonly="readonly" class="campo-readonly" />
+                    <span class="texto-ayuda">El ID no se puede modificar</span>
+                </div>
+                
+                <div class="campo-formulario">
+                    <label for="nombre">Nombre Completo:</label>
+                    <input type="text" id="nombre" name="nombre" value="{{ nombre }}" class="campo-requerido" />
+                    <span class="texto-ayuda">* Campo obligatorio</span>
+                </div>
+                
+                <div class="campo-formulario">
+                    <label for="puesto">Puesto:</label>
+                    <input type="text" id="puesto" name="puesto" value="{{ puesto }}" class="campo-requerido" />
+                    <span class="texto-ayuda">* Campo obligatorio</span>
+                </div>
+                
+                <div class="campo-formulario">
+                    <label for="categoria">Categoría:</label>
+                    <select id="categoria" name="categoria" class="campo-requerido">
+                        <option value="limpieza" {% if categoria == 'limpieza' %}selected="selected"{% endif %}>Limpieza</option>
+                        <option value="seguridad" {% if categoria == 'seguridad' %}selected="selected"{% endif %}>Seguridad</option>
+                        <option value="mantenimiento" {% if categoria == 'mantenimiento' %}selected="selected"{% endif %}>Mantenimiento</option>
+                        <option value="administrativo" {% if categoria == 'administrativo' %}selected="selected"{% endif %}>Administrativo</option>
+                        <option value="otros" {% if categoria == 'otros' %}selected="selected"{% endif %}>Otros</option>
+                    </select>
+                    <span class="texto-ayuda">* Campo obligatorio</span>
+                </div>
+                
+                <div class="campo-formulario">
+                    <label for="telefono">Teléfono:</label>
+                    <input type="text" id="telefono" name="telefono" value="{{ telefono }}" class="campo-requerido telefono" />
+                    <span class="texto-ayuda">* Campo obligatorio</span>
+                </div>
+                
+                <div class="campo-formulario">
+                    <label for="fecha_contratacion">Fecha de Contratación:</label>
+                    <input type="text" id="fecha_contratacion" name="fecha_contratacion" value="{{ fecha_contratacion }}" class="campo-requerido fecha"/>
+                    <span class="texto-ayuda">* Formato: AAAA-MM-DD</span>
+                </div>
+                
+                <div class="campo-formulario">
+                    <label for="horario">Horario de Trabajo:</label>
+                    <input type="text" id="horario" name="horario" value="{{ horario }}" class="campo-requerido" />
+                    <span class="texto-ayuda">* Campo obligatorio</span>
+                </div>
+                
+                <div class="campo-formulario">
+                    <label for="activo">Estado:</label>
+                    <select id="activo" name="activo">
+                        <option value="true" {% if activo == 'true' %}selected="selected"{% endif %}>Activo</option>
+                        <option value="false" {% if activo == 'false' %}selected="selected"{% endif %}>Inactivo</option>
+                    </select>
+                </div>
+                
+                <div class="botones-formulario">
+                    <button type="submit" class="btn-actualizar">Actualizar Personal</button>
+                    <button type="button" class="btn-volver" onclick="cancelarEdicion()">
+                        Cancelar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        //<![CDATA[
+        function validarFecha(fecha) {
+            var regex = /^\d{4}-\d{2}-\d{2}$/;
+            if (!regex.test(fecha)) return false;
+            
+            var partes = fecha.split('-');
+            var anio = parseInt(partes[0], 10);
+            var mes = parseInt(partes[1], 10);
+            var dia = parseInt(partes[2], 10);
+            
+            var fechaObj = new Date(anio, mes - 1, dia);
+            return fechaObj.getFullYear() === anio && 
+                   fechaObj.getMonth() === mes - 1 && 
+                   fechaObj.getDate() === dia;
+        }
+        
+        function validarFormularioPersonalExtra() {
+            var nombre = document.getElementById('nombre');
+            var puesto = document.getElementById('puesto');
+            var categoria = document.getElementById('categoria');
+            var telefono = document.getElementById('telefono');
+            var fechaContratacion = document.getElementById('fecha_contratacion');
+            var horario = document.getElementById('horario');
+            var valido = true;
+            
+            [nombre, puesto, categoria, telefono, fechaContratacion, horario].forEach(function(campo) {
+                campo.className = campo.className.replace(' campo-error', '');
+            });
+            
+            if (nombre.value.trim() === '') {
+                nombre.className += ' campo-error';
+                valido = false;
+            }
+            
+            if (puesto.value.trim() === '') {
+                puesto.className += ' campo-error';
+                valido = false;
+            }
+            
+            if (categoria.value === '') {
+                categoria.className += ' campo-error';
+                valido = false;
+            }
+            
+            if (telefono.value.trim() === '') {
+                telefono.className += ' campo-error';
+                valido = false;
+            }
+            
+            if (fechaContratacion.value.trim() === '' || !validarFecha(fechaContratacion.value)) {
+                fechaContratacion.className += ' campo-error';
+                valido = false;
+            }
+            
+            if (horario.value.trim() === '') {
+                horario.className += ' campo-error';
+                valido = false;
+            }
+            
+            return valido;
+        }
+        
+        function actualizarPersonalExtra(event) {
+            event.preventDefault();
+            
+            if (!validarFormularioPersonalExtra()) {
+                alert('Por favor, complete todos los campos correctamente.');
+                return false;
+            }
+            
+            const id = document.getElementById('id').value;
+            const nombre = document.getElementById('nombre').value;
+            const puesto = document.getElementById('puesto').value;
+            const categoria = document.getElementById('categoria').value;
+            const telefono = document.getElementById('telefono').value;
+            const fecha_contratacion = document.getElementById('fecha_contratacion').value;
+            const horario = document.getElementById('horario').value;
+            const activo = document.getElementById('activo').value;
+            
+            alert('Personal extra actualizado con éxito!\n\n' +
+                  'ID: ' + id + '\n' +
+                  'Nombre: ' + nombre + '\n' +
+                  'Puesto: ' + puesto + '\n' +
+                  'Categoría: ' + categoria + '\n' +
+                  'Teléfono: ' + telefono + '\n' +
+                  'Fecha Contratación: ' + fecha_contratacion + '\n' +
+                  'Horario: ' + horario + '\n' +
+                  'Estado: ' + (activo === 'true' ? 'Activo' : 'Inactivo'));
+            
+            setTimeout(function() {
+                window.location.href = "{% url 'personal_extra_modificar' %}";
+            }, 1500);
+        }
+        
+        function cancelarEdicion() {
+            if (confirm('¿Estás seguro de que deseas cancelar? Los cambios no guardados se perderán.')) {
+                window.location.href = "{% url 'personal_extra_modificar' %}";
+            }
+        }
+        
+        document.getElementById('id').addEventListener('input', function(e) {
+            this.value = '{{ personal_id }}';
+        });
+        
+        document.getElementById('id').addEventListener('keydown', function(e) {
+            e.preventDefault();
+        });
+        //]]>
+    </script>
+{% endblock %}

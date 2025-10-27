@@ -21,9 +21,9 @@
                 <div class="nav">
                     <ul>
                         <li><a href="{% url 'home' %}">Inicio</a></li>
-                        <li><a href="#citas">Citas</a></li>
+                        <li><a href="{% url 'citas' %}">Citas</a></li>
                         <li><a href="{% url 'registro' %}">Registro</a></li>
-                        <li><a href="#contacto">Contacto</a></li>
+                        <li><a href="{% url 'contacto' %}">Contacto</a></li>
                     </ul>
                 </div>
                 <button id="btn-login" class="btn-login" title="Iniciar Sesión" type="button">
@@ -85,6 +85,11 @@
     </div>
 
     <script type="text/javascript">
+        //<![CDATA[
+        function abrirLogin() {
+            window.location.href = "{% url 'login' %}";
+        }
+
         function verificarConexionBD() {
             fetch('/dataBaseConexion/')
                 .then(function(response) {
@@ -136,6 +141,10 @@
             });
         }
 
+        // Configurar el botón de login
+        document.getElementById('btn-login').addEventListener('click', abrirLogin);
+
+        // Eliminamos el smooth scroll para enlaces internos ya que ahora son URLs de Django
         var anchors = document.querySelectorAll('a[href^="#"]');
         for (var i = 0; i < anchors.length; i++) {
             anchors[i].addEventListener('click', function (e) {
@@ -153,6 +162,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             verificarConexionBD();
         });
+        //]]>
     </script>
 </body>
 </html>

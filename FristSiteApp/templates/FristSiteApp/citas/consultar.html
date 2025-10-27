@@ -1,0 +1,158 @@
+{% extends 'FristSiteApp/base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="container main-content">
+        <div class="section" id="consultar-citas">
+            <h2>Consultar Citas</h2>
+            <p>Busque y consulte las citas médicas programadas</p>
+            
+            <!-- Filtros de búsqueda -->
+            <div class="filtros-citas">
+                <div class="campos-duales">
+                    <div class="campo-formulario">
+                        <label for="filtro_paciente">Filtrar por Paciente:</label>
+                        <select id="filtro_paciente" onchange="filtrarCitas()">
+                            <option value="">Todos los pacientes</option>
+                            <option value="1">Ana García López</option>
+                            <option value="2">Carlos Rodríguez</option>
+                            <option value="3">María Fernández</option>
+                        </select>
+                    </div>
+                    
+                    <div class="campo-formulario">
+                        <label for="filtro_medico">Filtrar por Médico:</label>
+                        <select id="filtro_medico" onchange="filtrarCitas()">
+                            <option value="">Todos los médicos</option>
+                            <option value="1">Dr. Juan Pérez</option>
+                            <option value="2">Dra. María López</option>
+                            <option value="3">Dr. Roberto Sánchez</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="campos-duales">
+                    <div class="campo-formulario">
+                        <label for="filtro_fecha">Filtrar por Fecha:</label>
+                        <input type="date" id="filtro_fecha" onchange="filtrarCitas()" />
+                    </div>
+                    
+                    <div class="campo-formulario">
+                        <label for="filtro_estado">Filtrar por Estado:</label>
+                        <select id="filtro_estado" onchange="filtrarCitas()">
+                            <option value="">Todos los estados</option>
+                            <option value="programada">Programada</option>
+                            <option value="confirmada">Confirmada</option>
+                            <option value="completada">Completada</option>
+                            <option value="cancelada">Cancelada</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tabla de citas -->
+            <div class="contenedor-tabla">
+                <table class="tabla-datos">
+                    <thead>
+                        <tr>
+                            <th>ID Cita</th>
+                            <th>Paciente</th>
+                            <th>Médico</th>
+                            <th>Recepcionista</th>
+                            <th>Fecha</th>
+                            <th>Hora</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-citas">
+                        <tr>
+                            <td>CIT-001</td>
+                            <td>Ana García López</td>
+                            <td>Dr. Juan Pérez</td>
+                            <td>Ana García López</td>
+                            <td>2024-01-15</td>
+                            <td>10:00 AM</td>
+                            <td><span class="estado confirmada">Confirmada</span></td>
+                            <td>
+                                <button class="btn-modificar-tabla" title="Ver Detalles" onclick="verDetallesCita('CIT-001')">
+                                    <span class="icono">👁️</span>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>CIT-002</td>
+                            <td>Carlos Rodríguez</td>
+                            <td>Dra. María López</td>
+                            <td>Carlos Rodríguez</td>
+                            <td>2024-01-16</td>
+                            <td>03:30 PM</td>
+                            <td><span class="estado programada">Programada</span></td>
+                            <td>
+                                <button class="btn-modificar-tabla" title="Ver Detalles" onclick="verDetallesCita('CIT-002')">
+                                    <span class="icono">👁️</span>
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="botones-volver">
+                <button type="button" class="btn-volver" onclick="window.location.href='/citas/'">
+                    Volver a Citas
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <style type="text/css">
+        .filtros-citas {
+            background: var(--background-alt);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            border: 1px solid var(--border);
+        }
+        
+        .estado {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .estado.programada {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+        
+        .estado.confirmada {
+            background: #e8f5e8;
+            color: #2e7d32;
+        }
+        
+        .estado.completada {
+            background: #f3e5f5;
+            color: #7b1fa2;
+        }
+        
+        .estado.cancelada {
+            background: #ffebee;
+            color: #c62828;
+        }
+    </style>
+
+    <script type="text/javascript">
+        //<![CDATA[
+        function filtrarCitas() {
+            // Simular filtrado
+            alert('Aplicando filtros...');
+        }
+        
+        function verDetallesCita(idCita) {
+            alert('Mostrando detalles de la cita: ' + idCita);
+        }
+        //]]>
+    </script>
+{% endblock %}

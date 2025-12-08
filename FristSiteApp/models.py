@@ -61,3 +61,32 @@ class Recepcionista(AbstractBaseUser, PermissionsMixin):
     
     def __str__(self):
         return f"{self.nombre} ({self.email})"
+
+
+
+class PersonalExtra(models.Model):
+    nombre = models.CharField(max_length=200)
+    puesto = models.CharField(max_length=100)
+    categoria = models.CharField(max_length=50, choices=[
+        ('limpieza', 'Limpieza'),
+        ('seguridad', 'Seguridad'),
+        ('mantenimiento', 'Mantenimiento'),
+        ('administrativo', 'Administrativo'),
+        ('otros', 'Otros'),
+    ])
+    telefono = models.CharField(max_length=20)
+    fecha_contratacion = models.DateField(default=date.today)
+    horario = models.CharField(max_length=100)
+    is_active = models.BooleanField(default=True)
+    fecha_registro = models.DateTimeField(default=timezone.now)
+    
+    # AÑADE ESTA LÍNEA - ES CLAVE ↓↓↓
+    objects = models.Manager()
+    
+    class Meta:
+        db_table = 'personal_extra'
+        verbose_name = 'Personal Extra'
+        verbose_name_plural = 'Personal Extra'
+    
+    def __str__(self):
+        return f"{self.nombre} - {self.puesto}"

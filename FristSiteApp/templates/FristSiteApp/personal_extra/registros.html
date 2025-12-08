@@ -7,56 +7,181 @@
             <h2>Registros de Personal Extra</h2>
             <p>Lista completa de personal extra registrado en el sistema:</p>
             
-            <div class="contenedor-tabla">
-                <table class="tabla-datos">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Nombre</th>
-                            <th>Puesto</th>
-                            <th>Categoría</th>
-                            <th>Teléfono</th>
-                            <th>Horario</th>
-                            <th>Estado</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>PE-001</td>
-                            <td>María González</td>
-                            <td>Auxiliar de Limpieza</td>
-                            <td>Limpieza</td>
-                            <td>555-456-7890</td>
-                            <td>L-V 8:00-16:00</td>
-                            <td>Activo</td>
-                        </tr>
-                        <tr>
-                            <td>PE-002</td>
-                            <td>Roberto Sánchez</td>
-                            <td>Guardia de Seguridad</td>
-                            <td>Seguridad</td>
-                            <td>555-789-1234</td>
-                            <td>Nocturno</td>
-                            <td>Activo</td>
-                        </tr>
-                        <tr>
-                            <td>PE-003</td>
-                            <td>Jorge Martínez</td>
-                            <td>Técnico de Mantenimiento</td>
-                            <td>Mantenimiento</td>
-                            <td>555-321-9876</td>
-                            <td>L-S 7:00-15:00</td>
-                            <td>Activo</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+            {% if personal_extra %}
+                <div class="contenedor-tabla">
+                    <table class="tabla-datos">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Puesto</th>
+                                <th>Categoría</th>
+                                <th>Teléfono</th>
+                                <th>Fecha Contratación</th>
+                                <th>Horario</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for persona in personal_extra %}
+                            <tr>
+                                <td>PE-{{ persona.id|stringformat:"03d" }}</td>
+                                <td>{{ persona.nombre }}</td>
+                                <td>{{ persona.puesto }}</td>
+                                <td>
+                                    {% if persona.categoria == "limpieza" %}
+                                        Limpieza
+                                    {% elif persona.categoria == "seguridad" %}
+                                        Seguridad
+                                    {% elif persona.categoria == "mantenimiento" %}
+                                        Mantenimiento
+                                    {% elif persona.categoria == "administrativo" %}
+                                        Administrativo
+                                    {% elif persona.categoria == "otros" %}
+                                        Otros
+                                    {% else %}
+                                        {{ persona.categoria }}
+                                    {% endif %}
+                                </td>
+                                <td>{{ persona.telefono }}</td>
+                                <td>{{ persona.fecha_contratacion|date:"d/m/Y" }}</td>
+                                <td>{{ persona.horario }}</td>
+                                <td>
+                                    {% if persona.is_active %}
+                                        <span class="estado-activo">Activo</span>
+                                    {% else %}
+                                        <span class="estado-inactivo">Inactivo</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="mensaje-sin-datos">
+                    <p>No hay personal extra registrado en el sistema.</p>
+                    <p><a href="{% url 'personal_extra_agregar' %}" class="btn-agregar">Agregar Primer Personal Extra</a></p>
+                </div>
+            {% endif %}
             
-            <div class="botones-volver">
+            <div class="botones-tabla">
                 <button type="button" class="btn-volver" onclick="window.location.href='/registro/'">
                     Volver al Registro
                 </button>
             </div>
         </div>
     </div>
+
+    <style>
+        .contenedor-tabla {
+            overflow-x: auto;
+            margin: 20px 0;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .tabla-datos {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+        }
+        
+        .tabla-datos th {
+            background-color: #17a2b8;
+            color: white;
+            padding: 12px 15px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .tabla-datos td {
+            padding: 10px 15px;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 14px;
+        }
+        
+        .tabla-datos tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .tabla-datos tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .estado-activo {
+            color: #28a745;
+            font-weight: 600;
+            background-color: #d4edda;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        
+        .estado-inactivo {
+            color: #dc3545;
+            font-weight: 600;
+            background-color: #f8d7da;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        
+        .mensaje-sin-datos {
+            text-align: center;
+            padding: 40px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 2px dashed #dee2e6;
+        }
+        
+        .mensaje-sin-datos p {
+            margin: 10px 0;
+            color: #6c757d;
+        }
+        
+        .btn-agregar {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: background-color 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-agregar:hover {
+            background-color: #218838;
+        }
+        
+        .botones-tabla {
+            display: flex;
+            gap: 12px;
+            margin-top: 30px;
+            justify-content: center;
+        }
+        
+        
+        @media (max-width: 768px) {
+            .contenedor-tabla {
+                font-size: 12px;
+            }
+            
+            .tabla-datos th,
+            .tabla-datos td {
+                padding: 8px 10px;
+            }
+            
+            .botones-tabla {
+                flex-direction: column;
+            }
+        }
+    </style>
 {% endblock %}

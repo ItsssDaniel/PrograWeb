@@ -3,66 +3,71 @@
 
 {% block content %}
     <div class="container main-content">
-        <div class="section" id="eliminar-recepcionistas">
-            <h2>Eliminar Recepcionistas</h2>
-            <p>Selecciona un recepcionista para eliminar:</p>
+        <div class="section" id="eliminar-personal-extra">
+            <h2>Eliminar Personal Extra</h2>
+            <p>Selecciona un personal para eliminar:</p>
             
-            <div class="contenedor-tabla">
-                <table class="tabla-datos">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Nombre</th>
-                            <th>Email</th>
-                            <th>Teléfono</th>
-                            <th>Turno</th>
-                            <th>Estado</th>
-                            <th>Acción</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>REC-001</td>
-                            <td>Ana García López</td>
-                            <td>ana.garcia@clinica.com</td>
-                            <td>555-123-4567</td>
-                            <td>Matutino</td>
-                            <td>Activo</td>
-                            <td>
-                                <button type="button" class="btn-eliminar-tabla" onclick="confirmarEliminacionRecepcionista('REC-001', 'Ana García López')">
-                                    <span class="icono">×</span>
-                                </button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>REC-002</td>
-                            <td>Carlos Rodríguez</td>
-                            <td>c.rodriguez@clinica.com</td>
-                            <td>555-987-6543</td>
-                            <td>Vespertino</td>
-                            <td>Activo</td>
-                            <td>
-                                <button type="button" class="btn-eliminar-tabla" onclick="confirmarEliminacionRecepcionista('REC-002', 'Carlos Rodríguez')">
-                                    <span class="icono">×</span>
-                                </button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>REC-003</td>
-                            <td>María Fernández</td>
-                            <td>m.fernandez@clinica.com</td>
-                            <td>555-456-7890</td>
-                            <td>Nocturno</td>
-                            <td>Activo</td>
-                            <td>
-                                <button type="button" class="btn-eliminar-tabla" onclick="confirmarEliminacionRecepcionista('REC-003', 'María Fernández')">
-                                    <span class="icono">×</span>
-                                </button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+            {% if personal_extra %}
+                <div class="contenedor-tabla">
+                    <table class="tabla-datos">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Puesto</th>
+                                <th>Categoría</th>
+                                <th>Teléfono</th>
+                                <th>Horario</th>
+                                <th>Estado</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for persona in personal_extra %}
+                            <tr>
+                                <td>PE-{{ persona.id|stringformat:"03d" }}</td>
+                                <td>{{ persona.nombre }}</td>
+                                <td>{{ persona.puesto }}</td>
+                                <td>
+                                    {% if persona.categoria == "limpieza" %}
+                                        Limpieza
+                                    {% elif persona.categoria == "seguridad" %}
+                                        Seguridad
+                                    {% elif persona.categoria == "mantenimiento" %}
+                                        Mantenimiento
+                                    {% elif persona.categoria == "administrativo" %}
+                                        Administrativo
+                                    {% elif persona.categoria == "otros" %}
+                                        Otros
+                                    {% else %}
+                                        {{ persona.categoria }}
+                                    {% endif %}
+                                </td>
+                                <td>{{ persona.telefono }}</td>
+                                <td>{{ persona.horario }}</td>
+                                <td>
+                                    {% if persona.is_active %}
+                                        <span class="estado-activo">Activo</span>
+                                    {% else %}
+                                        <span class="estado-inactivo">Inactivo</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <button type="button" class="btn-eliminar-tabla" data-id="{{ persona.id }}" data-nombre="{{ persona.nombre }}">
+                                        <span class="icono">×</span>
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="mensaje-sin-datos">
+                    <p>No hay personal extra registrado en el sistema.</p>
+                    <p><a href="{% url 'personal_extra_agregar' %}" class="btn-agregar">Agregar Primer Personal Extra</a></p>
+                </div>
+            {% endif %}
 
             <div class="botones-volver">
                 <button type="button" class="btn-volver" onclick="window.location.href='/registro/'">
@@ -74,15 +79,66 @@
 
     <script type="text/javascript">
         //<![CDATA[
-        function confirmarEliminacionRecepcionista(id, nombre) {
-            if (confirm('¿Estás seguro de que deseas eliminar al recepcionista ' + nombre + ' (ID: ' + id + ')?\n\nEsta acción no se puede deshacer.')) {
-                alert('Recepcionista ' + nombre + ' (ID: ' + id + ') eliminado exitosamente');
-                // Aquí iría la lógica para eliminar de la base de datos
-                setTimeout(function() {
-                    window.location.reload();
-                }, 1000);
+        // Función para confirmar y eliminar personal extra
+        async function eliminarPersonalExtra(id, nombre) {
+            const idFormateado = String(id).padStart(3, '0');
+            
+            if (confirm(`¿Estás seguro de que deseas eliminar a ${nombre} (ID: PE-${idFormateado})?\n\n⚠️ Esta acción no se puede deshacer.`)) {
+                try {
+                    // Enviar solicitud DELETE al servidor
+                    const response = await fetch(`/personal_extra/eliminar/${id}/`, {
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRFToken': getCookie('csrftoken'),
+                        },
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        alert(data.message || '✅ Personal eliminado exitosamente');
+                        // Recargar la página para actualizar la tabla
+                        setTimeout(function() {
+                            window.location.reload();
+                        }, 1000);
+                    } else {
+                        alert('❌ Error: ' + data.message);
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('❌ Error de conexión. Intente nuevamente.');
+                }
             }
         }
+
+        // Función para obtener el token CSRF
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // Asignar eventos a los botones de eliminar
+        document.addEventListener('DOMContentLoaded', function() {
+            const botones = document.querySelectorAll('.btn-eliminar-tabla');
+            
+            botones.forEach(function(boton) {
+                boton.addEventListener('click', function() {
+                    const id = this.getAttribute('data-id');
+                    const nombre = this.getAttribute('data-nombre');
+                    eliminarPersonalExtra(id, nombre);
+                });
+            });
+        });
         //]]>
     </script>
 {% endblock %}

@@ -41,6 +41,8 @@ urlpatterns = [
     path('personal_extra/agregar/', views.personal_extra_agregar, name='personal_extra_agregar'),
     path('personal_extra/editar/', views.personal_extra_editar, name='personal_extra_editar'),
     path('personal_extra/eliminar/', views.personal_extra_eliminar, name='personal_extra_eliminar'),
+    path('personal_extra/editar/<int:id>/', views.personal_extra_editar, name='personal_extra_editar'),
+     path('personal_extra/eliminar/<int:id>/', views.personal_extra_eliminar_por_id, name='personal_extra_eliminar_por_id'),
     path('personal_extra/modificar/', views.personal_extra_modificar, name='personal_extra_modificar'),
     path('personal_extra/registros/', views.personal_extra_registros, name='personal_extra_registros'),
 

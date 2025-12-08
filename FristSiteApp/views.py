@@ -9,6 +9,7 @@ import json
 from datetime import datetime
 
 from .models import Recepcionista
+from .models import PersonalExtra
 
 # Create your views here.
 def home(request):
@@ -85,6 +86,24 @@ def paciente_editar(request):
     }
     
     return render(request, 'FristSiteApp/pacientes/editar.html', context)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -333,41 +352,227 @@ def recepcionista_editar(request, id):
 
 
 # Vistas para Personal Extra
+@csrf_exempt  # Para desarrollo
 def personal_extra_agregar(request):
+    if request.method == 'POST':
+        # Verificar si es una petición AJAX
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            try:
+                # Obtener datos del JSON
+                data = json.loads(request.body)
+                
+                # Crear el personal extra (NO es un usuario, es modelo normal)
+                personal = PersonalExtra.objects.create(
+                    nombre=data.get('nombre'),
+                    puesto=data.get('puesto'),
+                    categoria=data.get('categoria'),
+                    telefono=data.get('telefono'),
+                    fecha_contratacion=data.get('fecha_contratacion'),
+                    horario=data.get('horario')
+                )
+                
+                return JsonResponse({
+                    'success': True,
+                    'message': 'Personal extra guardado exitosamente!',
+                    'id': personal.id
+                })
+                
+            except Exception as e:
+                return JsonResponse({
+                    'success': False,
+                    'message': f'Error: {str(e)}'
+                }, status=400)
+        
+        else:
+            # Para peticiones normales de formulario
+            try:
+                nombre = request.POST.get('nombre')
+                puesto = request.POST.get('puesto')
+                categoria = request.POST.get('categoria')
+                telefono = request.POST.get('telefono')
+                fecha_contratacion = request.POST.get('fecha_contratacion')
+                horario = request.POST.get('horario')
+                
+                # Crear el personal extra
+                personal = PersonalExtra.objects.create(
+                    nombre=nombre,
+                    puesto=puesto,
+                    categoria=categoria,
+                    telefono=telefono,
+                    fecha_contratacion=fecha_contratacion,
+                    horario=horario
+                )
+                
+                messages.success(request, 'Personal extra guardado exitosamente!')
+                return redirect('personal_extra_registros')
+                
+            except Exception as e:
+                messages.error(request, f'Error: {str(e)}')
+    
+    # Para peticiones GET, simplemente renderizar el template
     return render(request, 'FristSiteApp/personal_extra/agregar.html')
-
 def personal_extra_modificar(request):
-    return render(request, 'FristSiteApp/personal_extra/modificar.html')
-
-def personal_extra_eliminar(request):
-    return render(request, 'FristSiteApp/personal_extra/eliminar.html')
-
-def personal_extra_registros(request):
-    return render(request, 'FristSiteApp/personal_extra/registros.html')
-
-def personal_extra_editar(request):
-    # Obtener los datos del personal extra desde los parámetros GET
-    personal_id = request.GET.get('id', '')
-    nombre = request.GET.get('nombre', '')
-    puesto = request.GET.get('puesto', '')
-    categoria = request.GET.get('categoria', '')
-    telefono = request.GET.get('telefono', '')
-    fecha_contratacion = request.GET.get('fecha_contratacion', '')
-    horario = request.GET.get('horario', '')
-    activo = request.GET.get('activo', 'true')
+    personal_extra = PersonalExtra.objects.all().order_by('-fecha_registro')
     
     context = {
-        'personal_id': personal_id,
-        'nombre': nombre,
-        'puesto': puesto,
-        'categoria': categoria,
-        'telefono': telefono,
-        'fecha_contratacion': fecha_contratacion,
-        'horario': horario,
-        'activo': activo,
+        'personal_extra': personal_extra
     }
     
-    return render(request, 'FristSiteApp/personal_extra/editar.html', context)
+    return render(request, 'FristSiteApp/personal_extra/modificar.html', context)
+def personal_extra_eliminar(request):
+    personal_extra = PersonalExtra.objects.all().order_by('-fecha_registro')
+    
+    context = {
+        'personal_extra': personal_extra
+    }
+    
+    return render(request, 'FristSiteApp/personal_extra/eliminar.html', context)
+
+@csrf_exempt
+def personal_extra_eliminar_por_id(request, id):
+    if request.method != 'DELETE':
+        return JsonResponse({
+            'success': False,
+            'message': 'Método no permitido. Use DELETE.'
+        }, status=405)
+    
+    try:
+        persona = PersonalExtra.objects.get(id=id)
+        nombre = persona.nombre
+        persona.delete()
+        
+        return JsonResponse({
+            'success': True,
+            'message': f'Personal "{nombre}" eliminado exitosamente'
+        })
+        
+    except ObjectDoesNotExist:  # Cambia PersonalExtra.DoesNotExist por ObjectDoesNotExist
+        return JsonResponse({
+            'success': False,
+            'message': 'La persona no existe'
+        }, status=404)
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': f'Error: {str(e)}'
+        }, status=500)
+    
+def personal_extra_registros(request):
+    # Obtener todo el personal extra de la base de datos
+    personal_extra = PersonalExtra.objects.all().order_by('-fecha_registro')
+    
+    context = {
+        'personal_extra': personal_extra
+    }
+    
+    return render(request, 'FristSiteApp/personal_extra/registros.html', context)
+
+@csrf_exempt
+def personal_extra_editar(request, id):
+    try:
+        # Obtener el personal extra por ID
+        persona = PersonalExtra.objects.get(id=id)
+        
+        if request.method == 'POST':
+            # Procesar la actualización
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                # Petición AJAX
+                try:
+                    data = json.loads(request.body)
+                    
+                    # Actualizar campos
+                    persona.nombre = data.get('nombre', persona.nombre)
+                    persona.puesto = data.get('puesto', persona.puesto)
+                    persona.categoria = data.get('categoria', persona.categoria)
+                    persona.telefono = data.get('telefono', persona.telefono)
+                    persona.fecha_contratacion = data.get('fecha_contratacion', persona.fecha_contratacion)
+                    persona.horario = data.get('horario', persona.horario)
+                    
+                    # Convertir string a booleano para is_active
+                    activo = data.get('activo')
+                    if activo is not None:
+                        persona.is_active = activo.lower() == 'true'
+                    
+                    persona.save()
+                    
+                    return JsonResponse({
+                        'success': True,
+                        'message': '✅ Personal extra actualizado exitosamente!'
+                    })
+                    
+                except Exception as e:
+                    return JsonResponse({
+                        'success': False,
+                        'message': f'❌ Error: {str(e)}'
+                    }, status=400)
+            else:
+                # Petición normal de formulario
+                persona.nombre = request.POST.get('nombre', persona.nombre)
+                persona.puesto = request.POST.get('puesto', persona.puesto)
+                persona.categoria = request.POST.get('categoria', persona.categoria)
+                persona.telefono = request.POST.get('telefono', persona.telefono)
+                persona.fecha_contratacion = request.POST.get('fecha_contratacion', persona.fecha_contratacion)
+                persona.horario = request.POST.get('horario', persona.horario)
+                persona.is_active = request.POST.get('activo') == 'true'
+                
+                persona.save()
+                
+                messages.success(request, '✅ Personal extra actualizado exitosamente!')
+                return redirect('personal_extra_modificar')
+        
+        # Para peticiones GET, preparar contexto
+        context = {
+            'persona': persona,
+            'id': persona.id,
+            'nombre': persona.nombre,
+            'puesto': persona.puesto,
+            'categoria': persona.categoria,
+            'telefono': persona.telefono,
+            'fecha_contratacion': persona.fecha_contratacion.strftime('%Y-%m-%d') if persona.fecha_contratacion else '',
+            'horario': persona.horario,
+            'activo': 'true' if persona.is_active else 'false'
+        }
+        
+        return render(request, 'FristSiteApp/personal_extra/editar.html', context)
+        
+    except ObjectDoesNotExist:
+        messages.error(request, '❌ El personal extra no existe')
+        return redirect('personal_extra_modificar')
+    except Exception as e:
+        messages.error(request, f'❌ Error: {str(e)}')
+        return redirect('personal_extra_modificar')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 def login_view(request):
     return render(request, 'FristSiteApp/login.html')

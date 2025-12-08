@@ -7,66 +7,67 @@
             <h2>Personal Extra Registrado</h2>
             <p>Selecciona un personal para modificar:</p>
             
-            <div class="contenedor-tabla">
-                <table class="tabla-datos">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Nombre</th>
-                            <th>Puesto</th>
-                            <th>Categoría</th>
-                            <th>Teléfono</th>
-                            <th>Horario</th>
-                            <th>Estado</th>
-                            <th>Acción</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>PE-001</td>
-                            <td>María González</td>
-                            <td>Auxiliar de Limpieza</td>
-                            <td>Limpieza</td>
-                            <td>555-456-7890</td>
-                            <td>L-V 8:00-16:00</td>
-                            <td>Activo</td>
-                            <td>
-                                <button type="button" class="btn-modificar-tabla" onclick="modificarPersonalExtra('PE-001', 'María González', 'Auxiliar de Limpieza', 'limpieza', '555-456-7890', 'L-V 8:00-16:00', 'Activo')">
-                                    <span class="icono">✎</span>
-                                </button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>PE-002</td>
-                            <td>Roberto Sánchez</td>
-                            <td>Guardia de Seguridad</td>
-                            <td>Seguridad</td>
-                            <td>555-789-1234</td>
-                            <td>Nocturno</td>
-                            <td>Activo</td>
-                            <td>
-                                <button type="button" class="btn-modificar-tabla" onclick="modificarPersonalExtra('PE-002', 'Roberto Sánchez', 'Guardia de Seguridad', 'seguridad', '555-789-1234', 'Nocturno', 'Activo')">
-                                    <span class="icono">✎</span>
-                                </button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>PE-003</td>
-                            <td>Jorge Martínez</td>
-                            <td>Técnico de Mantenimiento</td>
-                            <td>Mantenimiento</td>
-                            <td>555-321-9876</td>
-                            <td>L-S 7:00-15:00</td>
-                            <td>Activo</td>
-                            <td>
-                                <button type="button" class="btn-modificar-tabla" onclick="modificarPersonalExtra('PE-003', 'Jorge Martínez', 'Técnico de Mantenimiento', 'mantenimiento', '555-321-9876', 'L-S 7:00-15:00', 'Activo')">
-                                    <span class="icono">✎</span>
-                                </button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+            {% if personal_extra %}
+                <div class="contenedor-tabla">
+                    <table class="tabla-datos">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Puesto</th>
+                                <th>Categoría</th>
+                                <th>Teléfono</th>
+                                <th>Horario</th>
+                                <th>Estado</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for persona in personal_extra %}
+                            <tr>
+                                <td>PE-{{ persona.id|stringformat:"03d" }}</td>
+                                <td>{{ persona.nombre }}</td>
+                                <td>{{ persona.puesto }}</td>
+                                <td>
+                                    {% if persona.categoria == "limpieza" %}
+                                        Limpieza
+                                    {% elif persona.categoria == "seguridad" %}
+                                        Seguridad
+                                    {% elif persona.categoria == "mantenimiento" %}
+                                        Mantenimiento
+                                    {% elif persona.categoria == "administrativo" %}
+                                        Administrativo
+                                    {% elif persona.categoria == "otros" %}
+                                        Otros
+                                    {% else %}
+                                        {{ persona.categoria }}
+                                    {% endif %}
+                                </td>
+                                <td>{{ persona.telefono }}</td>
+                                <td>{{ persona.horario }}</td>
+                                <td>
+                                    {% if persona.is_active %}
+                                        <span class="estado-activo">Activo</span>
+                                    {% else %}
+                                        <span class="estado-inactivo">Inactivo</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <button type="button" class="btn-modificar-tabla" data-id="{{ persona.id }}">
+                                        <span class="icono">✎</span>
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="mensaje-sin-datos">
+                    <p>No hay personal extra registrado en el sistema.</p>
+                    <p><a href="{% url 'personal_extra_agregar' %}" class="btn-agregar">Agregar Primer Personal Extra</a></p>
+                </div>
+            {% endif %}
 
             <div class="botones-volver">
                 <button type="button" class="btn-volver" onclick="window.location.href='/registro/'">
@@ -78,18 +79,23 @@
 
     <script type="text/javascript">
         //<![CDATA[
-        function modificarPersonalExtra(id, nombre, puesto, categoria, telefono, horario, estado) {
-            // Convertir estado a formato booleano para la URL
-            var activo = estado === 'Activo' ? 'true' : 'false';
-            
-            window.location.href = "{% url 'personal_extra_editar' %}?id=" + encodeURIComponent(id) + 
-                                 "&nombre=" + encodeURIComponent(nombre) + 
-                                 "&puesto=" + encodeURIComponent(puesto) + 
-                                 "&categoria=" + encodeURIComponent(categoria) + 
-                                 "&telefono=" + encodeURIComponent(telefono) + 
-                                 "&horario=" + encodeURIComponent(horario) + 
-                                 "&activo=" + activo;
+        // Función para modificar personal extra
+        function modificarPersonalExtra(id) {
+            // Redirigir a la página de edición con el ID
+            window.location.href = '/personal_extra/editar/' + id + '/';
         }
+        
+        // Asignar eventos a los botones
+        document.addEventListener('DOMContentLoaded', function() {
+            const botones = document.querySelectorAll('.btn-modificar-tabla');
+            
+            botones.forEach(function(boton) {
+                boton.addEventListener('click', function() {
+                    const personalId = this.getAttribute('data-id');
+                    modificarPersonalExtra(personalId);
+                });
+            });
+        });
         //]]>
     </script>
 {% endblock %}

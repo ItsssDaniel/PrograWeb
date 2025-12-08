@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from .models import Recepcionista
+from .models import PersonalExtra
 
 class RecepcionistaForm(UserCreationForm):
     nombre = forms.CharField(
@@ -35,3 +36,16 @@ class RecepcionistaForm(UserCreationForm):
     class Meta:
         model = Recepcionista
         fields = ['nombre', 'email', 'telefono', 'turno', 'fecha_contratacion', 'password1', 'password2']
+
+class PersonalExtraForm(forms.ModelForm):
+    class Meta:
+        model = PersonalExtra
+        fields = ['nombre', 'puesto', 'categoria', 'telefono', 'fecha_contratacion', 'horario']
+        widgets = {
+            'nombre': forms.TextInput(attrs={'class': 'input-field', 'placeholder': 'Nombre completo'}),
+            'puesto': forms.TextInput(attrs={'class': 'input-field', 'placeholder': 'Ej: Auxiliar de Limpieza'}),
+            'categoria': forms.Select(attrs={'class': 'input-field'}),
+            'telefono': forms.TextInput(attrs={'class': 'input-field', 'placeholder': 'Teléfono'}),
+            'fecha_contratacion': forms.DateInput(attrs={'class': 'input-field', 'type': 'date'}),
+            'horario': forms.TextInput(attrs={'class': 'input-field', 'placeholder': 'Ej: Lunes a Viernes 8:00-16:00'}),
+        }

@@ -1,0 +1,363 @@
+{% extends 'FristSiteApp/base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="container main-content">
+        <div class="section" id="ver-receta">
+            <div class="receta-header">
+                <h2>Receta Médica</h2>
+                <div class="receta-meta">
+                    <span class="receta-id">ID: REC-001</span>
+                    <span class="receta-fecha">Fecha: 15 de Enero, 2024</span>
+                </div>
+            </div>
+            
+            <!-- Información de la clínica -->
+            <div class="clinica-info">
+                <h3>SGCM MEDIC</h3>
+                <p>Sistema de Gestión de Citas Médicas</p>
+                <p>Tecnológico Nacional de México, Campus Morelia</p>
+            </div>
+            
+            <div class="receta-content">
+                <!-- Información del paciente -->
+                <div class="receta-section">
+                    <h4>Información del Paciente</h4>
+                    <div class="paciente-info">
+                        <div class="info-row">
+                            <span class="info-label">Nombre:</span>
+                            <span class="info-value">Ana García López</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Edad:</span>
+                            <span class="info-value">35 años</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Género:</span>
+                            <span class="info-value">Femenino</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Peso:</span>
+                            <span class="info-value">62 kg</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Diagnóstico -->
+                <div class="receta-section">
+                    <h4>Diagnóstico</h4>
+                    <div class="diagnostico-content">
+                        <p><strong>Diagnóstico Principal:</strong> Infección de vías respiratorias superiores</p>
+                        <p><strong>Síntomas:</strong> Fiebre, tos productiva, congestión nasal, malestar general</p>
+                    </div>
+                </div>
+                
+                <!-- Medicamentos -->
+                <div class="receta-section">
+                    <h4>Medicamentos Recetados</h4>
+                    <div class="medicamentos-list">
+                        <div class="medicamento-item">
+                            <div class="medicamento-header">
+                                <span class="medicamento-nombre">Amoxicilina 500mg</span>
+                                <span class="medicamento-cantidad">Caja con 14 tabletas</span>
+                            </div>
+                            <div class="medicamento-detalles">
+                                <span class="dosis">Dosis: 1 tableta cada 8 horas</span>
+                                <span class="duracion">Duración: 7 días</span>
+                            </div>
+                            <div class="medicamento-instrucciones">
+                                <strong>Instrucciones:</strong> Tomar después de los alimentos. Completar el tratamiento completo.
+                            </div>
+                        </div>
+                        
+                        <div class="medicamento-item">
+                            <div class="medicamento-header">
+                                <span class="medicamento-nombre">Ibuprofeno 400mg</span>
+                                <span class="medicamento-cantidad">Caja con 10 tabletas</span>
+                            </div>
+                            <div class="medicamento-detalles">
+                                <span class="dosis">Dosis: 1 tableta cada 12 horas</span>
+                                <span class="duracion">Duración: 3 días</span>
+                            </div>
+                            <div class="medicamento-instrucciones">
+                                <strong>Instrucciones:</strong> Tomar solo en caso de fiebre o dolor intenso.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Indicaciones adicionales -->
+                <div class="receta-section">
+                    <h4>Indicaciones Adicionales</h4>
+                    <div class="indicaciones-content">
+                        <ul>
+                            <li>Reposo relativo por 48 horas</li>
+                            <li>Ingerir líquidos abundantes</li>
+                            <li>Dieta blanda durante los primeros 2 días</li>
+                            <li>Evitar cambios bruscos de temperatura</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Próximo control -->
+                <div class="receta-section">
+                    <h4>Control Médico</h4>
+                    <div class="control-info">
+                        <p><strong>Próximo control:</strong> 22 de Enero, 2024</p>
+                        <p><strong>Observaciones:</strong> Regresar en caso de persistencia de fiebre después de 48 horas de tratamiento</p>
+                    </div>
+                </div>
+                
+                <!-- Información del médico -->
+                <div class="receta-section medico-info">
+                    <div class="firma-medico">
+                        <div class="firma-line"></div>
+                        <p class="medico-nombre">Dr. Juan Pérez</p>
+                        <p class="medico-cedula">Cédula Profesional: 1234567</p>
+                        <p class="medico-especialidad">Médico General</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Botones de acción -->
+            <div class="receta-actions">
+                <div class="botones-formulario">
+                    <button type="button" class="btn-actualizar" onclick="modificarReceta('REC-001')">
+                        <span class="icono">✎</span> Modificar Receta
+                    </button>
+                    <button type="button" class="btn-guardar" onclick="imprimirReceta()">
+                        <span class="icono">🖨️</span> Imprimir Receta
+                    </button>
+                    <button type="button" class="btn-volver" onclick="window.location.href='/citas/'">
+                        Volver a Consultas
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style type="text/css">
+        .receta-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 1rem;
+        }
+        
+        .receta-meta {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 0.5rem;
+            color: var(--text-light);
+        }
+        
+        .clinica-info {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background: var(--primary-light);
+            border-radius: 8px;
+        }
+        
+        .clinica-info h3 {
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+        
+        .receta-content {
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px var(--shadow);
+        }
+        
+        .receta-section {
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .receta-section:last-of-type {
+            border-bottom: none;
+        }
+        
+        .receta-section h4 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+        
+        .paciente-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+        
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px dashed var(--border);
+        }
+        
+        .info-label {
+            font-weight: 600;
+            color: var(--text);
+        }
+        
+        .info-value {
+            color: var(--text-light);
+        }
+        
+        .diagnostico-content p {
+            margin: 0.5rem 0;
+            line-height: 1.6;
+        }
+        
+        .medicamentos-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        
+        .medicamento-item {
+            background: var(--background-alt);
+            padding: 1.5rem;
+            border-radius: 8px;
+            border-left: 4px solid var(--accent);
+        }
+        
+        .medicamento-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .medicamento-nombre {
+            font-weight: 600;
+            color: var(--primary);
+            font-size: 1.1rem;
+        }
+        
+        .medicamento-cantidad {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+        
+        .medicamento-detalles {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .dosis, .duracion {
+            color: var(--text);
+            font-weight: 500;
+        }
+        
+        .medicamento-instrucciones {
+            background: var(--background);
+            padding: 1rem;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+        }
+        
+        .indicaciones-content ul {
+            margin: 0;
+            padding-left: 1.5rem;
+        }
+        
+        .indicaciones-content li {
+            margin-bottom: 0.5rem;
+            line-height: 1.5;
+        }
+        
+        .control-info p {
+            margin: 0.5rem 0;
+            line-height: 1.6;
+        }
+        
+        .medico-info {
+            text-align: right;
+        }
+        
+        .firma-medico {
+            display: inline-block;
+            text-align: center;
+        }
+        
+        .firma-line {
+            width: 200px;
+            height: 1px;
+            background: var(--text);
+            margin: 1rem auto;
+        }
+        
+        .medico-nombre {
+            font-weight: 600;
+            color: var(--primary);
+            margin: 0.5rem 0;
+        }
+        
+        .medico-cedula, .medico-especialidad {
+            color: var(--text-light);
+            margin: 0.25rem 0;
+            font-size: 0.9rem;
+        }
+        
+        .receta-actions {
+            text-align: center;
+        }
+        
+        @media print {
+            .receta-actions {
+                display: none;
+            }
+            
+            .receta-content {
+                box-shadow: none;
+                border: 1px solid #000;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .medicamento-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+            
+            .medicamento-detalles {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .paciente-info {
+                grid-template-columns: 1fr;
+            }
+            
+            .receta-meta {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+        }
+    </style>
+
+    <script type="text/javascript">
+        //<![CDATA[
+        function modificarReceta(idReceta) {
+            if (confirm('¿Desea modificar la receta ' + idReceta + '?')) {
+                window.location.href = "{% url 'receta_medica' %}?modificar=" + idReceta;
+            }
+        }
+        
+        function imprimirReceta() {
+            window.print();
+        }
+        //]]>
+    </script>
+{% endblock %}

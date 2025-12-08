@@ -1,0 +1,290 @@
+{% extends 'FristSiteApp/base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="container main-content">
+        <div class="section" id="modificar-receta">
+            <h2>Modificar Receta Médica</h2>
+            <p>Busque y modifique una receta médica existente</p>
+            
+            <!-- Búsqueda de receta -->
+            <div class="seccion-busqueda">
+                <h3>Buscar Receta</h3>
+                <div class="campos-duales">
+                    <div class="campo-formulario">
+                        <label for="buscar_id">Buscar por ID de Receta:</label>
+                        <input type="text" id="buscar_id" name="buscar_id" placeholder="Ej: REC-2024-001" />
+                    </div>
+                    <div class="campo-formulario">
+                        <label for="buscar_paciente">Buscar por Nombre de Paciente:</label>
+                        <input type="text" id="buscar_paciente" name="buscar_paciente" placeholder="Nombre del paciente" />
+                    </div>
+                </div>
+                <div class="botones-formulario">
+                    <button type="button" class="btn-guardar" onclick="buscarReceta()">Buscar Receta</button>
+                </div>
+            </div>
+
+            <!-- Formulario de modificación (inicialmente oculto) -->
+            <div id="formulario-modificacion" style="display: none;">
+                <form class="formulario" onsubmit="guardarModificacion(event); return false;">
+                    <input type="hidden" id="receta_id" name="receta_id" />
+                    
+                    <!-- Información del paciente -->
+                    <div class="seccion-receta">
+                        <h3>Información del Paciente</h3>
+                        <div class="campos-duales">
+                            <div class="campo-formulario">
+                                <label for="mod_paciente_nombre">Nombre del Paciente:</label>
+                                <input type="text" id="mod_paciente_nombre" name="mod_paciente_nombre" required="required" />
+                            </div>
+                            <div class="campo-formulario">
+                                <label for="mod_paciente_edad">Edad:</label>
+                                <input type="number" id="mod_paciente_edad" name="mod_paciente_edad" required="required" />
+                            </div>
+                        </div>
+                        
+                        <div class="campos-duales">
+                            <div class="campo-formulario">
+                                <label for="mod_paciente_genero">Género:</label>
+                                <select id="mod_paciente_genero" name="mod_paciente_genero" required="required">
+                                    <option value="masculino">Masculino</option>
+                                    <option value="femenino">Femenino</option>
+                                    <option value="otro">Otro</option>
+                                </select>
+                            </div>
+                            <div class="campo-formulario">
+                                <label for="mod_paciente_peso">Peso (kg):</label>
+                                <input type="number" id="mod_paciente_peso" name="mod_paciente_peso" required="required" step="0.1" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Diagnóstico -->
+                    <div class="seccion-receta">
+                        <h3>Diagnóstico</h3>
+                        <div class="campo-formulario">
+                            <label for="mod_diagnostico">Diagnóstico Principal:</label>
+                            <input type="text" id="mod_diagnostico" name="mod_diagnostico" required="required" />
+                        </div>
+                        
+                        <div class="campo-formulario">
+                            <label for="mod_sintomas">Síntomas y Hallazgos:</label>
+                            <textarea id="mod_sintomas" name="mod_sintomas" rows="3" required="required"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Medicamentos -->
+                    <div class="seccion-receta">
+                        <h3>Medicamentos Recetados</h3>
+                        <div id="mod_lista_medicamentos">
+                            <!-- Los medicamentos se cargarán dinámicamente -->
+                        </div>
+                    </div>
+
+                    <!-- Indicaciones adicionales -->
+                    <div class="seccion-receta">
+                        <h3>Indicaciones Adicionales</h3>
+                        <div class="campo-formulario">
+                            <label for="mod_reposo">Reposo:</label>
+                            <input type="text" id="mod_reposo" name="mod_reposo" />
+                        </div>
+                        
+                        <div class="campo-formulario">
+                            <label for="mod_dieta">Dieta:</label>
+                            <input type="text" id="mod_dieta" name="mod_dieta" />
+                        </div>
+                        
+                        <div class="campo-formulario">
+                            <label for="mod_recomendaciones">Recomendaciones Generales:</label>
+                            <textarea id="mod_recomendaciones" name="mod_recomendaciones" rows="2"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Control Médico -->
+                    <div class="seccion-receta">
+                        <h3>Control Médico</h3>
+                        <div class="campos-duales">
+                            <div class="campo-formulario">
+                                <label for="mod_proximo_control">Próximo Control:</label>
+                                <input type="date" id="mod_proximo_control" name="mod_proximo_control" />
+                            </div>
+                            <div class="campo-formulario">
+                                <label for="mod_observaciones">Observaciones:</label>
+                                <input type="text" id="mod_observaciones" name="mod_observaciones" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="botones-formulario">
+                        <button type="submit" class="btn-actualizar">Guardar Cambios</button>
+                        <button type="button" class="btn-volver" onclick="cancelarModificacion()">
+                            Cancelar
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Historial de modificaciones -->
+            <div id="historial-modificaciones" class="seccion-receta" style="display: none; margin-top: 2rem;">
+                <h3>Historial de Modificaciones</h3>
+                <div class="contenedor-tabla">
+                    <table class="tabla-datos">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Usuario</th>
+                                <th>Cambios Realizados</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>2024-01-15 10:30</td>
+                                <td>Dr. Juan Pérez</td>
+                                <td>Receta creada</td>
+                            </tr>
+                            <tr>
+                                <td>2024-01-15 14:20</td>
+                                <td>Dr. Juan Pérez</td>
+                                <td>Modificación en dosis de Amoxicilina</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style type="text/css">
+        .seccion-busqueda {
+            background: var(--background-alt);
+            padding: 2rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            border-left: 4px solid var(--primary);
+        }
+        
+        .seccion-busqueda h3 {
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+        }
+    </style>
+
+    <script type="text/javascript">
+        //<![CDATA[
+        function buscarReceta() {
+            var idReceta = document.getElementById('buscar_id').value;
+            var nombrePaciente = document.getElementById('buscar_paciente').value;
+            
+            if (!idReceta && !nombrePaciente) {
+                alert('Por favor, ingrese al menos un criterio de búsqueda.');
+                return false;
+            }
+            
+            // Simular búsqueda exitosa
+            document.getElementById('formulario-modificacion').style.display = 'block';
+            document.getElementById('historial-modificaciones').style.display = 'block';
+            
+            // Cargar datos de ejemplo
+            cargarDatosEjemplo();
+            
+            alert('Receta encontrada. Puede modificar los datos.');
+        }
+        
+        function cargarDatosEjemplo() {
+            // Datos de ejemplo para demostración
+            document.getElementById('receta_id').value = 'REC-2024-001';
+            document.getElementById('mod_paciente_nombre').value = 'Ana García López';
+            document.getElementById('mod_paciente_edad').value = '35';
+            document.getElementById('mod_paciente_genero').value = 'femenino';
+            document.getElementById('mod_paciente_peso').value = '62';
+            document.getElementById('mod_diagnostico').value = 'Infección de vías respiratorias superiores';
+            document.getElementById('mod_sintomas').value = 'Fiebre, tos productiva, congestión nasal, malestar general';
+            document.getElementById('mod_reposo').value = 'Reposo relativo por 48 horas';
+            document.getElementById('mod_dieta').value = 'Ingerir líquidos abundantes, dieta blanda durante los primeros 2 días';
+            document.getElementById('mod_recomendaciones').value = 'Evitar cambios bruscos de temperatura';
+            document.getElementById('mod_proximo_control').value = '2024-01-22';
+            document.getElementById('mod_observaciones').value = 'Regresar en caso de persistencia de fiebre después de 48 horas de tratamiento';
+            
+            // Cargar medicamentos de ejemplo
+            const listaMedicamentos = document.getElementById('mod_lista_medicamentos');
+            listaMedicamentos.innerHTML = `
+                <div class="medicamento-item">
+                    <div class="campos-triples">
+                        <div class="campo-formulario">
+                            <label>Medicamento:</label>
+                            <input type="text" name="mod_medicamento[]" value="Amoxicilina" required="required" />
+                        </div>
+                        <div class="campo-formulario">
+                            <label>Presentación:</label>
+                            <input type="text" name="mod_presentacion[]" value="Caja con 14 tabletas" required="required" />
+                        </div>
+                        <div class="campo-formulario">
+                            <label>Dosis:</label>
+                            <input type="text" name="mod_dosis[]" value="500mg, 1 tableta cada 8 horas" required="required" />
+                        </div>
+                    </div>
+                    <div class="campos-duales">
+                        <div class="campo-formulario">
+                            <label>Duración:</label>
+                            <input type="text" name="mod_duracion[]" value="7 días" required="required" />
+                        </div>
+                        <div class="campo-formulario">
+                            <label>Instrucciones Especiales:</label>
+                            <input type="text" name="mod_instrucciones[]" value="Tomar después de los alimentos. Completar el tratamiento completo." />
+                        </div>
+                    </div>
+                </div>
+                <div class="medicamento-item">
+                    <div class="campos-triples">
+                        <div class="campo-formulario">
+                            <label>Medicamento:</label>
+                            <input type="text" name="mod_medicamento[]" value="Ibuprofeno" required="required" />
+                        </div>
+                        <div class="campo-formulario">
+                            <label>Presentación:</label>
+                            <input type="text" name="mod_presentacion[]" value="Caja con 10 tabletas" required="required" />
+                        </div>
+                        <div class="campo-formulario">
+                            <label>Dosis:</label>
+                            <input type="text" name="mod_dosis[]" value="400mg, 1 tableta cada 12 horas" required="required" />
+                        </div>
+                    </div>
+                    <div class="campos-duales">
+                        <div class="campo-formulario">
+                            <label>Duración:</label>
+                            <input type="text" name="mod_duracion[]" value="3 días" required="required" />
+                        </div>
+                        <div class="campo-formulario">
+                            <label>Instrucciones Especiales:</label>
+                            <input type="text" name="mod_instrucciones[]" value="Tomar solo en caso de fiebre o dolor intenso" />
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function guardarModificacion(event) {
+            event.preventDefault();
+            
+            var idReceta = document.getElementById('receta_id').value;
+            var pacienteNombre = document.getElementById('mod_paciente_nombre').value;
+            
+            if (confirm('¿Está seguro de que desea guardar los cambios en la receta ' + idReceta + '?')) {
+                // Simular guardado
+                alert('✅ Cambios guardados exitosamente en la receta de ' + pacienteNombre);
+                
+                setTimeout(function() {
+                    window.location.href = "{% url 'receta_lista' %}";
+                }, 1500);
+            }
+        }
+        
+        function cancelarModificacion() {
+            if (confirm('¿Está seguro de que desea cancelar? Los cambios no guardados se perderán.')) {
+                window.location.href = "{% url 'receta_lista' %}";
+            }
+        }
+        //]]>
+    </script>
+{% endblock %}

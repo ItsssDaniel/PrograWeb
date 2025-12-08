@@ -1,0 +1,134 @@
+{% extends 'FristSiteApp/base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="container main-content">
+        <div class="section" id="recuperar-contrasena">
+            <h2>Recuperar Contraseña</h2>
+            <p>Ingresa tu correo electrónico para restablecer tu contraseña</p>
+            
+            <form class="formulario" onsubmit="solicitarRecuperacion(event); return false;">
+                <div class="campo-formulario">
+                    <label for="email">Correo Electrónico:</label>
+                    <input type="email" id="email" name="email" required="required" placeholder="usuario@clinica.com" />
+                    <span class="texto-ayuda">Ingresa el correo electrónico asociado a tu cuenta</span>
+                </div>
+                
+                <div class="campo-formulario">
+                    <label for="tipo_usuario">Tipo de Usuario:</label>
+                    <select id="tipo_usuario" name="tipo_usuario" required="required">
+                        <option value="">Seleccionar tipo de usuario</option>
+                        <option value="medico">Médico</option>
+                        <option value="recepcionista">Recepcionista</option>
+                        <option value="personal_extra">Personal Administrativo</option>
+                        <option value="administrador">Administrador</option>
+                    </select>
+                </div>
+                
+                <div class="texto-ayuda destacado">
+                    <h4>📧 ¿Qué sucede después?</h4>
+                    <p>Te enviaremos un correo electrónico con un enlace seguro para restablecer tu contraseña. El enlace expirará en 1 hora por seguridad.</p>
+                </div>
+                
+                <div class="botones-formulario">
+                    <button type="submit" class="btn-guardar" >Enviar Enlace de Recuperación</button>
+                    <button type="button" class="btn-volver" onclick="window.location.href='/login/'">
+                        Volver al Login
+                    </button>
+                </div>
+            </form>
+            
+            <div class="info-adicional">
+                <h4>¿Problemas para recuperar tu cuenta?</h4>
+                <p>Si no recibes el correo o tienes problemas, contacta al administrador del sistema:</p>
+                <div class="contacto-admin">
+                    <p>📞 <strong>Teléfono:</strong> +52 (443) 312 1570</p>
+                    <p>📧 <strong>Email:</strong> soporte.sgcm@tecnm.mx</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style type="text/css">
+        .texto-ayuda.destacado {
+            background: var(--primary-light);
+            padding: 1.5rem;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary);
+            margin: 2rem 0;
+        }
+        
+        .texto-ayuda.destacado h4 {
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+        
+        .info-adicional {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 2px solid var(--border);
+            text-align: center;
+        }
+        
+        .info-adicional h4 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+        
+        .contacto-admin {
+            background: var(--background-alt);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            display: inline-block;
+        }
+        
+        .contacto-admin p {
+            margin: 0.5rem 0;
+            text-align: left;
+        }
+    </style>
+
+    <script type="text/javascript">
+        //<![CDATA[
+        function solicitarRecuperacion(event) {
+            event.preventDefault();
+            
+            var email = document.getElementById('email').value;
+            var tipoUsuario = document.getElementById('tipo_usuario').value;
+            
+            if (!email || !tipoUsuario) {
+                alert('Por favor, complete todos los campos.');
+                return false;
+            }
+            
+            if (!validarEmail(email)) {
+                alert('Por favor, ingrese un correo electrónico válido.');
+                return false;
+            }
+            
+            // Simular envío de recuperación
+            var boton = document.querySelector('.btn-guardar');
+            var textoOriginal = boton.innerHTML;
+            boton.innerHTML = '⏳ Enviando enlace...';
+            boton.disabled = true;
+            
+            setTimeout(function() {
+                alert('✅ ¡Enlace de recuperación enviado!\n\nRevisa tu correo electrónico (' + email + ') para restablecer tu contraseña.');
+                boton.innerHTML = textoOriginal;
+                boton.disabled = false;
+                
+                // Redirigir después de mostrar el mensaje
+                setTimeout(function() {
+                    window.location.href = "{% url 'login' %}";
+                }, 3000);
+            }, 2000);
+        }
+        
+        function validarEmail(email) {
+            var regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return regex.test(email);
+        }
+        //]]>
+    </script>
+{% endblock %}

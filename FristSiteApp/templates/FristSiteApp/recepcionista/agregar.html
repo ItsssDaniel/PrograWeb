@@ -6,25 +6,37 @@
         <div class="section" id="formulario-recepcionista">
             <h2>Agregar Nuevo Recepcionista</h2>
             
-            <form class="formulario" onsubmit="guardarRecepcionista(event); return false;">
+            {% if messages %}
+                <div class="messages">
+                    {% for message in messages %}
+                        <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            
+            <form class="formulario" id="formRecepcionista">
+                {% csrf_token %}
+                
                 <div class="campo-formulario">
                     <label for="nombre">Nombre Completo:</label>
-                    <input type="text" id="nombre" name="nombre" required="required" />
+                    <input type="text" id="nombre" name="nombre" required />
                 </div>
                 
                 <div class="campo-formulario">
                     <label for="email">Email:</label>
-                    <input type="email" id="email" name="email" required="required" />
+                    <input type="email" id="email" name="email" required />
                 </div>
                 
                 <div class="campo-formulario">
                     <label for="telefono">Teléfono:</label>
-                    <input type="tel" id="telefono" name="telefono" required="required" />
+                    <input type="tel" id="telefono" name="telefono" required />
                 </div>
                 
                 <div class="campo-formulario">
                     <label for="turno">Turno:</label>
-                    <select id="turno" name="turno" required="required">
+                    <select id="turno" name="turno" required>
                         <option value="">Seleccionar turno</option>
                         <option value="matutino">Matutino</option>
                         <option value="vespertino">Vespertino</option>
@@ -35,8 +47,11 @@
                 
                 <div class="campo-formulario">
                     <label for="fecha_contratacion">Fecha de Contratación:</label>
-                    <input type="date" id="fecha_contratacion" name="fecha_contratacion" required="required" />
+                    <input type="date" id="fecha_contratacion" name="fecha_contratacion" required />
                 </div>
+                
+                <!-- Campo oculto para contraseña (se generará automáticamente) -->
+                <input type="hidden" id="password" name="password" value="Recepcion123" />
                 
                 <div class="botones-formulario">
                     <button type="submit" class="btn-guardar">Guardar Recepcionista</button>
@@ -50,15 +65,203 @@
 
     <script type="text/javascript">
         //<![CDATA[
-        function guardarRecepcionista(event) {
+        document.getElementById('formRecepcionista').addEventListener('submit', async function(event) {
             event.preventDefault();
             
-            alert('Recepcionista guardado con éxito!');
+            // Obtener valores del formulario
+            const formData = {
+                nombre: document.getElementById('nombre').value,
+                email: document.getElementById('email').value,
+                telefono: document.getElementById('telefono').value,
+                turno: document.getElementById('turno').value,
+                fecha_contratacion: document.getElementById('fecha_contratacion').value,
+                password: document.getElementById('password').value
+            };
             
-            setTimeout(function() {
-                window.location.href = "{% url 'recepcionista_registros' %}";
-            }, 1000);
+            // Validación básica
+            if (!formData.nombre || !formData.email || !formData.telefono || !formData.turno || !formData.fecha_contratacion) {
+                alert('Por favor, complete todos los campos.');
+                return false;
+            }
+            
+            // Validar email
+            if (!validarEmail(formData.email)) {
+                alert('Por favor, ingrese un email válido.');
+                return false;
+            }
+            
+            // Mostrar mensaje de carga
+            const boton = document.querySelector('.btn-guardar');
+            const textoOriginal = boton.innerHTML;
+            boton.innerHTML = 'Guardando...';
+            boton.disabled = true;
+            
+            try {
+                // Enviar datos al servidor
+                const response = await fetch('{% url "recepcionista_agregar" %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',  // Para identificar como AJAX
+                        'X-CSRFToken': getCookie('csrftoken')  // Obtener el token CSRF
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Éxito - mostrar mensaje y redirigir
+                    alert(data.message || '✅ Recepcionista guardado con éxito!');
+                    
+                    // Redirigir después de 1 segundo
+                    setTimeout(function() {
+                        window.location.href = "{% url 'recepcionista_registros' %}";
+                    }, 1000);
+                } else {
+                    // Error
+                    alert('❌ ' + data.message || 'Error al guardar el recepcionista.');
+                    boton.innerHTML = textoOriginal;
+                    boton.disabled = false;
+                }
+                
+            } catch (error) {
+                // Error de red
+                alert('❌ Error de conexión. Intente nuevamente.');
+                console.error('Error:', error);
+                boton.innerHTML = textoOriginal;
+                boton.disabled = false;
+            }
+        });
+        
+        // Función para validar email
+        function validarEmail(email) {
+            const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return regex.test(email);
         }
+        
+        // Función para obtener el token CSRF
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        
+        // Establecer fecha actual por defecto
+        document.getElementById('fecha_contratacion').value = new Date().toISOString().split('T')[0];
+        
+        // Generar contraseña automática basada en el nombre
+        document.getElementById('nombre').addEventListener('blur', function() {
+            const nombre = this.value.trim();
+            if (nombre) {
+                // Generar contraseña: primeras 3 letras del nombre + '123'
+                const primerasLetras = nombre.substring(0, 3).toLowerCase();
+                const password = primerasLetras + '123';
+                document.getElementById('password').value = password;
+            }
+        });
         //]]>
     </script>
+
+    <style>
+        .alert {
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            border: 1px solid transparent;
+        }
+        
+        .alert-success {
+            color: #0f5132;
+            background-color: #d1e7dd;
+            border-color: #badbcc;
+        }
+        
+        .alert-error {
+            color: #842029;
+            background-color: #f8d7da;
+            border-color: #f5c2c7;
+        }
+        
+        .campo-formulario {
+            margin-bottom: 20px;
+        }
+        
+        .campo-formulario label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .campo-formulario input,
+        .campo-formulario select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        
+        .campo-formulario input:focus,
+        .campo-formulario select:focus {
+            border-color: #80bdff;
+            outline: 0;
+            box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+        }
+        
+        .botones-formulario {
+            display: flex;
+            gap: 12px;
+            margin-top: 30px;
+        }
+        
+        .btn-guardar {
+            flex: 1;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+        
+        .btn-guardar:hover {
+            background-color: #218838;
+        }
+        
+        .btn-guardar:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+        
+        .btn-volver {
+            flex: 1;
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+        
+        .btn-volver:hover {
+            background-color: #5a6268;
+        }
+    </style>
 {% endblock %}

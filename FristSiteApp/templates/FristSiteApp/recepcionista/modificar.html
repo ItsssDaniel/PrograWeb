@@ -7,65 +7,66 @@
             <h2>Recepcionistas Registrados</h2>
             <p>Selecciona un recepcionista para modificar:</p>
             
-            <div class="contenedor-tabla">
-                <table class="tabla-datos">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Nombre</th>
-                            <th>Email</th>
-                            <th>Teléfono</th>
-                            <th>Turno</th>
-                            <th>Estado</th>
-                            <th>Acción</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>REC-001</td>
-                            <td>Ana García López</td>
-                            <td>ana.garcia@clinica.com</td>
-                            <td>555-123-4567</td>
-                            <td>Matutino</td>
-                            <td>Activo</td>
-                            <td>
-                                <button type="button" class="btn-modificar-tabla" onclick="modificarRecepcionista('REC-001', 'Ana García López', 'ana.garcia@clinica.com', '555-123-4567', 'Matutino', 'Activo')">
-                                    <span class="icono">✎</span>
-                                </button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>REC-002</td>
-                            <td>Carlos Rodríguez</td>
-                            <td>c.rodriguez@clinica.com</td>
-                            <td>555-987-6543</td>
-                            <td>Vespertino</td>
-                            <td>Activo</td>
-                            <td>
-                                <button type="button" class="btn-modificar-tabla" onclick="modificarRecepcionista('REC-002', 'Carlos Rodríguez', 'c.rodriguez@clinica.com', '555-987-6543', 'Vespertino', 'Activo')">
-                                    <span class="icono">✎</span>
-                                </button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>REC-003</td>
-                            <td>María Fernández</td>
-                            <td>m.fernandez@clinica.com</td>
-                            <td>555-456-7890</td>
-                            <td>Nocturno</td>
-                            <td>Activo</td>
-                            <td>
-                                <button type="button" class="btn-modificar-tabla" onclick="modificarRecepcionista('REC-003', 'María Fernández', 'm.fernandez@clinica.com', '555-456-7890', 'Nocturno', 'Activo')">
-                                    <span class="icono">✎</span>
-                                </button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+            {% if recepcionistas %}
+                <div class="contenedor-tabla">
+                    <table class="tabla-datos">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Email</th>
+                                <th>Teléfono</th>
+                                <th>Turno</th>
+                                <th>Estado</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for recepcionista in recepcionistas %}
+                            <tr>
+                                <td>REC-{{ recepcionista.id|stringformat:"03d" }}</td>
+                                <td>{{ recepcionista.nombre }}</td>
+                                <td>{{ recepcionista.email }}</td>
+                                <td>{{ recepcionista.telefono }}</td>
+                                <td>
+                                    {% if recepcionista.turno == "matutino" %}
+                                        Matutino
+                                    {% elif recepcionista.turno == "vespertino" %}
+                                        Vespertino
+                                    {% elif recepcionista.turno == "nocturno" %}
+                                        Nocturno
+                                    {% elif recepcionista.turno == "completo" %}
+                                        Tiempo Completo
+                                    {% else %}
+                                        {{ recepcionista.turno }}
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if recepcionista.is_active %}
+                                        <span class="estado-activo">Activo</span>
+                                    {% else %}
+                                        <span class="estado-inactivo">Inactivo</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <button type="button" class="btn-modificar-tabla" data-recepcionista-id="{{ recepcionista.id }}">
+                                        <span class="icono">✎</span>
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="mensaje-sin-datos">
+                    <p>No hay recepcionistas registrados en el sistema.</p>
+                    <p><a href="{% url 'recepcionista_agregar' %}" class="btn-agregar">Agregar Primer Recepcionista</a></p>
+                </div>
+            {% endif %}
 
             <div class="botones-volver">
-                <button type="button" class="btn-volver" onclick="window.location.href='/registro/'">
+                 <button type="button" class="btn-volver" onclick="window.location.href='/registro/'">
                     Volver al Registro
                 </button>
             </div>
@@ -74,17 +75,27 @@
 
     <script type="text/javascript">
         //<![CDATA[
-        function modificarRecepcionista(id, nombre, email, telefono, turno, estado) {
-            // Convertir estado a formato booleano para la URL
-            var activo = estado === 'Activo' ? 'true' : 'false';
-            
-            window.location.href = "{% url 'recepcionista_editar' %}?id=" + encodeURIComponent(id) + 
-                                 "&nombre=" + encodeURIComponent(nombre) + 
-                                 "&email=" + encodeURIComponent(email) + 
-                                 "&telefono=" + encodeURIComponent(telefono) + 
-                                 "&turno=" + encodeURIComponent(turno.toLowerCase()) + 
-                                 "&activo=" + activo;
+        // Función para modificar recepcionista
+        function modificarRecepcionista(id) {
+            // Redirigir a la página de edición con el ID
+            window.location.href = '/recepcionista/editar/' + id + '/';
         }
+        
+        // Asignar eventos a todos los botones de modificar
+        document.addEventListener('DOMContentLoaded', function() {
+            const botones = document.querySelectorAll('.btn-modificar-tabla');
+            
+            botones.forEach(function(boton) {
+                boton.addEventListener('click', function() {
+                    const recepcionistaId = this.getAttribute('data-recepcionista-id');
+                    modificarRecepcionista(recepcionistaId);
+                });
+            });
+        });
         //]]>
     </script>
+
+    <style>
+        /* Mantén tus estilos aquí */
+    </style>
 {% endblock %}

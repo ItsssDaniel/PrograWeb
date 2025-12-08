@@ -1,0 +1,314 @@
+{% extends 'FristSiteApp/base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="container main-content">
+        <div class="section" id="receta-medica">
+            <h2>Receta Médica</h2>
+            <p>Complete la información para generar una receta médica</p>
+            
+            <form class="formulario" onsubmit="generarReceta(event); return false;">
+                <!-- Información del paciente -->
+                <div class="seccion-receta">
+                    <h3>Información del Paciente</h3>
+                    <div class="campos-duales">
+                        <div class="campo-formulario">
+                            <label for="paciente_nombre">Nombre del Paciente:</label>
+                            <input type="text" id="paciente_nombre" name="paciente_nombre" required="required" placeholder="Nombre completo del paciente" />
+                        </div>
+                        <div class="campo-formulario">
+                            <label for="paciente_edad">Edad:</label>
+                            <input type="number" id="paciente_edad" name="paciente_edad" required="required" placeholder="Edad en años" min="0" max="120" />
+                        </div>
+                    </div>
+                    
+                    <div class="campos-duales">
+                        <div class="campo-formulario">
+                            <label for="paciente_genero">Género:</label>
+                            <select id="paciente_genero" name="paciente_genero" required="required">
+                                <option value="">Seleccionar género</option>
+                                <option value="masculino">Masculino</option>
+                                <option value="femenino">Femenino</option>
+                                <option value="otro">Otro</option>
+                            </select>
+                        </div>
+                        <div class="campo-formulario">
+                            <label for="paciente_peso">Peso (kg):</label>
+                            <input type="number" id="paciente_peso" name="paciente_peso" required="required" placeholder="Peso en kilogramos" step="0.1" min="0" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Diagnóstico -->
+                <div class="seccion-receta">
+                    <h3>Diagnóstico</h3>
+                    <div class="campo-formulario">
+                        <label for="diagnostico">Diagnóstico Principal:</label>
+                        <input type="text" id="diagnostico" name="diagnostico" required="required" placeholder="Ej: Infección de vías respiratorias superiores" />
+                    </div>
+                    
+                    <div class="campo-formulario">
+                        <label for="sintomas">Síntomas y Hallazgos:</label>
+                        <textarea id="sintomas" name="sintomas" rows="3" required="required" placeholder="Describa los síntomas principales y hallazgos relevantes..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Medicamentos -->
+                <div class="seccion-receta">
+                    <h3>Medicamentos Recetados</h3>
+                    <div id="lista-medicamentos">
+                        <div class="medicamento-item">
+                            <div class="campos-triples">
+                                <div class="campo-formulario">
+                                    <label>Medicamento:</label>
+                                    <input type="text" name="medicamento[]" required="required" placeholder="Nombre del medicamento" />
+                                </div>
+                                <div class="campo-formulario">
+                                    <label>Presentación:</label>
+                                    <input type="text" name="presentacion[]" required="required" placeholder="Ej: Caja con 14 tabletas" />
+                                </div>
+                                <div class="campo-formulario">
+                                    <label>Dosis:</label>
+                                    <input type="text" name="dosis[]" required="required" placeholder="Ej: 500mg, 1 tableta cada 8 horas" />
+                                </div>
+                            </div>
+                            <div class="campos-duales">
+                                <div class="campo-formulario">
+                                    <label>Duración:</label>
+                                    <input type="text" name="duracion[]" required="required" placeholder="Ej: 7 días" />
+                                </div>
+                                <div class="campo-formulario">
+                                    <label>Instrucciones Especiales:</label>
+                                    <input type="text" name="instrucciones[]" placeholder="Ej: Tomar después de los alimentos" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button type="button" class="btn-agregar-medicamento" onclick="agregarMedicamento()">
+                        <span class="icono">➕</span> Agregar Otro Medicamento
+                    </button>
+                </div>
+
+                <!-- Indicaciones adicionales -->
+                <div class="seccion-receta">
+                    <h3>Indicaciones Adicionales</h3>
+                    <div class="campo-formulario">
+                        <label for="reposo">Reposo:</label>
+                        <input type="text" id="reposo" name="reposo" placeholder="Ej: Reposo relativo por 48 horas" />
+                    </div>
+                    
+                    <div class="campo-formulario">
+                        <label for="dieta">Dieta:</label>
+                        <input type="text" id="dieta" name="dieta" placeholder="Ej: Ingerir líquidos abundantes, dieta blanda" />
+                    </div>
+                    
+                    <div class="campo-formulario">
+                        <label for="recomendaciones">Recomendaciones Generales:</label>
+                        <textarea id="recomendaciones" name="recomendaciones" rows="2" placeholder="Otras recomendaciones importantes..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Control Médico -->
+                <div class="seccion-receta">
+                    <h3>Control Médico</h3>
+                    <div class="campos-duales">
+                        <div class="campo-formulario">
+                            <label for="proximo_control">Próximo Control:</label>
+                            <input type="date" id="proximo_control" name="proximo_control" />
+                        </div>
+                        <div class="campo-formulario">
+                            <label for="observaciones">Observaciones:</label>
+                            <input type="text" id="observaciones" name="observaciones" placeholder="Ej: Regresar en caso de persistencia de fiebre" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Información del médico -->
+                <div class="seccion-receta">
+                    <h3>Información del Médico</h3>
+                    <div class="campos-duales">
+                        <div class="campo-formulario">
+                            <label for="medico_nombre">Nombre del Médico:</label>
+                            <input type="text" id="medico_nombre" name="medico_nombre" required="required" placeholder="Nombre completo del médico" />
+                        </div>
+                        <div class="campo-formulario">
+                            <label for="medico_cedula">Cédula Profesional:</label>
+                            <input type="text" id="medico_cedula" name="medico_cedula" required="required" placeholder="Número de cédula profesional" />
+                        </div>
+                    </div>
+                    
+                    <div class="campo-formulario">
+                        <label for="medico_especialidad">Especialidad:</label>
+                        <input type="text" id="medico_especialidad" name="medico_especialidad" required="required" placeholder="Especialidad médica" />
+                    </div>
+                </div>
+
+                <div class="botones-formulario">
+                    <button type="submit" class="btn-guardar">Generar Receta</button>
+                    <button type="button" class="btn-volver" onclick="limpiarFormulario()">
+                        Limpiar Formulario
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <style type="text/css">
+        .seccion-receta {
+            background: var(--background-alt);
+            padding: 2rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            border-left: 4px solid var(--primary);
+        }
+        
+        .seccion-receta h3 {
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            font-size: 1.3rem;
+        }
+        
+        .campos-triples {
+            display: grid;
+            grid-template-columns: 2fr 1.5fr 1.5fr;
+            gap: 1rem;
+        }
+        
+        .medicamento-item {
+            background: var(--background);
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            margin-bottom: 1rem;
+            position: relative;
+        }
+        
+        .btn-agregar-medicamento {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+        }
+        
+        .btn-agregar-medicamento:hover {
+            background: #2f855a;
+            transform: translateY(-2px);
+        }
+        
+        .btn-eliminar-medicamento {
+            background: #e53e3e;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            margin-top: 0.5rem;
+        }
+        
+        @media (max-width: 768px) {
+            .campos-triples {
+                grid-template-columns: 1fr;
+            }
+            
+            .seccion-receta {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+
+    <script type="text/javascript">
+        //<![CDATA[
+        let contadorMedicamentos = 1;
+        
+        function agregarMedicamento() {
+            contadorMedicamentos++;
+            const lista = document.getElementById('lista-medicamentos');
+            
+            const nuevoMedicamento = document.createElement('div');
+            nuevoMedicamento.className = 'medicamento-item';
+            nuevoMedicamento.innerHTML = `
+                <div class="campos-triples">
+                    <div class="campo-formulario">
+                        <label>Medicamento:</label>
+                        <input type="text" name="medicamento[]" required="required" placeholder="Nombre del medicamento" />
+                    </div>
+                    <div class="campo-formulario">
+                        <label>Presentación:</label>
+                        <input type="text" name="presentacion[]" required="required" placeholder="Ej: Caja con 14 tabletas" />
+                    </div>
+                    <div class="campo-formulario">
+                        <label>Dosis:</label>
+                        <input type="text" name="dosis[]" required="required" placeholder="Ej: 500mg, 1 tableta cada 8 horas" />
+                    </div>
+                </div>
+                <div class="campos-duales">
+                    <div class="campo-formulario">
+                        <label>Duración:</label>
+                        <input type="text" name="duracion[]" required="required" placeholder="Ej: 7 días" />
+                    </div>
+                    <div class="campo-formulario">
+                        <label>Instrucciones Especiales:</label>
+                        <input type="text" name="instrucciones[]" placeholder="Ej: Tomar después de los alimentos" />
+                    </div>
+                </div>
+                <button type="button" class="btn-eliminar-medicamento" onclick="eliminarMedicamento(this)">
+                    <span class="icono">🗑️</span> Eliminar Medicamento
+                </button>
+            `;
+            
+            lista.appendChild(nuevoMedicamento);
+        }
+        
+        function eliminarMedicamento(boton) {
+            if (contadorMedicamentos > 1) {
+                boton.parentElement.remove();
+                contadorMedicamentos--;
+            } else {
+                alert('Debe haber al menos un medicamento en la receta.');
+            }
+        }
+        
+        function generarReceta(event) {
+            event.preventDefault();
+            
+            const pacienteNombre = document.getElementById('paciente_nombre').value;
+            const diagnostico = document.getElementById('diagnostico').value;
+            const medicoNombre = document.getElementById('medico_nombre').value;
+            
+            if (!pacienteNombre || !diagnostico || !medicoNombre) {
+                alert('Por favor, complete los campos obligatorios.');
+                return false;
+            }
+            
+            // Simular generación de receta
+            alert('✅ Receta médica generada con éxito para: ' + pacienteNombre);
+            
+        }
+        
+        function limpiarFormulario() {
+            if (confirm('¿Está seguro de que desea limpiar todo el formulario? Se perderán todos los datos ingresados.')) {
+                document.querySelector('.formulario').reset();
+                // Mantener solo un medicamento
+                const lista = document.getElementById('lista-medicamentos');
+                while (lista.children.length > 1) {
+                    lista.removeChild(lista.lastChild);
+                }
+                contadorMedicamentos = 1;
+            }
+        }
+        //]]>
+    </script>
+{% endblock %}

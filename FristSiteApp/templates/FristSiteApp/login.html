@@ -35,7 +35,7 @@
                   <!-- En la sección del welcome-footer, cambia el href -->
 <div class="welcome-footer">
     <p>¿No tienes una cuenta?</p>
-    <a href="{% url 'contacto' %}" class="register-link">Contacta al administrador</a>
+    <a href="{% url 'registro_solicitud' %}" class="register-link">Contacta al administrador</a>
 </div>
                 </div>
             </div>
@@ -65,7 +65,7 @@
                                 <span class="checkmark"></span>
                                 Recordar sesión
                             </label>
-                            <a href="#recuperar" class="forgot-password">¿Olvidaste tu contraseña?</a>
+                           <a href="{% url 'recuperar_contrasena' %}" class="forgot-password">¿Olvidaste tu contraseña?</a>
                         </div>
                         
                         <div class="botones-login">

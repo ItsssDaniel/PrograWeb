@@ -5,56 +5,76 @@
     <div class="container main-content">
         <div class="section" id="editar-recepcionista">
             <h2>Modificar Recepcionista</h2>
-            <p>Editando recepcionista con ID: <strong>{{ recepcionista_id }}</strong></p>
+            <p>Editando recepcionista con ID: <strong>REC-{{ recepcionista_id|stringformat:"03d" }}</strong></p>
             
-            <form class="formulario" action="#" method="post" onsubmit="actualizarRecepcionista(event); return false;">
-                <div class="campo-formulario">
-                    <label for="id">ID (No editable):</label>
-                    <input type="text" id="id" name="id" value="{{ recepcionista_id }}" readonly="readonly" class="campo-readonly" />
-                    <span class="texto-ayuda">El ID no se puede modificar</span>
+            {% if messages %}
+                <div class="messages">
+                    {% for message in messages %}
+                        <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
                 </div>
+            {% endif %}
+            
+            <form class="formulario" id="formEditarRecepcionista">
+                {% csrf_token %}
+                
+                <input type="hidden" id="id" name="id" value="{{ recepcionista_id }}" />
                 
                 <div class="campo-formulario">
                     <label for="nombre">Nombre Completo:</label>
-                    <input type="text" id="nombre" name="nombre" value="{{ nombre }}" class="campo-requerido" />
+                    <input type="text" id="nombre" name="nombre" value="{{ nombre }}" required />
                     <span class="texto-ayuda">* Campo obligatorio</span>
                 </div>
                 
                 <div class="campo-formulario">
                     <label for="email">Email:</label>
-                    <input type="text" id="email" name="email" value="{{ email }}" class="campo-requerido email" />
+                    <input type="email" id="email" name="email" value="{{ email }}" required />
                     <span class="texto-ayuda">* Campo obligatorio</span>
                 </div>
                 
                 <div class="campo-formulario">
                     <label for="telefono">Teléfono:</label>
-                    <input type="text" id="telefono" name="telefono" value="{{ telefono }}" class="campo-requerido telefono" />
+                    <input type="text" id="telefono" name="telefono" value="{{ telefono }}" required />
                     <span class="texto-ayuda">* Campo obligatorio</span>
                 </div>
                 
                 <div class="campo-formulario">
                     <label for="turno">Turno:</label>
-                    <select id="turno" name="turno" class="campo-requerido">
-                        <option value="matutino" {% if turno == 'matutino' %}selected="selected"{% endif %}>Matutino</option>
-                        <option value="vespertino" {% if turno == 'vespertino' %}selected="selected"{% endif %}>Vespertino</option>
-                        <option value="nocturno" {% if turno == 'nocturno' %}selected="selected"{% endif %}>Nocturno</option>
-                        <option value="completo" {% if turno == 'completo' %}selected="selected"{% endif %}>Tiempo Completo</option>
+                    <select id="turno" name="turno" required>
+                        <option value="matutino" {% if turno == 'matutino' %}selected{% endif %}>Matutino</option>
+                        <option value="vespertino" {% if turno == 'vespertino' %}selected{% endif %}>Vespertino</option>
+                        <option value="nocturno" {% if turno == 'nocturno' %}selected{% endif %}>Nocturno</option>
+                        <option value="completo" {% if turno == 'completo' %}selected{% endif %}>Tiempo Completo</option>
                     </select>
                     <span class="texto-ayuda">* Campo obligatorio</span>
                 </div>
                 
                 <div class="campo-formulario">
                     <label for="fecha_contratacion">Fecha de Contratación:</label>
-                    <input type="text" id="fecha_contratacion" name="fecha_contratacion" value="{{ fecha_contratacion }}" class="campo-requerido fecha"/>
+                    <input type="date" id="fecha_contratacion" name="fecha_contratacion" value="{{ fecha_contratacion }}" required />
                     <span class="texto-ayuda">* Formato: AAAA-MM-DD</span>
                 </div>
                 
                 <div class="campo-formulario">
                     <label for="activo">Estado:</label>
                     <select id="activo" name="activo">
-                        <option value="true" {% if activo == 'true' %}selected="selected"{% endif %}>Activo</option>
-                        <option value="false" {% if activo == 'false' %}selected="selected"{% endif %}>Inactivo</option>
+                        <option value="true" {% if activo == 'true' %}selected{% endif %}>Activo</option>
+                        <option value="false" {% if activo == 'false' %}selected{% endif %}>Inactivo</option>
                     </select>
+                </div>
+                
+                <div class="campo-formulario">
+                    <label for="nueva_password">Nueva Contraseña (opcional):</label>
+                    <input type="password" id="nueva_password" name="nueva_password" />
+                    <span class="texto-ayuda">Dejar en blanco para mantener la contraseña actual</span>
+                </div>
+                
+                <div class="campo-formulario">
+                    <label for="confirmar_password">Confirmar Contraseña:</label>
+                    <input type="password" id="confirmar_password" name="confirmar_password" />
+                    <span class="texto-ayuda">Repetir la nueva contraseña si la cambias</span>
                 </div>
                 
                 <div class="botones-formulario">
@@ -74,19 +94,21 @@
             return regex.test(email);
         }
         
-        function validarFecha(fecha) {
-            var regex = /^\d{4}-\d{2}-\d{2}$/;
-            if (!regex.test(fecha)) return false;
+        function validarContraseñas() {
+            var nueva = document.getElementById('nueva_password').value;
+            var confirmar = document.getElementById('confirmar_password').value;
             
-            var partes = fecha.split('-');
-            var anio = parseInt(partes[0], 10);
-            var mes = parseInt(partes[1], 10);
-            var dia = parseInt(partes[2], 10);
-            
-            var fechaObj = new Date(anio, mes - 1, dia);
-            return fechaObj.getFullYear() === anio && 
-                   fechaObj.getMonth() === mes - 1 && 
-                   fechaObj.getDate() === dia;
+            if (nueva || confirmar) {
+                if (nueva !== confirmar) {
+                    alert('Las contraseñas no coinciden');
+                    return false;
+                }
+                if (nueva.length < 6) {
+                    alert('La contraseña debe tener al menos 6 caracteres');
+                    return false;
+                }
+            }
+            return true;
         }
         
         function validarFormularioRecepcionista() {
@@ -97,10 +119,12 @@
             var fechaContratacion = document.getElementById('fecha_contratacion');
             var valido = true;
             
+            // Limpiar errores previos
             [nombre, email, telefono, turno, fechaContratacion].forEach(function(campo) {
                 campo.className = campo.className.replace(' campo-error', '');
             });
             
+            // Validar campos requeridos
             if (nombre.value.trim() === '') {
                 nombre.className += ' campo-error';
                 valido = false;
@@ -121,15 +145,20 @@
                 valido = false;
             }
             
-            if (fechaContratacion.value.trim() === '' || !validarFecha(fechaContratacion.value)) {
+            if (fechaContratacion.value.trim() === '') {
                 fechaContratacion.className += ' campo-error';
+                valido = false;
+            }
+            
+            // Validar contraseñas
+            if (!validarContraseñas()) {
                 valido = false;
             }
             
             return valido;
         }
         
-        function actualizarRecepcionista(event) {
+        async function actualizarRecepcionista(event) {
             event.preventDefault();
             
             if (!validarFormularioRecepcionista()) {
@@ -137,26 +166,57 @@
                 return false;
             }
             
-            const id = document.getElementById('id').value;
-            const nombre = document.getElementById('nombre').value;
-            const email = document.getElementById('email').value;
-            const telefono = document.getElementById('telefono').value;
-            const turno = document.getElementById('turno').value;
-            const fecha_contratacion = document.getElementById('fecha_contratacion').value;
-            const activo = document.getElementById('activo').value;
+            const formData = {
+                id: document.getElementById('id').value,
+                nombre: document.getElementById('nombre').value,
+                email: document.getElementById('email').value,
+                telefono: document.getElementById('telefono').value,
+                turno: document.getElementById('turno').value,
+                fecha_contratacion: document.getElementById('fecha_contratacion').value,
+                activo: document.getElementById('activo').value,
+                nueva_password: document.getElementById('nueva_password').value || null
+            };
             
-            alert('Recepcionista actualizado con éxito!\n\n' +
-                  'ID: ' + id + '\n' +
-                  'Nombre: ' + nombre + '\n' +
-                  'Email: ' + email + '\n' +
-                  'Teléfono: ' + telefono + '\n' +
-                  'Turno: ' + turno + '\n' +
-                  'Fecha Contratación: ' + fecha_contratacion + '\n' +
-                  'Estado: ' + (activo === 'true' ? 'Activo' : 'Inactivo'));
+            // Mostrar mensaje de carga
+            const boton = document.querySelector('.btn-actualizar');
+            const textoOriginal = boton.innerHTML;
+            boton.innerHTML = 'Actualizando...';
+            boton.disabled = true;
             
-            setTimeout(function() {
-                window.location.href = "{% url 'recepcionista_modificar' %}";
-            }, 1500);
+            try {
+                // Enviar datos al servidor
+                const response = await fetch('{% url "recepcionista_editar" recepcionista_id %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert(data.message || '✅ Recepcionista actualizado con éxito!');
+                    
+                    // Redirigir después de 1 segundo
+                    setTimeout(function() {
+                        window.location.href = "{% url 'recepcionista_modificar' %}";
+                    }, 1000);
+                } else {
+                    alert('❌ ' + (data.message || 'Error al actualizar el recepcionista.'));
+                    boton.innerHTML = textoOriginal;
+                    boton.disabled = false;
+                }
+                
+            } catch (error) {
+                // Error de red
+                alert('❌ Error de conexión. Intente nuevamente.');
+                console.error('Error:', error);
+                boton.innerHTML = textoOriginal;
+                boton.disabled = false;
+            }
         }
         
         function cancelarEdicion() {
@@ -165,13 +225,131 @@
             }
         }
         
-        document.getElementById('id').addEventListener('input', function(e) {
-            this.value = '{{ recepcionista_id }}';
-        });
+        // Función para obtener el token CSRF
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
         
-        document.getElementById('id').addEventListener('keydown', function(e) {
-            e.preventDefault();
-        });
+        // Asignar evento al formulario
+        document.getElementById('formEditarRecepcionista').addEventListener('submit', actualizarRecepcionista);
+        
+        // Validar contraseñas en tiempo real
+        document.getElementById('confirmar_password').addEventListener('blur', validarContraseñas);
         //]]>
     </script>
+
+    <style>
+        .alert {
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            border: 1px solid transparent;
+        }
+        
+        .alert-success {
+            color: #0f5132;
+            background-color: #d1e7dd;
+            border-color: #badbcc;
+        }
+        
+        .alert-error {
+            color: #842029;
+            background-color: #f8d7da;
+            border-color: #f5c2c7;
+        }
+        
+        .campo-formulario {
+            margin-bottom: 20px;
+        }
+        
+        .campo-formulario label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .campo-formulario input,
+        .campo-formulario select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        
+        .campo-formulario input:focus,
+        .campo-formulario select:focus {
+            border-color: #80bdff;
+            outline: 0;
+            box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+        }
+        
+        .texto-ayuda {
+            display: block;
+            margin-top: 5px;
+            font-size: 12px;
+            color: #6c757d;
+        }
+        
+        .campo-error {
+            border-color: #dc3545 !important;
+        }
+        
+        .botones-formulario {
+            display: flex;
+            gap: 12px;
+            margin-top: 30px;
+        }
+        
+        .btn-actualizar {
+            flex: 1;
+            background-color: #ffc107;
+            color: #212529;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+        
+        .btn-actualizar:hover {
+            background-color: #e0a800;
+        }
+        
+        .btn-actualizar:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+        
+        .btn-volver {
+            flex: 1;
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+        
+        .btn-volver:hover {
+            background-color: #5a6268;
+        }
+    </style>
 {% endblock %}

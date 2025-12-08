@@ -1,0 +1,116 @@
+{% extends 'FristSiteApp/base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="container main-content">
+        <div class="section" id="eliminar-receta">
+            <h2>Eliminar Receta Médica</h2>
+            
+            <form class="formulario" onsubmit="eliminarReceta(event); return false;">
+                <div class="campo-formulario">
+                    <label for="id_receta">ID de la Receta a Eliminar:</label>
+                    <input type="text" id="id_receta" name="id_receta" required="required" placeholder="Ej: REC-2024-001" />
+                </div>
+                
+                <div class="campo-formulario">
+                    <label for="motivo">Motivo de Eliminación:</label>
+                    <select id="motivo" name="motivo" required="required">
+                        <option value="">Seleccionar motivo</option>
+                        <option value="error">Error en la receta</option>
+                        <option value="duplicada">Receta duplicada</option>
+                        <option value="cancelacion">Cancelación de consulta</option>
+                        <option value="otro">Otro motivo</option>
+                    </select>
+                </div>
+                
+                <div class="campo-formulario">
+                    <label for="detalle_motivo">Detalle del Motivo:</label>
+                    <textarea id="detalle_motivo" name="detalle_motivo" rows="3" required="required" placeholder="Explique detalladamente el motivo de la eliminación..."></textarea>
+                </div>
+                
+                <div class="campo-formulario">
+                    <label for="confirmacion">Confirmar Eliminación:</label>
+                    <input type="text" id="confirmacion" name="confirmacion" required="required" placeholder="Escriba 'ELIMINAR RECETA' para confirmar" />
+                </div>
+                
+                <div class="texto-ayuda destacado">
+                    <h4>⚠️ Advertencia Importante</h4>
+                    <p>Esta acción <strong>NO se puede deshacer</strong>. Se eliminarán permanentemente todos los datos de la receta médica, incluyendo información del paciente, diagnóstico y medicamentos recetados.</p>
+                    <p>Todas las eliminaciones son registradas en el sistema para auditoría.</p>
+                </div>
+                
+                <div class="botones-formulario">
+                    <button type="submit" class="btn-eliminar" style="background-color: #e53e3e;">Eliminar Receta Permanentemente</button>
+                    <button type="button" class="btn-volver" onclick="window.location.href='/citas/'">
+                        Cancelar y Volver
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <style type="text/css">
+        .texto-ayuda.destacado {
+            background: #fed7d7;
+            border: 2px solid #e53e3e;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 2rem 0;
+        }
+        
+        .texto-ayuda.destacado h4 {
+            color: #742a2a;
+            margin-bottom: 1rem;
+        }
+        
+        .texto-ayuda.destacado p {
+            color: #742a2a;
+            margin-bottom: 0.5rem;
+        }
+        
+        .btn-eliminar {
+            background: #e53e3e;
+            color: white;
+            border: none;
+            padding: 1rem 2.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-eliminar:hover {
+            background: #c53030;
+            transform: translateY(-2px);
+        }
+    </style>
+
+    <script type="text/javascript">
+        //<![CDATA[
+        function eliminarReceta(event) {
+            event.preventDefault();
+            
+            var idReceta = document.getElementById('id_receta').value;
+            var motivo = document.getElementById('motivo').value;
+            var detalle = document.getElementById('detalle_motivo').value;
+            var confirmacion = document.getElementById('confirmacion').value;
+            
+            if (!idReceta || !motivo || !detalle || !confirmacion) {
+                alert('Por favor, complete todos los campos del formulario.');
+                return false;
+            }
+            
+            if (confirmacion !== 'ELIMINAR RECETA') {
+                alert('Debe escribir exactamente "ELIMINAR RECETA" para confirmar la eliminación.');
+                return false;
+            }
+            
+            if (confirm('¿ESTÁ ABSOLUTAMENTE SEGURO de que desea eliminar permanentemente la receta ' + idReceta + '?\n\nEsta acción NO se puede deshacer.')) {
+                // Simular eliminación
+                alert('✅ Receta ' + idReceta + ' eliminada permanentemente del sistema.');
+                
+            }
+        }
+        //]]>
+    </script>
+{% endblock %}

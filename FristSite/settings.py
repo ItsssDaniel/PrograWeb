@@ -83,7 +83,7 @@ WSGI_APPLICATION = 'FristSite.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME'  : 'FirstSiteDB',
+        'NAME'  : 'sgcm_medic_db',
         'USER'  : 'postgres',
         'PASSWORD'  : 'Ravit.0307',
         'HOST'  : 'localhost',
@@ -132,9 +132,16 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'FristSiteApp/static'),
 ]
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
-
+SESSION_COOKIE_AGE = 3600  # 1 hora
+SESSION_SAVE_EVERY_REQUEST = True
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 BASE_DIR
+
+# En settings.py, agrega al final:
+AUTH_USER_MODEL = 'FristSiteApp.Recepcionista'

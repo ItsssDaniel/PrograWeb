@@ -2,16 +2,31 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="es" lang="es">
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-t" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SGCM MEDIC - Sistema de Gestión de Citas Médicas</title>
     
     <link rel="stylesheet" href="{% static 'FristSiteApp/css/style.css' %}" type="text/css" />
-     <link rel="stylesheet" href="{% static 'FristSiteApp/css/views.css' %}" type="text/css" /> 
-    <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/ItsssDaniel/PrograWeb@main/FristSiteApp/static/FristSiteApp/css/views.css" type="text/css" /> -->
+    <link rel="stylesheet" href="{% static 'FristSiteApp/css/views.css' %}" type="text/css" /> 
+    
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     
 </head>
-<body>
+<body 
+    x-data="{ 
+        darkMode: localStorage.getItem('modoOscuro') === 'activado',
+        toggleDarkMode() {
+            this.darkMode = !this.darkMode;
+            localStorage.setItem('modoOscuro', this.darkMode ? 'activado' : 'desactivado');
+            if (this.darkMode) {
+                document.documentElement.setAttribute('data-tema', 'oscuro');
+            } else {
+                document.documentElement.removeAttribute('data-tema');
+            }
+        }
+    }" 
+    x-init="if (darkMode) document.documentElement.setAttribute('data-tema', 'oscuro')">
+
     <div id="header">
         <div class="container header-content">
             <div class="logo">
@@ -41,8 +56,13 @@
             <div class="footer-content">
                 <div class="footer-controls">
                     <div class="footer-left">
-                        <button id="btn-modo-oscuro" class="btn-modo-oscuro" title="Modo Oscuro" type="button">
-                            <span class="icono-modo">🌙</span>
+                        <button 
+                            id="btn-modo-oscuro" 
+                            class="btn-modo-oscuro" 
+                            title="Modo Oscuro" 
+                            type="button" 
+                            @click="toggleDarkMode()">
+                            <span class="icono-modo" x-text="darkMode ? '☀️' : '🌙'"></span>
                         </button>
                     </div>
                     
@@ -70,10 +90,33 @@
                     </div>
                     
                     <div class="footer-right">
-                        <div id="dbStatus" class="db-status">
-                            <span class="status-icon"></span>
-                            Verificando conexión...
-                        </div>
+                        <div 
+                            id="dbStatus" 
+                            x-data="{ 
+                                message: 'Verificando conexión...', 
+                                statusClass: 'db-status' 
+                            }"
+                            x-init="
+                                fetch('/dataBaseConexion/')
+                                    .then(response => response.json())
+                                    .then(data => {
+                                        if (data.conectado) {
+                                            statusClass = 'db-status conectado';
+                                            message = '<span class=\'status-icon\'></span> ✅ Base de Datos Conectada';
+                                        } else {
+                                            statusClass = 'db-status error';
+                                            message = '<span class=\'status-icon\'></span> ❌ Error de Conexión';
+                                        }
+                                    })
+                                    .catch(error => {
+                                        statusClass = 'db-status error';
+                                        message = '<span class=\'status-icon\'></span> ❌ Error de Conexión';
+                                        console.error('Error verificando BD:', error);
+                                    })
+                            "
+                            :class="statusClass"
+                            x-html="message">
+                            </div>
                     </div>
                 </div>
                 
@@ -89,62 +132,7 @@
         function abrirLogin() {
             window.location.href = "{% url 'login' %}";
         }
-
-        function verificarConexionBD() {
-            fetch('/dataBaseConexion/')
-                .then(function(response) {
-                    return response.json();
-                })
-                .then(function(data) {
-                    var dbStatus = document.getElementById('dbStatus');
-                    if (dbStatus) {
-                        if (data.conectado) {
-                            dbStatus.className = 'db-status conectado';
-                            dbStatus.innerHTML = '<span class="status-icon"></span> ✅ Base de Datos Conectada';
-                        } else {
-                            dbStatus.className = 'db-status error';
-                            dbStatus.innerHTML = '<span class="status-icon"></span> ❌ Error de Conexión';
-                        }
-                    }
-                })
-                .catch(function(error) {
-                    var dbStatus = document.getElementById('dbStatus');
-                    if (dbStatus) {
-                        dbStatus.className = 'db-status error';
-                        dbStatus.innerHTML = '<span class="status-icon"></span> ❌ Error de Conexión';
-                    }
-                    console.error('Error verificando BD:', error);
-                });
-        }
-
-        var modoOscuroBtn = document.getElementById('btn-modo-oscuro');
-        var iconoModo = document.querySelector('.icono-modo');
-        
-        if (localStorage.getItem('modoOscuro') === 'activado') {
-            document.documentElement.setAttribute('data-tema', 'oscuro');
-            iconoModo.textContent = '☀️';
-        }
-        
-        if (modoOscuroBtn) {
-            modoOscuroBtn.addEventListener('click', function() {
-                var temaActual = document.documentElement.getAttribute('data-tema');
-                
-                if (temaActual === 'oscuro') {
-                    document.documentElement.removeAttribute('data-tema');
-                    localStorage.setItem('modoOscuro', 'desactivado');
-                    iconoModo.textContent = '🌙';
-                } else {
-                    document.documentElement.setAttribute('data-tema', 'oscuro');
-                    localStorage.setItem('modoOscuro', 'activado');
-                    iconoModo.textContent = '☀️';
-                }
-            });
-        }
-
-        // Configurar el botón de login
         document.getElementById('btn-login').addEventListener('click', abrirLogin);
-
-        // Eliminamos el smooth scroll para enlaces internos ya que ahora son URLs de Django
         var anchors = document.querySelectorAll('a[href^="#"]');
         for (var i = 0; i < anchors.length; i++) {
             anchors[i].addEventListener('click', function (e) {
@@ -158,10 +146,8 @@
                 }
             });
         }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            verificarConexionBD();
-        });
+        
+        // ¡Ya no necesitamos el DOMContentLoaded para la BD! Alpine lo maneja.
         //]]>
     </script>
 </body>

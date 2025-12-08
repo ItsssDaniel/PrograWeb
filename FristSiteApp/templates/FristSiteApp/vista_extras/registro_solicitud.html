@@ -1,0 +1,102 @@
+{% extends 'FristSiteApp/base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="container main-content">
+        <div class="section" id="solicitud-registro">
+            <h2>Solicitud de Registro</h2>
+            <p>Complete el siguiente formulario para solicitar una cuenta en el sistema SGCM MEDIC</p>
+            
+            <form class="formulario" onsubmit="enviarSolicitud(event); return false;">
+                <div class="campos-duales">
+                    <div class="campo-formulario">
+                        <label for="nombre">Nombre Completo:</label>
+                        <input type="text" id="nombre" name="nombre" required="required" placeholder="Ingrese su nombre completo" />
+                    </div>
+                    <div class="campo-formulario">
+                        <label for="email">Correo Electrónico:</label>
+                        <input type="email" id="email" name="email" required="required" placeholder="usuario@correo.com" />
+                    </div>
+                </div>
+                
+                <div class="campos-duales">
+                    <div class="campo-formulario">
+                        <label for="telefono">Teléfono:</label>
+                        <input type="tel" id="telefono" name="telefono" required="required" placeholder="+52 (443) 123 4567" />
+                    </div>
+                    <div class="campo-formulario">
+                        <label for="institucion">Institución:</label>
+                        <input type="text" id="institucion" name="institucion" required="required" placeholder="Hospital o Clínica" />
+                    </div>
+                </div>
+                
+                <div class="campo-formulario">
+                    <label for="tipo_usuario">Tipo de Usuario Solicitado:</label>
+                    <select id="tipo_usuario" name="tipo_usuario" required="required">
+                        <option value="">Seleccionar tipo de usuario</option>
+                        <option value="medico">Médico</option>
+                        <option value="recepcionista">Recepcionista</option>
+                        <option value="personal_extra">Personal Administrativo</option>
+                        <option value="administrador">Administrador</option>
+                    </select>
+                </div>
+                
+                <div class="campo-formulario">
+                    <label for="justificacion">Justificación de la Solicitud:</label>
+                    <textarea id="justificacion" name="justificacion" rows="4" required="required" placeholder="Explique brevemente por qué necesita acceso al sistema..."></textarea>
+                </div>
+                
+                <div class="campo-formulario">
+                    <label for="departamento">Departamento/Área:</label>
+                    <input type="text" id="departamento" name="departamento" required="required" placeholder="Ej: Urgencias, Consultorios, Administración" />
+                </div>
+                
+                <div class="texto-ayuda">
+                    <p>⚠️ <strong>Nota:</strong> Esta es una solicitud de registro. Un administrador revisará su solicitud y se pondrá en contacto con usted para activar su cuenta.</p>
+                </div>
+                
+                <div class="botones-formulario">
+                    <button type="submit" class="btn-guardar">Enviar Solicitud</button>
+                    <button type="button" class="btn-volver" onclick="window.location.href='/login/'">
+                        Volver al Login
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        //<![CDATA[
+        function enviarSolicitud(event) {
+            event.preventDefault();
+            
+            var nombre = document.getElementById('nombre').value;
+            var email = document.getElementById('email').value;
+            var telefono = document.getElementById('telefono').value;
+            var tipoUsuario = document.getElementById('tipo_usuario').value;
+            
+            if (!nombre || !email || !telefono || !tipoUsuario) {
+                alert('Por favor, complete todos los campos obligatorios.');
+                return false;
+            }
+            
+            if (!validarEmail(email)) {
+                alert('Por favor, ingrese un correo electrónico válido.');
+                return false;
+            }
+            
+            // Simular envío de solicitud
+            alert('¡Solicitud enviada con éxito!\n\nEl administrador revisará su solicitud y se pondrá en contacto con usted en un plazo de 24-48 horas.');
+            
+            setTimeout(function() {
+                window.location.href = "{% url 'login' %}";
+            }, 2000);
+        }
+        
+        function validarEmail(email) {
+            var regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return regex.test(email);
+        }
+        //]]>
+    </script>
+{% endblock %}

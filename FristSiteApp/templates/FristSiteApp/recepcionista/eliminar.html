@@ -7,62 +7,63 @@
             <h2>Eliminar Recepcionistas</h2>
             <p>Selecciona un recepcionista para eliminar:</p>
             
-            <div class="contenedor-tabla">
-                <table class="tabla-datos">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Nombre</th>
-                            <th>Email</th>
-                            <th>Teléfono</th>
-                            <th>Turno</th>
-                            <th>Estado</th>
-                            <th>Acción</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>REC-001</td>
-                            <td>Ana García López</td>
-                            <td>ana.garcia@clinica.com</td>
-                            <td>555-123-4567</td>
-                            <td>Matutino</td>
-                            <td>Activo</td>
-                            <td>
-                                <button type="button" class="btn-eliminar-tabla" onclick="confirmarEliminacionRecepcionista('REC-001', 'Ana García López')">
-                                    <span class="icono">×</span>
-                                </button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>REC-002</td>
-                            <td>Carlos Rodríguez</td>
-                            <td>c.rodriguez@clinica.com</td>
-                            <td>555-987-6543</td>
-                            <td>Vespertino</td>
-                            <td>Activo</td>
-                            <td>
-                                <button type="button" class="btn-eliminar-tabla" onclick="confirmarEliminacionRecepcionista('REC-002', 'Carlos Rodríguez')">
-                                    <span class="icono">×</span>
-                                </button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>REC-003</td>
-                            <td>María Fernández</td>
-                            <td>m.fernandez@clinica.com</td>
-                            <td>555-456-7890</td>
-                            <td>Nocturno</td>
-                            <td>Activo</td>
-                            <td>
-                                <button type="button" class="btn-eliminar-tabla" onclick="confirmarEliminacionRecepcionista('REC-003', 'María Fernández')">
-                                    <span class="icono">×</span>
-                                </button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+            {% if recepcionistas %}
+                <div class="contenedor-tabla">
+                    <table class="tabla-datos">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Email</th>
+                                <th>Teléfono</th>
+                                <th>Turno</th>
+                                <th>Estado</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for recepcionista in recepcionistas %}
+                            <tr>
+                                <td>REC-{{ recepcionista.id|stringformat:"03d" }}</td>
+                                <td>{{ recepcionista.nombre }}</td>
+                                <td>{{ recepcionista.email }}</td>
+                                <td>{{ recepcionista.telefono }}</td>
+                                <td>
+                                    {% if recepcionista.turno == "matutino" %}
+                                        Matutino
+                                    {% elif recepcionista.turno == "vespertino" %}
+                                        Vespertino
+                                    {% elif recepcionista.turno == "nocturno" %}
+                                        Nocturno
+                                    {% elif recepcionista.turno == "completo" %}
+                                        Tiempo Completo
+                                    {% else %}
+                                        {{ recepcionista.turno }}
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if recepcionista.is_active %}
+                                        <span class="estado-activo">Activo</span>
+                                    {% else %}
+                                        <span class="estado-inactivo">Inactivo</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <button type="button" class="btn-eliminar-tabla" data-id="{{ recepcionista.id }}" data-nombre="{{ recepcionista.nombre }}">
+                                        <span class="icono">×</span>
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="mensaje-sin-datos">
+                    <p>No hay recepcionistas registrados en el sistema.</p>
+                    <p><a href="{% url 'recepcionista_agregar' %}" class="btn-agregar">Agregar Primer Recepcionista</a></p>
+                </div>
+            {% endif %}
 
             <div class="botones-volver">
                 <button type="button" class="btn-volver" onclick="window.location.href='/registro/'">
@@ -74,15 +75,214 @@
 
     <script type="text/javascript">
         //<![CDATA[
-        function confirmarEliminacionRecepcionista(id, nombre) {
-            if (confirm('¿Estás seguro de que deseas eliminar al recepcionista ' + nombre + ' (ID: ' + id + ')?\n\nEsta acción no se puede deshacer.')) {
-                alert('Recepcionista ' + nombre + ' (ID: ' + id + ') eliminado exitosamente');
-                // Aquí iría la lógica para eliminar de la base de datos
-                setTimeout(function() {
-                    window.location.reload();
-                }, 1000);
+        // Función para confirmar y eliminar recepcionista
+        async function eliminarRecepcionista(id, nombre) {
+            const idFormateado = String(id).padStart(3, '0');
+            
+            if (confirm(`¿Estás seguro de que deseas eliminar al recepcionista ${nombre} (ID: REC-${idFormateado})?\n\n⚠️ Esta acción no se puede deshacer.`)) {
+                try {
+                    // Enviar solicitud DELETE al servidor
+                    const response = await fetch(`/recepcionista/eliminar/${id}/`, {
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRFToken': getCookie('csrftoken'),
+                        },
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        alert(data.message || '✅ Recepcionista eliminado exitosamente');
+                        // Recargar la página para actualizar la tabla
+                        setTimeout(function() {
+                            window.location.reload();
+                        }, 1000);
+                    } else {
+                        alert('❌ Error: ' + data.message);
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('❌ Error de conexión. Intente nuevamente.');
+                }
             }
         }
+
+        // Función para obtener el token CSRF
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // Asignar eventos a los botones de eliminar
+        document.addEventListener('DOMContentLoaded', function() {
+            const botones = document.querySelectorAll('.btn-eliminar-tabla');
+            
+            botones.forEach(function(boton) {
+                boton.addEventListener('click', function() {
+                    const id = this.getAttribute('data-id');
+                    const nombre = this.getAttribute('data-nombre');
+                    eliminarRecepcionista(id, nombre);
+                });
+            });
+        });
         //]]>
     </script>
+
+    <style>
+        .contenedor-tabla {
+            overflow-x: auto;
+            margin: 20px 0;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .tabla-datos {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+        }
+        
+        .tabla-datos th {
+            background-color: #dc3545;
+            color: white;
+            padding: 12px 15px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .tabla-datos td {
+            padding: 10px 15px;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 14px;
+        }
+        
+        .tabla-datos tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .tabla-datos tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .estado-activo {
+            color: #28a745;
+            font-weight: 600;
+            background-color: #d4edda;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        
+        .estado-inactivo {
+            color: #6c757d;
+            font-weight: 600;
+            background-color: #f8f9fa;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        
+        .btn-eliminar-tabla {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .btn-eliminar-tabla:hover {
+            background-color: #c82333;
+            transform: scale(1.05);
+        }
+        
+        .icono {
+            font-size: 16px;
+            font-weight: bold;
+        }
+        
+        .mensaje-sin-datos {
+            text-align: center;
+            padding: 40px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 2px dashed #dee2e6;
+        }
+        
+        .mensaje-sin-datos p {
+            margin: 10px 0;
+            color: #6c757d;
+        }
+        
+        .btn-agregar {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: background-color 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-agregar:hover {
+            background-color: #218838;
+        }
+        
+        .botones-volver {
+            display: flex;
+            gap: 12px;
+            margin-top: 30px;
+            justify-content: center;
+        }
+        
+        .btn-volver {
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+        
+        .btn-volver:hover {
+            background-color: #5a6268;
+        }
+        
+        /* Animación para filas eliminadas */
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+        
+        .eliminando {
+            animation: fadeOut 0.5s ease-out;
+            background-color: #f8d7da !important;
+        }
+    </style>
 {% endblock %}

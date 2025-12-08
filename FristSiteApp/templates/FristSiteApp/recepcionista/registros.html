@@ -7,52 +7,72 @@
             <h2>Registros de Recepcionistas</h2>
             <p>Lista completa de recepcionistas registrados en el sistema:</p>
             
-            <div class="contenedor-tabla">
-                <table class="tabla-datos">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Nombre</th>
-                            <th>Email</th>
-                            <th>Teléfono</th>
-                            <th>Turno</th>
-                            <th>Estado</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>REC-001</td>
-                            <td>Ana García López</td>
-                            <td>ana.garcia@clinica.com</td>
-                            <td>555-123-4567</td>
-                            <td>Matutino</td>
-                            <td>Activo</td>
-                        </tr>
-                        <tr>
-                            <td>REC-002</td>
-                            <td>Carlos Rodríguez</td>
-                            <td>c.rodriguez@clinica.com</td>
-                            <td>555-987-6543</td>
-                            <td>Vespertino</td>
-                            <td>Activo</td>
-                        </tr>
-                        <tr>
-                            <td>REC-003</td>
-                            <td>María Fernández</td>
-                            <td>m.fernandez@clinica.com</td>
-                            <td>555-456-7890</td>
-                            <td>Nocturno</td>
-                            <td>Activo</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+            {% if recepcionistas %}
+                <div class="contenedor-tabla">
+                    <table class="tabla-datos">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Email</th>
+                                <th>Teléfono</th>
+                                <th>Turno</th>
+                                <th>Fecha Contratación</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for recepcionista in recepcionistas %}
+                            <tr>
+                                <td>REC-{{ recepcionista.id|stringformat:"03d" }}</td>
+                                <td>{{ recepcionista.nombre }}</td>
+                                <td>{{ recepcionista.email }}</td>
+                                <td>{{ recepcionista.telefono }}</td>
+                                <td>
+                                    {% if recepcionista.turno == "matutino" %}
+                                        Matutino
+                                    {% elif recepcionista.turno == "vespertino" %}
+                                        Vespertino
+                                    {% elif recepcionista.turno == "nocturno" %}
+                                        Nocturno
+                                    {% elif recepcionista.turno == "completo" %}
+                                        Tiempo Completo
+                                    {% else %}
+                                        {{ recepcionista.turno }}
+                                    {% endif %}
+                                </td>
+                                <td>{{ recepcionista.fecha_contratacion|date:"d/m/Y" }}</td>
+                                <td>
+                                    {% if recepcionista.is_active %}
+                                        <span class="estado-activo">Activo</span>
+                                    {% else %}
+                                        <span class="estado-inactivo">Inactivo</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="mensaje-sin-datos">
+                    <p>No hay recepcionistas registrados en el sistema.</p>
+                    <p><a href="{% url 'recepcionista_agregar' %}" class="btn-agregar">Agregar Primer Recepcionista</a></p>
+                </div>
+            {% endif %}
             
-            <div class="botones-volver">
+            <div class="botones-tabla">
+                <!--<button type="button" class="btn-agregar" onclick="window.location.href='{% url 'recepcionista_agregar' %}'">
+                    Agregar Nuevo Recepcionista
+                </button>-->
                 <button type="button" class="btn-volver" onclick="window.location.href='/registro/'">
-                    Volver al Registro
-                </button>
+                        Volver al Registro
+                    </button>
             </div>
         </div>
     </div>
+
+    <style>
+        /* Estilos básicos (mantén los mismos estilos de arriba) */
+    </style>
 {% endblock %}

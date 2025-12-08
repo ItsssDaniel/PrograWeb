@@ -5,97 +5,271 @@
     <div class="container main-content">
         <div class="section" id="consultar-citas">
             <h2>Consultar Citas</h2>
-            <p>Busque y consulte las citas médicas programadas</p>
+            <p>Gestión de recetas médicas por paciente</p>
             
-            <!-- Filtros de búsqueda -->
-            <div class="filtros-citas">
-                <div class="campos-duales">
-                    <div class="campo-formulario">
-                        <label for="filtro_paciente">Filtrar por Paciente:</label>
-                        <select id="filtro_paciente" onchange="filtrarCitas()">
-                            <option value="">Todos los pacientes</option>
-                            <option value="1">Ana García López</option>
-                            <option value="2">Carlos Rodríguez</option>
-                            <option value="3">María Fernández</option>
-                        </select>
-                    </div>
-                    
-                    <div class="campo-formulario">
-                        <label for="filtro_medico">Filtrar por Médico:</label>
-                        <select id="filtro_medico" onchange="filtrarCitas()">
-                            <option value="">Todos los médicos</option>
-                            <option value="1">Dr. Juan Pérez</option>
-                            <option value="2">Dra. María López</option>
-                            <option value="3">Dr. Roberto Sánchez</option>
-                        </select>
-                    </div>
-                </div>
-                
-                <div class="campos-duales">
-                    <div class="campo-formulario">
-                        <label for="filtro_fecha">Filtrar por Fecha:</label>
-                        <input type="date" id="filtro_fecha" onchange="filtrarCitas()" />
-                    </div>
-                    
-                    <div class="campo-formulario">
-                        <label for="filtro_estado">Filtrar por Estado:</label>
-                        <select id="filtro_estado" onchange="filtrarCitas()">
-                            <option value="">Todos los estados</option>
-                            <option value="programada">Programada</option>
-                            <option value="confirmada">Confirmada</option>
-                            <option value="completada">Completada</option>
-                            <option value="cancelada">Cancelada</option>
-                        </select>
-                    </div>
+            <!-- Pestañas para diferentes vistas -->
+            <div class="tabs-citas">
+                <button class="tab-btn active" onclick="abrirTab('tab-citas-activas')">Citas Activas</button>
+                <button class="tab-btn" onclick="abrirTab('tab-historial')">Historial de Consultas</button>
+                <button class="tab-btn" onclick="abrirTab('tab-recetas')">Recetas Médicas</button>
+            </div>
+            
+            <!-- Tabla de citas activas -->
+            <div id="tab-citas-activas" class="tab-content active">
+                <div class="contenedor-tabla">
+                    <table class="tabla-datos">
+                        <thead>
+                            <tr>
+                                <th>ID Cita</th>
+                                <th>Paciente</th>
+                                <th>Médico</th>
+                                <th>Fecha</th>
+                                <th>Hora</th>
+                                <th>Estado</th>
+                                <th>Receta</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>CIT-001</td>
+                                <td>Ana García López</td>
+                                <td>Dr. Juan Pérez</td>
+                                <td>2024-01-15</td>
+                                <td>10:00 AM</td>
+                                <td><span class="estado confirmada">Confirmada</span></td>
+                                <td><span class="estado receta-generada">Generada</span></td>
+                                <td>
+                                    <button class="btn-accion-tabla btn-ver-receta" title="Ver Receta" onclick="verReceta('REC-001')">
+                                        <span class="icono">👁️</span>
+                                    </button>
+                                    <button class="btn-accion-tabla btn-modificar" title="Modificar Receta" onclick="modificarReceta('REC-001')">
+                                        <span class="icono">✏️</span>
+                                    </button>
+                                    <button class="btn-accion-tabla btn-eliminar" title="Eliminar Receta" onclick="eliminarReceta('REC-001')">
+                                        <span class="icono">🗑️</span>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>CIT-002</td>
+                                <td>Carlos Rodríguez</td>
+                                <td>Dra. María López</td>
+                                <td>2024-01-16</td>
+                                <td>03:30 PM</td>
+                                <td><span class="estado programada">Programada</span></td>
+                                <td><span class="estado receta-pendiente">Pendiente</span></td>
+                                <td>
+                                    <button class="btn-accion-tabla btn-receta" title="Crear Receta" onclick="crearReceta('CIT-002')">
+                                        <span class="icono">📝</span>
+                                    </button>
+                                    <button class="btn-accion-tabla" style="background: #9E9E9B; color: white;" title="No disponible" disabled>
+                                        <span class="icono">👁️</span>
+                                    </button>
+                                    <button class="btn-accion-tabla" style="background: #9E9E9B; color: white;" title="No disponible" disabled>
+                                        <span class="icono">✏️</span>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>CIT-003</td>
+                                <td>María Fernández</td>
+                                <td>Dr. Roberto Sánchez</td>
+                                <td>2024-01-17</td>
+                                <td>09:15 AM</td>
+                                <td><span class="estado completada">Completada</span></td>
+                                <td><span class="estado receta-generada">Generada</span></td>
+                                <td>
+                                    <button class="btn-accion-tabla btn-ver-receta" title="Ver Receta" onclick="verReceta('REC-003')">
+                                        <span class="icono">👁️</span>
+                                    </button>
+                                    <button class="btn-accion-tabla btn-modificar" title="Modificar Receta" onclick="modificarReceta('REC-003')">
+                                        <span class="icono">✏️</span>
+                                    </button>
+                                    <button class="btn-accion-tabla btn-eliminar" title="Eliminar Receta" onclick="eliminarReceta('REC-003')">
+                                        <span class="icono">🗑️</span>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>CIT-004</td>
+                                <td>Jorge Martínez</td>
+                                <td>Dr. Juan Pérez</td>
+                                <td>2024-01-18</td>
+                                <td>11:00 AM</td>
+                                <td><span class="estado confirmada">Confirmada</span></td>
+                                <td><span class="estado receta-pendiente">Pendiente</span></td>
+                                <td>
+                                    <button class="btn-accion-tabla btn-receta" title="Crear Receta" onclick="crearReceta('CIT-004')">
+                                        <span class="icono">📝</span>
+                                    </button>
+                                    <button class="btn-accion-tabla" style="background: #9E9E9B; color: white;" title="No disponible" disabled>
+                                        <span class="icono">👁️</span>
+                                    </button>
+                                    <button class="btn-accion-tabla" style="background: #9E9E9B; color: white;" title="No disponible" disabled>
+                                        <span class="icono">✏️</span>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
             
-            <!-- Tabla de citas -->
-            <div class="contenedor-tabla">
-                <table class="tabla-datos">
-                    <thead>
-                        <tr>
-                            <th>ID Cita</th>
-                            <th>Paciente</th>
-                            <th>Médico</th>
-                            <th>Recepcionista</th>
-                            <th>Fecha</th>
-                            <th>Hora</th>
-                            <th>Estado</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabla-citas">
-                        <tr>
-                            <td>CIT-001</td>
-                            <td>Ana García López</td>
-                            <td>Dr. Juan Pérez</td>
-                            <td>Ana García López</td>
-                            <td>2024-01-15</td>
-                            <td>10:00 AM</td>
-                            <td><span class="estado confirmada">Confirmada</span></td>
-                            <td>
-                                <button class="btn-modificar-tabla" title="Ver Detalles" onclick="verDetallesCita('CIT-001')">
-                                    <span class="icono">👁️</span>
-                                </button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>CIT-002</td>
-                            <td>Carlos Rodríguez</td>
-                            <td>Dra. María López</td>
-                            <td>Carlos Rodríguez</td>
-                            <td>2024-01-16</td>
-                            <td>03:30 PM</td>
-                            <td><span class="estado programada">Programada</span></td>
-                            <td>
-                                <button class="btn-modificar-tabla" title="Ver Detalles" onclick="verDetallesCita('CIT-002')">
-                                    <span class="icono">👁️</span>
-                                </button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+            <!-- Historial de consultas -->
+            <div id="tab-historial" class="tab-content">
+                <div class="contenedor-tabla">
+                    <table class="tabla-datos">
+                        <thead>
+                            <tr>
+                                <th>ID Cita</th>
+                                <th>Paciente</th>
+                                <th>Fecha</th>
+                                <th>Diagnóstico</th>
+                                <th>Estado</th>
+                                <th>Receta</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>CIT-015</td>
+                                <td>Ana García López</td>
+                                <td>2024-01-10</td>
+                                <td>Hipertensión arterial controlada</td>
+                                <td><span class="estado completada">Completada</span></td>
+                                <td><span class="estado receta-generada">Generada</span></td>
+                                <td>
+                                    <button class="btn-accion-tabla btn-ver-receta" title="Ver Receta" onclick="verReceta('REC-015')">
+                                        <span class="icono">👁️</span>
+                                    </button>
+                                    <button class="btn-accion-tabla btn-modificar" title="Modificar Receta" onclick="modificarReceta('REC-015')">
+                                        <span class="icono">✏️</span>
+                                    </button>
+                                    <button class="btn-accion-tabla btn-eliminar" title="Eliminar Receta" onclick="eliminarReceta('REC-015')">
+                                        <span class="icono">🗑️</span>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>CIT-012</td>
+                                <td>Carlos Rodríguez</td>
+                                <td>2024-01-08</td>
+                                <td>Control diabetes tipo 2</td>
+                                <td><span class="estado completada">Completada</span></td>
+                                <td><span class="estado receta-pendiente">Pendiente</span></td>
+                                <td>
+                                    <button class="btn-accion-tabla btn-receta" title="Crear Receta" onclick="crearReceta('CIT-012')">
+                                        <span class="icono">📝</span>
+                                    </button>
+                                    <button class="btn-accion-tabla" style="background: #9E9E9B; color: white;" title="No disponible" disabled>
+                                        <span class="icono">👁️</span>
+                                    </button>
+                                    <button class="btn-accion-tabla" style="background: #9E9E9B; color: white;" title="No disponible" disabled>
+                                        <span class="icono">✏️</span>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>CIT-008</td>
+                                <td>María Fernández</td>
+                                <td>2024-01-05</td>
+                                <td>Consulta general de rutina</td>
+                                <td><span class="estado completada">Completada</span></td>
+                                <td><span class="estado receta-generada">Generada</span></td>
+                                <td>
+                                    <button class="btn-accion-tabla btn-ver-receta" title="Ver Receta" onclick="verReceta('REC-008')">
+                                        <span class="icono">👁️</span>
+                                    </button>
+                                    <button class="btn-accion-tabla btn-modificar" title="Modificar Receta" onclick="modificarReceta('REC-008')">
+                                        <span class="icono">✏️</span>
+                                    </button>
+                                    <button class="btn-accion-tabla btn-eliminar" title="Eliminar Receta" onclick="eliminarReceta('REC-008')">
+                                        <span class="icono">🗑️</span>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Recetas médicas -->
+            <div id="tab-recetas" class="tab-content">
+                <div class="contenedor-tabla">
+                    <table class="tabla-datos">
+                        <thead>
+                            <tr>
+                                <th>ID Receta</th>
+                                <th>Paciente</th>
+                                <th>Fecha</th>
+                                <th>Médico</th>
+                                <th>Diagnóstico</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>REC-015</td>
+                                <td>Ana García López</td>
+                                <td>2024-01-10</td>
+                                <td>Dr. Juan Pérez</td>
+                                <td>Hipertensión arterial</td>
+                                <td><span class="estado activa">Activa</span></td>
+                                <td>
+                                    <button class="btn-accion-tabla btn-ver-receta" title="Ver Receta" onclick="verReceta('REC-015')">
+                                        <span class="icono">👁️</span>
+                                    </button>
+                                    <button class="btn-accion-tabla btn-modificar" title="Modificar" onclick="modificarReceta('REC-015')">
+                                        <span class="icono">✏️</span>
+                                    </button>
+                                    <button class="btn-accion-tabla btn-eliminar" title="Eliminar" onclick="eliminarReceta('REC-015')">
+                                        <span class="icono">🗑️</span>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>REC-008</td>
+                                <td>María Fernández</td>
+                                <td>2024-01-05</td>
+                                <td>Dr. Roberto Sánchez</td>
+                                <td>Consulta general</td>
+                                <td><span class="estado activa">Activa</span></td>
+                                <td>
+                                    <button class="btn-accion-tabla btn-ver-receta" title="Ver Receta" onclick="verReceta('REC-008')">
+                                        <span class="icono">👁️</span>
+                                    </button>
+                                    <button class="btn-accion-tabla btn-modificar" title="Modificar" onclick="modificarReceta('REC-008')">
+                                        <span class="icono">✏️</span>
+                                    </button>
+                                    <button class="btn-accion-tabla btn-eliminar" title="Eliminar" onclick="eliminarReceta('REC-008')">
+                                        <span class="icono">🗑️</span>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>REC-001</td>
+                                <td>Ana García López</td>
+                                <td>2024-01-15</td>
+                                <td>Dr. Juan Pérez</td>
+                                <td>Control presión arterial</td>
+                                <td><span class="estado activa">Activa</span></td>
+                                <td>
+                                    <button class="btn-accion-tabla btn-ver-receta" title="Ver Receta" onclick="verReceta('REC-001')">
+                                        <span class="icono">👁️</span>
+                                    </button>
+                                    <button class="btn-accion-tabla btn-modificar" title="Modificar" onclick="modificarReceta('REC-001')">
+                                        <span class="icono">✏️</span>
+                                    </button>
+                                    <button class="btn-accion-tabla btn-eliminar" title="Eliminar" onclick="eliminarReceta('REC-001')">
+                                        <span class="icono">🗑️</span>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
             
             <div class="botones-volver">
@@ -107,12 +281,38 @@
     </div>
 
     <style type="text/css">
-        .filtros-citas {
-            background: var(--background-alt);
-            padding: 1.5rem;
-            border-radius: 8px;
+        .tabs-citas {
+            display: flex;
             margin-bottom: 2rem;
-            border: 1px solid var(--border);
+            border-bottom: 2px solid var(--border);
+        }
+        
+        .tab-btn {
+            background: none;
+            border: none;
+            padding: 1rem 2rem;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--text-light);
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .tab-btn.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+        
+        .tab-btn:hover {
+            color: var(--primary);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
         }
         
         .estado {
@@ -141,17 +341,114 @@
             background: #ffebee;
             color: #c62828;
         }
+        
+        .estado.receta-generada {
+            background: #e8f5e8;
+            color: #2e7d32;
+        }
+        
+        .estado.receta-pendiente {
+            background: #fff3e0;
+            color: #ef6c00;
+        }
+        
+        .estado.activa {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+        
+        .btn-accion-tabla {
+            width: 32px;
+            height: 32px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 2px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-accion-tabla:disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+        
+        .btn-ver-receta {
+            background: #2196F3;
+            color: white;
+        }
+        
+        .btn-receta {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .btn-modificar {
+            background: #FF9800;
+            color: white;
+        }
+        
+        .btn-eliminar {
+            background: #F44336;
+            color: white;
+        }
+        
+        .btn-accion-tabla:hover:not(:disabled) {
+            transform: scale(1.1);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .acciones-container {
+            display: flex;
+            gap: 4px;
+            justify-content: center;
+        }
     </style>
 
     <script type="text/javascript">
         //<![CDATA[
-        function filtrarCitas() {
-            // Simular filtrado
-            alert('Aplicando filtros...');
+        function abrirTab(tabName) {
+            // Ocultar todos los tabs
+            var tabs = document.getElementsByClassName('tab-content');
+            for (var i = 0; i < tabs.length; i++) {
+                tabs[i].classList.remove('active');
+            }
+            
+            // Remover active de todos los botones
+            var tabBtns = document.getElementsByClassName('tab-btn');
+            for (var i = 0; i < tabBtns.length; i++) {
+                tabBtns[i].classList.remove('active');
+            }
+            
+            // Mostrar el tab seleccionado
+            document.getElementById(tabName).classList.add('active');
+            event.currentTarget.classList.add('active');
         }
         
-        function verDetallesCita(idCita) {
-            alert('Mostrando detalles de la cita: ' + idCita);
+        function crearReceta(idCita) {
+            if (confirm('¿Desea crear una nueva receta médica para la cita ' + idCita + '?')) {
+                window.location.href = "{% url 'receta_medica' %}?cita=" + idCita;
+            }
+        }
+        
+        function verReceta(idReceta) {
+            window.location.href = "{% url 'ver_receta' %}?id=" + idReceta;
+        }
+        
+        function modificarReceta(idReceta) {
+            if (confirm('¿Desea modificar la receta ' + idReceta + '?')) {
+                window.location.href = "{% url 'receta_medica' %}?modificar=" + idReceta;
+            }
+        }
+        
+        function eliminarReceta(idReceta) {
+            if (confirm('¿Está seguro de que desea eliminar la receta ' + idReceta + '? Esta acción no se puede deshacer.')) {
+                alert('Receta ' + idReceta + ' eliminada correctamente.');
+                // Aquí iría la lógica para eliminar la receta de la base de datos
+                // window.location.reload(); // Recargar para ver los cambios
+            }
         }
         //]]>
     </script>

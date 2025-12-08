@@ -1,0 +1,393 @@
+{% extends 'FristSiteApp/base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="container main-content">
+        <div class="section" id="historial-asistencia">
+            <h2>Historial de Asistencia de Pacientes</h2>
+            <p>Métricas y estadísticas de asistencia médica</p>
+            
+            <!-- Métricas principales -->
+            <div class="metricas-principales">
+                <div class="metrica-card">
+                    <div class="metrica-icon">👥</div>
+                    <div class="metrica-info">
+                        <h3>1,247</h3>
+                        <p>Pacientes Activos</p>
+                    </div>
+                </div>
+                <div class="metrica-card">
+                    <div class="metrica-icon">📅</div>
+                    <div class="metrica-info">
+                        <h3>89%</h3>
+                        <p>Tasa de Asistencia</p>
+                    </div>
+                </div>
+                <div class="metrica-card">
+                    <div class="metrica-icon">⏱️</div>
+                    <div class="metrica-info">
+                        <h3>15 min</h3>
+                        <p>Tiempo Promedio de Espera</p>
+                    </div>
+                </div>
+                <div class="metrica-card">
+                    <div class="metrica-icon">🎯</div>
+                    <div class="metrica-info">
+                        <h3>94%</h3>
+                        <p>Satisfacción del Paciente</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filtros -->
+            <div class="filtros-asistencia">
+                <h3>Filtrar Historial</h3>
+                <div class="filtros-grid">
+                    <div class="campo-formulario">
+                        <label for="fecha_inicio">Fecha Inicio:</label>
+                        <input type="date" id="fecha_inicio" name="fecha_inicio" />
+                    </div>
+                    <div class="campo-formulario">
+                        <label for="fecha_fin">Fecha Fin:</label>
+                        <input type="date" id="fecha_fin" name="fecha_fin" />
+                    </div>
+                    <div class="campo-formulario">
+                        <label for="medico">Médico:</label>
+                        <select id="medico" name="medico">
+                            <option value="">Todos los médicos</option>
+                            <option value="1">Dr. Juan Pérez</option>
+                            <option value="2">Dra. María López</option>
+                            <option value="3">Dr. Roberto Sánchez</option>
+                        </select>
+                    </div>
+                    <div class="campo-formulario">
+                        <button type="button" class="btn-guardar" onclick="aplicarFiltros()">Aplicar Filtros</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabla de historial -->
+            <div class="historial-tabla">
+                <h3>Registros de Asistencia</h3>
+                <div class="contenedor-tabla">
+                    <table class="tabla-datos">
+                        <thead>
+                            <tr>
+                                <th>ID Paciente</th>
+                                <th>Nombre del Paciente</th>
+                                <th>Médico</th>
+                                <th>Fecha Cita</th>
+                                <th>Hora</th>
+                                <th>Estado</th>
+                                <th>Tipo Consulta</th>
+                                <th>Duración</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>PAC-001</td>
+                                <td>Ana García López</td>
+                                <td>Dr. Juan Pérez</td>
+                                <td>2024-01-15</td>
+                                <td>10:00 AM</td>
+                                <td><span class="estado-asistio">Asistió</span></td>
+                                <td>Consulta General</td>
+                                <td>30 min</td>
+                            </tr>
+                            <tr>
+                                <td>PAC-002</td>
+                                <td>Carlos Rodríguez</td>
+                                <td>Dra. María López</td>
+                                <td>2024-01-15</td>
+                                <td>11:30 AM</td>
+                                <td><span class="estado-asistio">Asistió</span></td>
+                                <td>Control</td>
+                                <td>25 min</td>
+                            </tr>
+                            <tr>
+                                <td>PAC-003</td>
+                                <td>María Fernández</td>
+                                <td>Dr. Roberto Sánchez</td>
+                                <td>2024-01-15</td>
+                                <td>02:15 PM</td>
+                                <td><span class="estado-no-asistio">No Asistió</span></td>
+                                <td>Especialidad</td>
+                                <td>-</td>
+                            </tr>
+                            <tr>
+                                <td>PAC-004</td>
+                                <td>Jorge Martínez</td>
+                                <td>Dr. Juan Pérez</td>
+                                <td>2024-01-16</td>
+                                <td>09:00 AM</td>
+                                <td><span class="estado-asistio">Asistió</span></td>
+                                <td>Urgencias</td>
+                                <td>45 min</td>
+                            </tr>
+                            <tr>
+                                <td>PAC-005</td>
+                                <td>Laura Hernández</td>
+                                <td>Dra. María López</td>
+                                <td>2024-01-16</td>
+                                <td>03:45 PM</td>
+                                <td><span class="estado-cancelada">Cancelada</span></td>
+                                <td>Consulta General</td>
+                                <td>-</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Gráficos de métricas -->
+            <div class="graficos-metricas">
+                <h3>Métricas de Asistencia</h3>
+                <div class="graficos-grid">
+                    <div class="grafico-card">
+                        <h4>Asistencia por Día de la Semana</h4>
+                        <div class="grafico-barras">
+                            <div class="barra-container">
+                                <div class="barra-label">Lun</div>
+                                <div class="barra" style="width: 85%"><span>85%</span></div>
+                            </div>
+                            <div class="barra-container">
+                                <div class="barra-label">Mar</div>
+                                <div class="barra" style="width: 92%"><span>92%</span></div>
+                            </div>
+                            <div class="barra-container">
+                                <div class="barra-label">Mié</div>
+                                <div class="barra" style="width: 78%"><span>78%</span></div>
+                            </div>
+                            <div class="barra-container">
+                                <div class="barra-label">Jue</div>
+                                <div class="barra" style="width: 88%"><span>88%</span></div>
+                            </div>
+                            <div class="barra-container">
+                                <div class="barra-label">Vie</div>
+                                <div class="barra" style="width: 95%"><span>95%</span></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="grafico-card">
+                        <h4>Distribución por Tipo de Consulta</h4>
+                        <div class="grafico-torta">
+                            <div class="torta-item">
+                                <div class="torta-color" style="background: #4CAF50;"></div>
+                                <span>General: 45%</span>
+                            </div>
+                            <div class="torta-item">
+                                <div class="torta-color" style="background: #2196F3;"></div>
+                                <span>Especialidad: 30%</span>
+                            </div>
+                            <div class="torta-item">
+                                <div class="torta-color" style="background: #FF9800;"></div>
+                                <span>Control: 15%</span>
+                            </div>
+                            <div class="torta-item">
+                                <div class="torta-color" style="background: #F44336;"></div>
+                                <span>Urgencias: 10%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style type="text/css">
+        .metricas-principales {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+        
+        .metrica-card {
+            background: var(--background);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px var(--shadow);
+        }
+        
+        .metrica-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+        }
+        
+        .metrica-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .metrica-info h3 {
+            color: var(--primary);
+            font-size: 2rem;
+            margin: 0;
+        }
+        
+        .metrica-info p {
+            color: var(--text-light);
+            margin: 0.5rem 0 0 0;
+        }
+        
+        .filtros-asistencia {
+            background: var(--background-alt);
+            padding: 2rem;
+            border-radius: 8px;
+            margin: 2rem 0;
+        }
+        
+        .filtros-asistencia h3 {
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+        }
+        
+        .filtros-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+        
+        .estado-asistio {
+            background: #4CAF50;
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .estado-no-asistio {
+            background: #F44336;
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .estado-cancelada {
+            background: #FF9800;
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .graficos-metricas {
+            margin-top: 3rem;
+        }
+        
+        .graficos-metricas h3 {
+            color: var(--primary);
+            margin-bottom: 2rem;
+        }
+        
+        .graficos-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+        
+        .grafico-card {
+            background: var(--background);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px var(--shadow);
+        }
+        
+        .grafico-card h4 {
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        
+        .grafico-barras {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .barra-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .barra-label {
+            width: 40px;
+            font-weight: 600;
+            color: var(--text);
+        }
+        
+        .barra {
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            height: 30px;
+            border-radius: 6px;
+            position: relative;
+            transition: width 0.5s ease;
+        }
+        
+        .barra span {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: white;
+            font-weight: 600;
+            font-size: 0.8rem;
+        }
+        
+        .grafico-torta {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .torta-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .torta-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+        }
+        
+        @media (max-width: 768px) {
+            .metricas-principales {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .graficos-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .filtros-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+
+    <script type="text/javascript">
+        //<![CDATA[
+        function aplicarFiltros() {
+            var fechaInicio = document.getElementById('fecha_inicio').value;
+            var fechaFin = document.getElementById('fecha_fin').value;
+            var medico = document.getElementById('medico').value;
+            
+            alert('Filtros aplicados:\nFecha Inicio: ' + (fechaInicio || 'No especificada') + 
+                  '\nFecha Fin: ' + (fechaFin || 'No especificada') + 
+                  '\nMédico: ' + (medico ? document.getElementById('medico').options[document.getElementById('medico').selectedIndex].text : 'Todos'));
+        }
+        //]]>
+    </script>
+{% endblock %}

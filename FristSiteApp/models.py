@@ -63,6 +63,33 @@ class Recepcionista(AbstractBaseUser, PermissionsMixin):
         return f"{self.nombre} ({self.email})"
 
 
+# Agrega esto después de la clase Recepcionista y antes de PersonalExtra
+
+class Medico(models.Model):
+    nombre = models.CharField(max_length=200)
+    especialidad = models.CharField(max_length=100)
+    cedula_profesional = models.CharField(max_length=50, unique=True)
+    email = models.EmailField(unique=True)
+    telefono = models.CharField(max_length=20)
+    direccion_consultorio = models.TextField()
+    horario_atencion = models.CharField(max_length=100)
+    fecha_contratacion = models.DateField(default=date.today)
+    foto = models.ImageField(upload_to='medicos_fotos/', null=True, blank=True)
+    estado = models.BooleanField(default=True)
+    observaciones = models.TextField(blank=True, null=True)
+    fecha_registro = models.DateTimeField(default=timezone.now)
+    
+    objects = models.Manager()
+    
+    class Meta:
+        db_table = 'medico'
+        verbose_name = 'Médico'
+        verbose_name_plural = 'Médicos'
+    
+    def __str__(self):
+        return f"{self.nombre} - {self.especialidad}"
+
+
 
 class PersonalExtra(models.Model):
     nombre = models.CharField(max_length=200)

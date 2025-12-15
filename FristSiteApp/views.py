@@ -7,9 +7,12 @@ from .forms import RecepcionistaForm
 from django.contrib import messages
 import json
 from datetime import datetime
+from django.shortcuts import get_object_or_404
 
 from .models import Recepcionista
 from .models import PersonalExtra
+from .models import Medico
+from .forms import MedicoForm
 
 # Create your views here.
 def home(request):
@@ -26,35 +29,177 @@ def dataBaseConexion(request):
 def registro_view(request):
     return render(request, 'FristSiteApp/registro.html')
 
-def medico_agregar(request):
-    return render(request, 'FristSiteApp/medicos/agregar.html') 
+@csrf_exempt
+def agregar_medico(request):
+    if request.method == 'POST':
+        # Verificar si es una petición AJAX
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            try:
+                # Obtener datos del JSON
+                data = json.loads(request.body)
+                
+                # Crear el médico
+                medico = Medico.objects.create(
+                    nombre=data.get('nombre'),
+                    especialidad=data.get('especialidad'),
+                    cedula_profesional=data.get('cedula_profesional'),
+                    email=data.get('email'),
+                    telefono=data.get('telefono'),
+                    direccion_consultorio=data.get('direccion_consultorio'),
+                    horario_atencion=data.get('horario_atencion'),
+                    fecha_contratacion=data.get('fecha_contratacion'),
+                    estado=data.get('estado') == 'true',
+                    observaciones=data.get('observaciones')
+                )
+                
+                return JsonResponse({
+                    'success': True,
+                    'message': 'Médico guardado exitosamente!',
+                    'id': medico.id
+                })
+                
+            except Exception as e:
+                return JsonResponse({
+                    'success': False,
+                    'message': f'Error: {str(e)}'
+                }, status=400)
+        
+        else:
+            # Para peticiones normales de formulario (si aún quieres mantener esa opción)
+            try:
+                form = MedicoForm(request.POST, request.FILES)
+                if form.is_valid():
+                    form.save()
+                    messages.success(request, 'Médico agregado exitosamente.')
+                    return redirect('medico_registros')
+                else:
+                    messages.error(request, 'Por favor corrige los errores en el formulario.')
+            except Exception as e:
+                messages.error(request, f'Error: {str(e)}')
+    
+    # Para peticiones GET, simplemente renderizar el template
+    return render(request, 'FristSiteApp/medicos/agregar.html')
 
 def medico_modificar(request):
-    return render(request, 'FristSiteApp/medicos/modificar.html') 
-
-def medico_eliminar(request):
-    return render(request, 'FristSiteApp/medicos/eliminar.html') 
-
-def medico_registros(request):
-    return render(request, 'FristSiteApp/medicos/registros.html') 
-
-def medico_editar(request):
-    # Obtener los datos del médico desde los parámetros GET
-    medico_id = request.GET.get('id', '')
-    nombre = request.GET.get('nombre', '')
-    especialidad = request.GET.get('especialidad', '')
-    cedula = request.GET.get('cedula', '')
-    activo = request.GET.get('activo', 'true')
+    # Obtener todos los médicos de la base de datos
+    medicos = Medico.objects.all().order_by('id')
     
     context = {
-        'medico_id': medico_id,
-        'nombre': nombre,
-        'especialidad': especialidad,
-        'cedula': cedula,
-        'activo': activo,
+        'medicos': medicos
     }
     
-    return render(request, 'FristSiteApp/medicos/editar.html', context)
+    return render(request, 'FristSiteApp/medicos/modificar.html', context)
+
+def medico_eliminar(request):
+    # Obtener todos los médicos de la base de datos
+    medicos = Medico.objects.all().order_by('id')
+    
+    context = {
+        'medicos': medicos
+    }
+    
+    return render(request, 'FristSiteApp/medicos/eliminar.html', context)
+
+@csrf_exempt
+def medico_eliminar_por_id(request, id):
+    if request.method == 'DELETE':
+        try:
+            # Intentar obtener el médico
+            medico = get_object_or_404(Medico, id=id)
+            nombre = medico.nombre
+            medico.delete()
+            
+            return JsonResponse({
+                'success': True,
+                'message': f'Médico "{nombre}" eliminado exitosamente'
+            })
+            
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'message': f'Error: {str(e)}'
+            }, status=500)
+    
+    return JsonResponse({
+        'success': False,
+        'message': 'Método no permitido'
+    }, status=405)
+
+def medico_registros(request):
+    # Obtener todos los médicos de la base de datos
+    medicos = Medico.objects.all().order_by('id')
+    
+    context = {
+        'medicos': medicos
+    }
+    
+    return render(request, 'FristSiteApp/medicos/registros.html', context)
+
+@csrf_exempt
+def medico_editar(request, id):
+    try:
+        # Obtener el médico por ID
+        medico = get_object_or_404(Medico, id=id)
+        
+        if request.method == 'POST':
+            # Procesar la actualización
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                # Petición AJAX
+                try:
+                    data = json.loads(request.body)
+                    
+                    # Actualizar campos
+                    medico.nombre = data.get('nombre', medico.nombre)
+                    medico.especialidad = data.get('especialidad', medico.especialidad)
+                    medico.cedula_profesional = data.get('cedula_profesional', medico.cedula_profesional)
+                    medico.email = data.get('email', medico.email)
+                    medico.telefono = data.get('telefono', medico.telefono)
+                    medico.direccion_consultorio = data.get('direccion_consultorio', medico.direccion_consultorio)
+                    medico.horario_atencion = data.get('horario_atencion', medico.horario_atencion)
+                    medico.fecha_contratacion = data.get('fecha_contratacion', medico.fecha_contratacion)
+                    medico.estado = data.get('estado') == 'true'
+                    medico.observaciones = data.get('observaciones', medico.observaciones)
+                    
+                    medico.save()
+                    
+                    return JsonResponse({
+                        'success': True,
+                        'message': '✅ Médico actualizado exitosamente!'
+                    })
+                    
+                except Exception as e:
+                    return JsonResponse({
+                        'success': False,
+                        'message': f'❌ Error: {str(e)}'
+                    }, status=400)
+            else:
+                # Petición normal de formulario
+                medico.nombre = request.POST.get('nombre', medico.nombre)
+                medico.especialidad = request.POST.get('especialidad', medico.especialidad)
+                medico.cedula_profesional = request.POST.get('cedula_profesional', medico.cedula_profesional)
+                medico.email = request.POST.get('email', medico.email)
+                medico.telefono = request.POST.get('telefono', medico.telefono)
+                medico.direccion_consultorio = request.POST.get('direccion_consultorio', medico.direccion_consultorio)
+                medico.horario_atencion = request.POST.get('horario_atencion', medico.horario_atencion)
+                medico.fecha_contratacion = request.POST.get('fecha_contratacion', medico.fecha_contratacion)
+                medico.estado = request.POST.get('estado') == 'true'
+                medico.observaciones = request.POST.get('observaciones', medico.observaciones)
+                
+                medico.save()
+                
+                messages.success(request, '✅ Médico actualizado exitosamente!')
+                return redirect('medico_modificar')
+        
+        # Para peticiones GET, preparar contexto
+        context = {
+            'medico': medico
+        }
+        
+        return render(request, 'FristSiteApp/medicos/editar.html', context)
+        
+    except Exception as e:
+        messages.error(request, f'❌ Error: {str(e)}')
+        return redirect('medico_modificar')
 
 # Vistas para Paciente
 def paciente_agregar(request):

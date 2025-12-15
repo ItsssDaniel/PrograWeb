@@ -2,6 +2,7 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from .models import Recepcionista
 from .models import PersonalExtra
+from .models import Medico
 
 class RecepcionistaForm(UserCreationForm):
     nombre = forms.CharField(
@@ -48,4 +49,39 @@ class PersonalExtraForm(forms.ModelForm):
             'telefono': forms.TextInput(attrs={'class': 'input-field', 'placeholder': 'Teléfono'}),
             'fecha_contratacion': forms.DateInput(attrs={'class': 'input-field', 'type': 'date'}),
             'horario': forms.TextInput(attrs={'class': 'input-field', 'placeholder': 'Ej: Lunes a Viernes 8:00-16:00'}),
+        }
+
+# Agrega esto después de PersonalExtraForm
+
+class MedicoForm(forms.ModelForm):
+    class Meta:
+        model = Medico
+        fields = ['nombre', 'especialidad', 'cedula_profesional', 'email', 'telefono', 'estado']
+        widgets = {
+            'nombre': forms.TextInput(attrs={
+                'class': 'campo-requerido',
+                'placeholder': 'Nombre completo',
+                'id': 'id_nombre'
+            }),
+            'especialidad': forms.TextInput(attrs={
+                'class': 'campo-requerido',
+                'placeholder': 'Especialidad médica',
+                'id': 'id_especialidad'
+            }),
+            'cedula_profesional': forms.TextInput(attrs={
+                'class': 'campo-requerido',
+                'placeholder': 'Número de cédula profesional',
+                'id': 'id_cedula_profesional'
+            }),
+            'email': forms.EmailInput(attrs={
+                'placeholder': 'correo@ejemplo.com',
+                'id': 'id_email'
+            }),
+            'telefono': forms.TextInput(attrs={
+                'placeholder': 'Teléfono',
+                'id': 'id_telefono'
+            }),
+            'estado': forms.CheckboxInput(attrs={
+                'id': 'id_estado'
+            }),
         }

@@ -7,6 +7,16 @@
             <h2>Registros de Médicos</h2>
             <p>Lista completa de médicos registrados en el sistema:</p>
             
+            {% if messages %}
+                <div class="messages">
+                    {% for message in messages %}
+                        <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            
             <div class="contenedor-tabla">
                 <table class="tabla-datos">
                     <thead>
@@ -15,40 +25,43 @@
                             <th>Nombre</th>
                             <th>Especialidad</th>
                             <th>Cédula</th>
-                            <th>Activo</th>
+                            <th>Email</th>
+                            <th>Teléfono</th>
+                            <th>Estado</th>
                         </tr>
                     </thead>
                     <tbody>
+                        {% for medico in medicos %}
                         <tr>
-                            <td>1</td>
-                            <td>Dr. Juan Pérez</td>
-                            <td>Cardiología</td>
-                            <td>CP12345</td>
-                            <td>✅</td>
+                            <td>{{ medico.id }}</td>
+                            <td>{{ medico.nombre }}</td>
+                            <td>{{ medico.especialidad }}</td>
+                            <td>{{ medico.cedula_profesional }}</td>
+                            <td>{{ medico.email|default:"-" }}</td>
+                            <td>{{ medico.telefono|default:"-" }}</td>
+                            <td>
+                                {% if medico.estado %}
+                                    <span class="estado-activo">✅ Activo</span>
+                                {% else %}
+                                    <span class="estado-inactivo">❌ Inactivo</span>
+                                {% endif %}
+                            </td>
                         </tr>
+                        {% empty %}
                         <tr>
-                            <td>2</td>
-                            <td>Dra. María García</td>
-                            <td>Pediatría</td>
-                            <td>CP67890</td>
-                            <td>✅</td>
+                            <td colspan="7" class="text-center">No hay médicos registrados en el sistema.</td>
                         </tr>
-                        <tr>
-                            <td>3</td>
-                            <td>Dr. Carlos López</td>
-                            <td>Dermatología</td>
-                            <td>CP11223</td>
-                            <td>❌</td>
-                        </tr>
+                        {% endfor %}
                     </tbody>
                 </table>
             </div>
             
             <div class="botones-volver">
                 <button type="button" class="btn-volver" onclick="window.location.href='/registro/'">
-                 Volver al Registro
+                    Volver al Registro
                 </button>
             </div>
         </div>
     </div>
+
 {% endblock %}

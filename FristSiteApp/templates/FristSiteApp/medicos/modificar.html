@@ -7,58 +7,54 @@
             <h2>Médicos Registrados</h2>
             <p>Selecciona un médico para modificar:</p>
             
-            <div class="contenedor-tabla">
-                <table class="tabla-datos">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Nombre</th>
-                            <th>Especialidad</th>
-                            <th>Cédula</th>
-                            <th>Activo</th>
-                            <th>Acción</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>1</td>
-                            <td>Dr. Juan Pérez</td>
-                            <td>Cardiología</td>
-                            <td>CP12345</td>
-                            <td>✅</td>
-                            <td>
-                                <button type="button" class="btn-modificar-tabla" onclick="modificarMedico(1, 'Dr. Juan Pérez', 'Cardiología', 'CP12345', 'true')">
-                                    <span class="icono">✎</span>
-                                </button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>2</td>
-                            <td>Dra. María García</td>
-                            <td>Pediatría</td>
-                            <td>CP67890</td>
-                            <td>✅</td>
-                            <td>
-                                <button type="button" class="btn-modificar-tabla" onclick="modificarMedico(2, 'Dra. María García', 'Pediatría', 'CP67890', 'true')">
-                                    <span class="icono">✎</span>
-                                </button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>3</td>
-                            <td>Dr. Carlos López</td>
-                            <td>Dermatología</td>
-                            <td>CP11223</td>
-                            <td>❌</td>
-                            <td>
-                                <button type="button" class="btn-modificar-tabla" onclick="modificarMedico(3, 'Dr. Carlos López', 'Dermatología', 'CP11223', 'false')">
-                                    <span class="icono">✎</span>
-                                </button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+            {% if medicos %}
+                <div class="contenedor-tabla">
+                    <table class="tabla-datos">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Especialidad</th>
+                                <th>Cédula</th>
+                                <th>Email</th>
+                                <th>Teléfono</th>
+                                <th>Estado</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for medico in medicos %}
+                            <tr>
+                                <td>{{ medico.id }}</td>
+                                <td>{{ medico.nombre }}</td>
+                                <td>{{ medico.especialidad }}</td>
+                                <td>{{ medico.cedula_profesional }}</td>
+                                <td>{{ medico.email|default:"-" }}</td>
+                                <td>{{ medico.telefono|default:"-" }}</td>
+                                <td>
+                                    {% if medico.estado %}
+                                        <span class="estado-activo">Activo</span>
+                                    {% else %}
+                                        <span class="estado-inactivo">Inactivo</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <button type="button" class="btn-modificar-tabla" data-id="{{ medico.id }}">
+                                        <span class="icono">✎</span>
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="mensaje-sin-datos">
+                    <p>No hay médicos registrados en el sistema.</p>
+                    <p><a href="{% url 'medico_agregar' %}" class="btn-agregar">Agregar Primer Médico</a></p>
+                </div>
+            {% endif %}
+
             <div class="botones-volver">
                 <button type="button" class="btn-volver" onclick="window.location.href='/registro/'">
                     Volver al Registro
@@ -69,13 +65,23 @@
 
     <script type="text/javascript">
         //<![CDATA[
-        function modificarMedico(id, nombre, especialidad, cedula, activo) {
-            window.location.href = "{% url 'medico_editar' %}?id=" + id + 
-                                 "&nombre=" + encodeURIComponent(nombre) + 
-                                 "&especialidad=" + encodeURIComponent(especialidad) + 
-                                 "&cedula=" + encodeURIComponent(cedula) + 
-                                 "&activo=" + activo;
+        // Función para modificar médico
+        function modificarMedico(id) {
+            // Redirigir a la página de edición con el ID
+            window.location.href = '/medico/editar/' + id + '/';
         }
+        
+        // Asignar eventos a los botones
+        document.addEventListener('DOMContentLoaded', function() {
+            const botones = document.querySelectorAll('.btn-modificar-tabla');
+            
+            botones.forEach(function(boton) {
+                boton.addEventListener('click', function() {
+                    const medicoId = this.getAttribute('data-id');
+                    modificarMedico(medicoId);
+                });
+            });
+        });
         //]]>
     </script>
 {% endblock %}

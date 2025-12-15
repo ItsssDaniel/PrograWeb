@@ -15,9 +15,11 @@ urlpatterns = [
     path('contacto/', views.contacto_view, name='contacto'),
 
     # URLs para Médico
-    path('medico/agregar/', views.medico_agregar, name='medico_agregar'),
+    path('medico/agregar/', views.agregar_medico, name='medico_agregar'),
     path('medico/modificar/', views.medico_modificar, name='medico_modificar'),
+    path('medico/editar/<int:id>/', views.medico_editar, name='medico_editar'),
     path('medico/eliminar/', views.medico_eliminar, name='medico_eliminar'),
+    path('medico/eliminar/<int:id>/', views.medico_eliminar_por_id, name='medico_eliminar_por_id'),
     path('medico/registros/', views.medico_registros, name='medico_registros'),
     path('medico/editar/', views.medico_editar, name='medico_editar'), 
 

@@ -5,39 +5,78 @@
     <div class="container main-content">
         <div class="section" id="editar-medico">
             <h2>Modificar Médico</h2>
-            <p>Editando médico con ID: <strong>{{ medico_id }}</strong></p>
+            <p>Editando médico con ID: <strong>{{ medico.id }}</strong></p>
             
-            <form class="formulario" action="#" method="post" onsubmit="actualizarMedico(event); return false;">
-                <div class="campo-formulario">
-                    <label for="id">ID (No editable):</label>
-                    <input type="text" id="id" name="id" value="{{ medico_id }}" readonly="readonly" class="campo-readonly" />
-                    <span class="texto-ayuda">El ID no se puede modificar</span>
+            {% if messages %}
+                <div class="messages">
+                    {% for message in messages %}
+                        <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
                 </div>
+            {% endif %}
+            
+            <form class="formulario" id="formEditarMedico">
+                {% csrf_token %}
+                
+                <input type="hidden" id="id" name="id" value="{{ medico.id }}" />
                 
                 <div class="campo-formulario">
                     <label for="nombre">Nombre Completo:</label>
-                    <input type="text" id="nombre" name="nombre" value="{{ nombre }}" class="campo-requerido" />
+                    <input type="text" id="nombre" name="nombre" value="{{ medico.nombre }}" required />
                     <span class="texto-ayuda">* Campo obligatorio</span>
                 </div>
                 
                 <div class="campo-formulario">
                     <label for="especialidad">Especialidad:</label>
-                    <input type="text" id="especialidad" name="especialidad" value="{{ especialidad }}" class="campo-requerido" />
+                    <input type="text" id="especialidad" name="especialidad" value="{{ medico.especialidad }}" required />
                     <span class="texto-ayuda">* Campo obligatorio</span>
                 </div>
                 
                 <div class="campo-formulario">
-                    <label for="cedula">Cédula Profesional:</label>
-                    <input type="text" id="cedula" name="cedula" value="{{ cedula }}" class="campo-requerido" />
+                    <label for="cedula_profesional">Cédula Profesional:</label>
+                    <input type="text" id="cedula_profesional" name="cedula_profesional" value="{{ medico.cedula_profesional }}" required />
                     <span class="texto-ayuda">* Campo obligatorio</span>
                 </div>
                 
                 <div class="campo-formulario">
-                    <label for="activo">Estado:</label>
-                    <select id="activo" name="activo">
-                        <option value="true" {% if activo == 'true' %}selected="selected"{% endif %}>Activo</option>
-                        <option value="false" {% if activo == 'false' %}selected="selected"{% endif %}>Inactivo</option>
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" value="{{ medico.email }}" />
+                </div>
+                
+                <div class="campo-formulario">
+                    <label for="telefono">Teléfono:</label>
+                    <input type="text" id="telefono" name="telefono" value="{{ medico.telefono }}" />
+                </div>
+                
+                <div class="campo-formulario">
+                    <label for="direccion_consultorio">Dirección del Consultorio:</label>
+                    <textarea id="direccion_consultorio" name="direccion_consultorio" rows="3">{{ medico.direccion_consultorio }}</textarea>
+                </div>
+                
+                <div class="campo-formulario">
+                    <label for="horario_atencion">Horario de Atención:</label>
+                    <input type="text" id="horario_atencion" name="horario_atencion" value="{{ medico.horario_atencion }}" />
+                </div>
+                
+                <div class="campo-formulario">
+                    <label for="fecha_contratacion">Fecha de Contratación:</label>
+                    <input type="date" id="fecha_contratacion" name="fecha_contratacion" value="{{ medico.fecha_contratacion|date:'Y-m-d' }}" required />
+                    <span class="texto-ayuda">* Formato: AAAA-MM-DD</span>
+                </div>
+                
+                <div class="campo-formulario">
+                    <label for="estado">Estado:</label>
+                    <select id="estado" name="estado">
+                        <option value="true" {% if medico.estado %}selected{% endif %}>Activo</option>
+                        <option value="false" {% if not medico.estado %}selected{% endif %}>Inactivo</option>
                     </select>
+                </div>
+                
+                <div class="campo-formulario">
+                    <label for="observaciones">Observaciones:</label>
+                    <textarea id="observaciones" name="observaciones" rows="3">{{ medico.observaciones }}</textarea>
                 </div>
                 
                 <div class="botones-formulario">
@@ -52,56 +91,82 @@
 
     <script type="text/javascript">
         //<![CDATA[
-        function validarFormularioMedico() {
-            var nombre = document.getElementById('nombre');
-            var especialidad = document.getElementById('especialidad');
-            var cedula = document.getElementById('cedula');
-            var valido = true;
-            
-            [nombre, especialidad, cedula].forEach(function(campo) {
-                campo.className = campo.className.replace(' campo-error', '');
-            });
-            
-            if (nombre.value.trim() === '') {
-                nombre.className += ' campo-error';
-                valido = false;
-            }
-            if (especialidad.value.trim() === '') {
-                especialidad.className += ' campo-error';
-                valido = false;
-            }
-            if (cedula.value.trim() === '') {
-                cedula.className += ' campo-error';
-                valido = false;
-            }
-            
-            return valido;
-        }
-        
-        function actualizarMedico(event) {
+        async function actualizarMedico(event) {
             event.preventDefault();
             
-            if (!validarFormularioMedico()) {
+            // Validar campos requeridos
+            const camposRequeridos = ['nombre', 'especialidad', 'cedula_profesional', 'fecha_contratacion'];
+            let valido = true;
+            
+            camposRequeridos.forEach(campo => {
+                const elemento = document.getElementById(campo);
+                if (!elemento.value.trim()) {
+                    elemento.classList.add('campo-error');
+                    valido = false;
+                } else {
+                    elemento.classList.remove('campo-error');
+                }
+            });
+            
+            if (!valido) {
                 alert('Por favor, complete todos los campos obligatorios.');
                 return false;
             }
             
-            const id = document.getElementById('id').value;
-            const nombre = document.getElementById('nombre').value;
-            const especialidad = document.getElementById('especialidad').value;
-            const cedula = document.getElementById('cedula').value;
-            const activo = document.getElementById('activo').value;
+            const formData = {
+                id: document.getElementById('id').value,
+                nombre: document.getElementById('nombre').value,
+                especialidad: document.getElementById('especialidad').value,
+                cedula_profesional: document.getElementById('cedula_profesional').value,
+                email: document.getElementById('email').value,
+                telefono: document.getElementById('telefono').value,
+                direccion_consultorio: document.getElementById('direccion_consultorio').value,
+                horario_atencion: document.getElementById('horario_atencion').value,
+                fecha_contratacion: document.getElementById('fecha_contratacion').value,
+                estado: document.getElementById('estado').value,
+                observaciones: document.getElementById('observaciones').value
+            };
             
-            alert('Médico actualizado con éxito!\n\n' +
-                  'ID: ' + id + '\n' +
-                  'Nombre: ' + nombre + '\n' +
-                  'Especialidad: ' + especialidad + '\n' +
-                  'Cédula: ' + cedula + '\n' +
-                  'Estado: ' + (activo === 'true' ? 'Activo' : 'Inactivo'));
+            // Mostrar mensaje de carga
+            const boton = document.querySelector('.btn-actualizar');
+            const textoOriginal = boton.innerHTML;
+            boton.innerHTML = 'Actualizando...';
+            boton.disabled = true;
             
-            setTimeout(function() {
-                window.location.href = "{% url 'medico_modificar' %}";
-            }, 1500);
+            try {
+                // Enviar datos al servidor
+                const response = await fetch('{% url "medico_editar" medico.id %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert(data.message || '✅ Médico actualizado con éxito!');
+                    
+                    // Redirigir después de 1 segundo
+                    setTimeout(function() {
+                        window.location.href = "{% url 'medico_modificar' %}";
+                    }, 1000);
+                } else {
+                    alert('❌ ' + (data.message || 'Error al actualizar el médico.'));
+                    boton.innerHTML = textoOriginal;
+                    boton.disabled = false;
+                }
+                
+            } catch (error) {
+                // Error de red
+                alert('❌ Error de conexión. Intente nuevamente.');
+                console.error('Error:', error);
+                boton.innerHTML = textoOriginal;
+                boton.disabled = false;
+            }
         }
         
         function cancelarEdicion() {
@@ -110,12 +175,35 @@
             }
         }
         
-        document.getElementById('id').addEventListener('input', function(e) {
-            this.value = '{{ medico_id }}';
+        // Función para obtener el token CSRF
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        
+        // Asignar evento al formulario
+        document.getElementById('formEditarMedico').addEventListener('submit', actualizarMedico);
+        
+        // Limpiar errores al escribir
+        document.querySelectorAll('input, select, textarea').forEach(elemento => {
+            elemento.addEventListener('input', function() {
+                this.classList.remove('campo-error');
+            });
         });
         
-        document.getElementById('id').addEventListener('keydown', function(e) {
-            e.preventDefault();
+        // Validación en tiempo real para teléfono
+        document.getElementById('telefono').addEventListener('input', function() {
+            this.value = this.value.replace(/[^0-9+\-\s]/g, '');
         });
         //]]>
     </script>

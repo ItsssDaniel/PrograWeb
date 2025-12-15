@@ -7,58 +7,54 @@
             <h2>Eliminar Médicos</h2>
             <p>Selecciona un médico para eliminar:</p>
             
-            <div class="contenedor-tabla">
-                <table class="tabla-datos">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Nombre</th>
-                            <th>Especialidad</th>
-                            <th>Cédula</th>
-                            <th>Activo</th>
-                            <th>Acción</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>1</td>
-                            <td>Dr. Juan Pérez</td>
-                            <td>Cardiología</td>
-                            <td>CP12345</td>
-                            <td>✅</td>
-                            <td>
-                                <button type="button" class="btn-eliminar-tabla" onclick="confirmarEliminacion(1)">
-                                    <span class="icono">×</span>
-                                </button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>2</td>
-                            <td>Dra. María García</td>
-                            <td>Pediatría</td>
-                            <td>CP67890</td>
-                            <td>✅</td>
-                            <td>
-                                <button type="button" class="btn-eliminar-tabla" onclick="confirmarEliminacion(2)">
-                                    <span class="icono">×</span>
-                                </button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>3</td>
-                            <td>Dr. Carlos López</td>
-                            <td>Dermatología</td>
-                            <td>CP11223</td>
-                            <td>❌</td>
-                            <td>
-                                <button type="button" class="btn-eliminar-tabla" onclick="confirmarEliminacion(3)">
-                                    <span class="icono">×</span>
-                                </button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+            {% if medicos %}
+                <div class="contenedor-tabla">
+                    <table class="tabla-datos">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Especialidad</th>
+                                <th>Cédula</th>
+                                <th>Email</th>
+                                <th>Teléfono</th>
+                                <th>Estado</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for medico in medicos %}
+                            <tr>
+                                <td>{{ medico.id }}</td>
+                                <td>{{ medico.nombre }}</td>
+                                <td>{{ medico.especialidad }}</td>
+                                <td>{{ medico.cedula_profesional }}</td>
+                                <td>{{ medico.email|default:"-" }}</td>
+                                <td>{{ medico.telefono|default:"-" }}</td>
+                                <td>
+                                    {% if medico.estado %}
+                                        <span class="estado-activo">Activo</span>
+                                    {% else %}
+                                        <span class="estado-inactivo">Inactivo</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <button type="button" class="btn-eliminar-tabla" data-id="{{ medico.id }}" data-nombre="{{ medico.nombre }}">
+                                        <span class="icono">×</span>
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="mensaje-sin-datos">
+                    <p>No hay médicos registrados en el sistema.</p>
+                    <p><a href="{% url 'medico_agregar' %}" class="btn-agregar">Agregar Primer Médico</a></p>
+                </div>
+            {% endif %}
+
             <div class="botones-volver">
                 <button type="button" class="btn-volver" onclick="window.location.href='/registro/'">
                     Volver al Registro
@@ -69,11 +65,64 @@
 
     <script type="text/javascript">
         //<![CDATA[
-        function confirmarEliminacion(id) {
-            if (confirm('¿Estás seguro de que deseas eliminar este médico? Esta acción no se puede deshacer.')) {
-                alert('Médico con ID ' + id + ' eliminado');
+        // Función para confirmar y eliminar médico
+        async function eliminarMedico(id, nombre) {
+            if (confirm(`¿Estás seguro de que deseas eliminar al Dr. ${nombre} (ID: ${id})?\n\n⚠️ Esta acción no se puede deshacer.`)) {
+                try {
+                    // Enviar solicitud DELETE al servidor
+                    const response = await fetch(`/medico/eliminar/${id}/`, {
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRFToken': getCookie('csrftoken'),
+                        },
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        alert(data.message || '✅ Médico eliminado exitosamente');
+                        // Recargar la página para actualizar la tabla
+                        setTimeout(function() {
+                            window.location.reload();
+                        }, 1000);
+                    } else {
+                        alert('❌ Error: ' + data.message);
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('❌ Error de conexión. Intente nuevamente.');
+                }
             }
         }
+
+        // Función para obtener el token CSRF
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // Asignar eventos a los botones de eliminar
+        document.addEventListener('DOMContentLoaded', function() {
+            const botones = document.querySelectorAll('.btn-eliminar-tabla');
+            
+            botones.forEach(function(boton) {
+                boton.addEventListener('click', function() {
+                    const id = this.getAttribute('data-id');
+                    const nombre = this.getAttribute('data-nombre');
+                    eliminarMedico(id, nombre);
+                });
+            });
+        });
         //]]>
     </script>
 {% endblock %}

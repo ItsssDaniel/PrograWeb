@@ -29,7 +29,6 @@
                     <div class="col-md-4">
                         <label for="turno_disponibilidad" class="form-label">Turno (Opcional)</label>
                         <select id="turno_disponibilidad" class="form-select">
-                            <option value="">Todos los turnos</option>
                             <option value="mañana">Mañana (6:00 AM - 12:00 PM)</option>
                             <option value="tarde">Tarde (12:00 PM - 6:00 PM)</option>
                             <option value="noche">Noche (6:00 PM - 12:00 AM)</option>
@@ -130,6 +129,543 @@
     </div>
 </div>
 
+<style>
+/* Variables de diseño moderno */
+:root {
+    --primary: #2b6cb0;
+    --primary-light: #ebf4ff;
+    --secondary: #4a5568;
+    --accent: #38a169;
+    --text: #2d3748;
+    --text-light: #718096;
+    --background: #ffffff;
+    --background-alt: #f7fafc;
+    --border: #e2e8f0;
+    --shadow: rgba(0, 0, 0, 0.05);
+    --max-width: 1200px;
+    --border-radius: 12px;
+    --transition: all 0.3s ease;
+    --danger: #e53e3e;
+    --danger-light: #fed7d7;
+}
+
+/* Estilos generales para la sección de disponibilidad */
+.container.main-content {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+}
+
+#disponibilidad-citas {
+    background: var(--background);
+    border-radius: var(--border-radius);
+    padding: 2.5rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border: 1px solid var(--border);
+}
+
+#disponibilidad-citas h2 {
+    color: var(--primary);
+    font-size: 2.2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    text-align: center;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+#disponibilidad-citas > p {
+    color: var(--text-light);
+    text-align: center;
+    font-size: 1.1rem;
+    margin-bottom: 2.5rem;
+    font-weight: 300;
+}
+
+/* Card del formulario */
+.card {
+    border: 1px solid var(--border);
+    border-radius: var(--border-radius);
+    box-shadow: 0 6px 15px var(--shadow);
+    background: var(--background);
+    transition: var(--transition);
+    overflow: hidden;
+}
+
+.card:hover {
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+.card-header {
+    background: var(--background-alt);
+    border-bottom: 1px solid var(--border);
+    padding: 1.5rem 2rem;
+    font-weight: 600;
+    color: var(--primary);
+}
+
+.card-header h5 {
+    font-size: 1.4rem;
+    margin: 0;
+    font-weight: 600;
+}
+
+.card-body {
+    padding: 2rem;
+}
+
+/* Formulario */
+.form-label {
+    color: var(--secondary);
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+}
+
+.form-control, .form-select {
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    color: var(--text);
+    background: var(--background);
+    transition: var(--transition);
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-light);
+    outline: none;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary), #2c5282);
+    border: none;
+    padding: 0.85rem 2rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: var(--transition);
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(43, 108, 176, 0.3);
+    background: linear-gradient(135deg, #2c5282, var(--primary));
+}
+
+.btn-success {
+    background: linear-gradient(135deg, var(--accent), #2f855a);
+    border: none;
+    padding: 0.85rem 2rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: var(--transition);
+    color: white;
+}
+
+.btn-success:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(56, 161, 105, 0.3);
+    background: linear-gradient(135deg, #2f855a, var(--accent));
+}
+
+/* Tabs */
+.nav-tabs {
+    border-bottom: 2px solid var(--border);
+    margin-bottom: 2rem;
+}
+
+.nav-tabs .nav-link {
+    color: var(--secondary);
+    font-weight: 500;
+    border: none;
+    border-bottom: 3px solid transparent;
+    padding: 1rem 1.5rem;
+    margin: 0 0.5rem;
+    border-radius: 8px 8px 0 0;
+    transition: var(--transition);
+    font-size: 0.95rem;
+}
+
+.nav-tabs .nav-link:hover {
+    color: var(--primary);
+    background-color: var(--primary-light);
+}
+
+.nav-tabs .nav-link.active {
+    color: var(--primary);
+    font-weight: 600;
+    border-bottom: 3px solid var(--primary);
+    background-color: var(--primary-light);
+}
+
+/* Tarjetas de horarios */
+.horario-card {
+    cursor: pointer;
+    transition: var(--transition);
+    border: 2px solid transparent;
+    border-radius: 10px;
+    background: var(--background);
+    box-shadow: 0 4px 12px var(--shadow);
+    border: 1px solid var(--border);
+    height: 100%;
+    overflow: hidden;
+    position: relative;
+}
+
+.horario-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary), var(--accent));
+    opacity: 0;
+    transition: var(--transition);
+}
+
+.horario-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
+    border-color: var(--accent);
+}
+
+.horario-card:hover::before {
+    opacity: 1;
+}
+
+.horario-card.disponible {
+    border-color: var(--border);
+}
+
+.horario-card.disponible:hover {
+    border-color: var(--accent);
+}
+
+.horario-card.ocupado {
+    border-color: var(--danger-light);
+    opacity: 0.9;
+    cursor: not-allowed;
+}
+
+.horario-card.ocupado:hover {
+    border-color: var(--danger);
+    transform: none;
+    box-shadow: 0 4px 12px var(--shadow);
+}
+
+.horario-card.ocupado:hover::before {
+    opacity: 0;
+}
+
+.horario-card .card-body {
+    padding: 1.75rem 1rem !important;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.horario-card .card-title {
+    color: var(--primary);
+    font-weight: 600;
+    font-size: 1.15rem;
+    margin-bottom: 0.75rem;
+}
+
+.horario-card.ocupado .card-title {
+    color: var(--text-light);
+}
+
+/* Badges */
+.badge {
+    padding: 0.5rem 1.25rem;
+    border-radius: 20px;
+    font-weight: 500;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.bg-success {
+    background: linear-gradient(135deg, var(--accent), #2f855a) !important;
+    color: white;
+}
+
+.bg-danger {
+    background: linear-gradient(135deg, var(--danger), #c53030) !important;
+    color: white;
+}
+
+.bg-primary {
+    background: linear-gradient(135deg, var(--primary), #2c5282) !important;
+    color: white;
+}
+
+.bg-warning {
+    background: linear-gradient(135deg, #d69e2e, #b7791f) !important;
+    color: white;
+}
+
+.bg-secondary {
+    background: linear-gradient(135deg, var(--secondary), #2d3748) !important;
+    color: white;
+}
+
+/* Alertas */
+.alert {
+    border-radius: var(--border-radius);
+    border: none;
+    padding: 1.25rem 1.5rem;
+    font-size: 1rem;
+}
+
+.alert-info {
+    background: linear-gradient(135deg, var(--primary-light), #e6fffa);
+    color: var(--text);
+    border-left: 4px solid var(--primary);
+}
+
+.alert-warning {
+    background: linear-gradient(135deg, #fffaf0, #feebc8);
+    color: #744210;
+    border-left: 4px solid #d69e2e;
+}
+
+.alert-danger {
+    background: linear-gradient(135deg, #fff5f5, #fed7d7);
+    color: #742a2a;
+    border-left: 4px solid var(--danger);
+}
+
+/* Tabla de citas existentes */
+.table {
+    color: var(--text);
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+}
+
+.table thead th {
+    background: var(--background-alt);
+    color: var(--secondary);
+    font-weight: 600;
+    border-bottom: 2px solid var(--border);
+    padding: 1rem 1.5rem;
+    font-size: 0.95rem;
+}
+
+.table tbody td {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+}
+
+.table tbody tr:hover {
+    background-color: var(--primary-light);
+}
+
+.table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Grid de horarios */
+.row {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1.25rem;
+    margin: 0;
+}
+
+/* Card footer */
+.card-footer {
+    background: var(--background-alt);
+    border-top: 1px solid var(--border);
+    padding: 1.5rem 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Botón de buscar con animación */
+#btnBuscarDisponibilidad .fa-spinner {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Modo oscuro */
+[data-tema="oscuro"] {
+    --primary: #63b3ed;
+    --primary-light: #2d3748;
+    --secondary: #a0aec0;
+    --accent: #68d391;
+    --text: #e2e8f0;
+    --text-light: #a0aec0;
+    --background: #1a202c;
+    --background-alt: #2d3748;
+    --border: #4a5568;
+    --shadow: rgba(0, 0, 0, 0.3);
+    --danger: #fc8181;
+    --danger-light: #742a2a;
+}
+
+[data-tema="oscuro"] #disponibilidad-citas {
+    background: var(--background);
+    border-color: var(--border);
+}
+
+[data-tema="oscuro"] .card {
+    background: var(--background-alt);
+    border-color: var(--border);
+}
+
+[data-tema="oscuro"] .horario-card {
+    background: var(--background-alt);
+    border-color: var(--border);
+}
+
+[data-tema="oscuro"] .horario-card.disponible:hover {
+    background: #2d3748;
+    border-color: var(--accent);
+}
+
+[data-tema="oscuro"] .horario-card.ocupado {
+    border-color: var(--danger-light);
+}
+
+[data-tema="oscuro"] .horario-card.ocupado:hover {
+    border-color: var(--danger);
+}
+
+[data-tema="oscuro"] .table thead th {
+    background: #2d3748;
+}
+
+[data-tema="oscuro"] .table tbody tr:hover {
+    background-color: #2d3748;
+}
+
+[data-tema="oscuro"] .alert-info {
+    background: linear-gradient(135deg, #2d3748, #234e52);
+    color: var(--text);
+}
+
+[data-tema="oscuro"] .alert-warning {
+    background: linear-gradient(135deg, #44337a, #744210);
+    color: #d6bcfa;
+}
+
+[data-tema="oscuro"] .alert-danger {
+    background: linear-gradient(135deg, #742a2a, #521b41);
+    color: #fed7d7;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .container.main-content {
+        padding: 1rem;
+    }
+    
+    #disponibilidad-citas {
+        padding: 1.5rem;
+    }
+    
+    #disponibilidad-citas h2 {
+        font-size: 1.8rem;
+    }
+    
+    .card-body {
+        padding: 1.5rem;
+    }
+    
+    .row {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 1rem;
+    }
+    
+    .nav-tabs .nav-link {
+        padding: 0.75rem 1rem;
+        font-size: 0.9rem;
+        margin: 0 0.25rem;
+    }
+    
+    .horario-card .card-body {
+        padding: 1.25rem 0.75rem !important;
+    }
+    
+    .horario-card .card-title {
+        font-size: 1rem;
+    }
+    
+    .table thead th,
+    .table tbody td {
+        padding: 0.75rem;
+    }
+    
+    .btn-primary,
+    .btn-success {
+        padding: 0.75rem 1.5rem;
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    #disponibilidad-citas {
+        padding: 1rem;
+    }
+    
+    #disponibilidad-citas h2 {
+        font-size: 1.6rem;
+    }
+    
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .row {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+    }
+    
+    .nav-tabs {
+        flex-direction: column;
+    }
+    
+    .nav-tabs .nav-item {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+    
+    .nav-tabs .nav-link {
+        border-radius: 8px;
+        margin: 0;
+        text-align: center;
+    }
+    
+    .nav-tabs .nav-link.active {
+        border-bottom: 3px solid var(--primary);
+        border-radius: 8px 8px 8px 8px;
+    }
+    
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+}
+</style>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const formDisponibilidad = document.getElementById('formDisponibilidad');
@@ -150,7 +686,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const turno = document.getElementById('turno_disponibilidad').value;
         
         if (!medicoId || !fecha) {
-            alert('Por favor, seleccione un médico y una fecha.');
+            mostrarAlerta('Por favor, seleccione un médico y una fecha.', 'warning');
             return;
         }
         
@@ -178,17 +714,58 @@ document.addEventListener('DOMContentLoaded', function() {
             if (data.success) {
                 mostrarResultados(data);
                 resultadosDiv.classList.remove('d-none');
+                
+                // Scroll suave a los resultados
+                resultadosDiv.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'start' 
+                });
             } else {
-                alert('Error: ' + data.message);
+                mostrarAlerta('Error: ' + data.message, 'danger');
             }
         } catch (error) {
             console.error('Error:', error);
-            alert('Error al buscar disponibilidad. Intente nuevamente.');
+            mostrarAlerta('Error al buscar disponibilidad. Intente nuevamente.', 'danger');
         } finally {
             btnBuscar.innerHTML = '<i class="fas fa-search me-2"></i>Buscar Disponibilidad';
             btnBuscar.disabled = false;
         }
     });
+    
+    function mostrarAlerta(mensaje, tipo) {
+        // Remover alertas existentes
+        const alertasExistentes = document.querySelectorAll('.alert-temporario');
+        alertasExistentes.forEach(alerta => alerta.remove());
+        
+        // Crear alerta temporal
+        const alerta = document.createElement('div');
+        alerta.className = `alert alert-${tipo} alert-temporario alert-dismissible fade show`;
+        alerta.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            max-width: 400px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            border-radius: var(--border-radius);
+        `;
+        alerta.innerHTML = `
+            <div class="d-flex align-items-center">
+                <i class="fas fa-${tipo === 'warning' ? 'exclamation-triangle' : tipo === 'danger' ? 'exclamation-circle' : 'check-circle'} me-2"></i>
+                <div>${mensaje}</div>
+            </div>
+            <button type="button" class="btn-close" onclick="this.parentElement.remove()"></button>
+        `;
+        
+        document.body.appendChild(alerta);
+        
+        // Auto-remover después de 5 segundos
+        setTimeout(() => {
+            if (alerta.parentNode) {
+                alerta.remove();
+            }
+        }, 5000);
+    }
     
     function mostrarResultados(data) {
         // Actualizar información del médico y fecha
@@ -202,10 +779,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 turnoTab.click(); // Activar el tab correspondiente
             }
             
-            // Mostrar horarios en el turno específico
-            mostrarHorariosEnTurno(data.turno, data.horarios_disponibles);
+            // Mostrar TODOS los horarios en el turno específico (disponibles y ocupados)
+            mostrarTodosHorariosEnTurno(data.turno, data.horarios_disponibles, data.citas_existentes);
             
-            // Mostrar citas existentes
+            // Mostrar citas existentes en la tabla
             mostrarCitasExistentes(data.citas_existentes);
             
             // Ocultar otros tabs
@@ -218,8 +795,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
         } else {
-            // Mostrar todos los turnos
-            mostrarDisponibilidadTodosTurnos(data.disponibilidad_turnos);
+            // Mostrar todos los turnos con TODOS los horarios
+            mostrarTodosHorariosTodosTurnos(data.disponibilidad_turnos, data.citas_existentes);
         }
         
         // Configurar botón para agendar cita
@@ -230,31 +807,66 @@ document.addEventListener('DOMContentLoaded', function() {
         };
     }
     
-    function mostrarHorariosEnTurno(turnoId, horarios) {
+    function mostrarTodosHorariosEnTurno(turnoId, horariosDisponibles, citasExistentes) {
         const container = document.getElementById(`horarios${capitalizeFirstLetter(turnoId)}`);
         container.innerHTML = '';
         
-        if (horarios.length === 0) {
+        // Generar todos los horarios posibles para este turno
+        const todosHorarios = generarHorariosParaTurno(turnoId);
+        
+        if (todosHorarios.length === 0) {
             container.innerHTML = `
                 <div class="col-12">
-                    <div class="alert alert-warning">
-                        <i class="fas fa-exclamation-triangle me-2"></i>
-                        No hay horarios disponibles en este turno.
+                    <div class="alert alert-warning d-flex align-items-center">
+                        <i class="fas fa-exclamation-triangle me-3 fs-4"></i>
+                        <div>
+                            <h6 class="mb-1">No hay horarios configurados</h6>
+                            <p class="mb-0">No hay horarios para este turno.</p>
+                        </div>
                     </div>
                 </div>
             `;
             return;
         }
         
-        horarios.forEach(horario => {
+        // Crear un mapa de horarios ocupados
+        const horariosOcupados = new Map();
+        citasExistentes.forEach(cita => {
+            const horaInicio = cita.hora_inicio.substring(0, 5); // Formato "HH:MM"
+            horariosOcupados.set(horaInicio, true);
+        });
+        
+        // Crear un mapa de horarios disponibles del backend
+        const horariosDisponiblesMap = new Map();
+        horariosDisponibles.forEach(horario => {
+            const horaInicio = horario.inicio.substring(0, 5); // Formato "HH:MM"
+            horariosDisponiblesMap.set(horaInicio, horario);
+        });
+        
+        // Mostrar todos los horarios
+        todosHorarios.forEach(horario => {
+            const horaFormatted = formatHora(horario);
+            const estaOcupado = horariosOcupados.has(horario);
+            const estaDisponible = horariosDisponiblesMap.has(horario) && !estaOcupado;
+            
             const col = document.createElement('div');
-            col.className = 'col-md-3 col-sm-4 col-6 mb-3';
+            
+            // Determinar clase y estado
+            const estadoClase = estaOcupado ? 'ocupado' : 'disponible';
+            const estadoBadge = estaOcupado ? 'danger' : 'success';
+            const estadoTexto = estaOcupado ? 'Ocupado' : 'Disponible';
             
             col.innerHTML = `
-                <div class="card horario-disponible" data-hora-inicio="${horario.inicio}">
-                    <div class="card-body text-center p-3">
-                        <h6 class="card-title mb-2">${horario.formatted}</h6>
-                        <span class="badge bg-success">Disponible</span>
+                <div class="card horario-card ${estadoClase}" 
+                     data-hora="${horario}" 
+                     data-estado="${estadoClase}"
+                     ${estaOcupado ? 'style="cursor: not-allowed;"' : 'onclick="seleccionarHorario(\'' + horario + '\', this)"'}>
+                    <div class="card-body text-center">
+                        <div class="d-flex align-items-center justify-content-center mb-2">
+                            <i class="fas fa-clock me-2" style="color: ${estaOcupado ? 'var(--danger)' : 'var(--accent)'};"></i>
+                            <h6 class="card-title mb-0">${horaFormatted}</h6>
+                        </div>
+                        <span class="badge bg-${estadoBadge}">${estadoTexto}</span>
                     </div>
                 </div>
             `;
@@ -263,37 +875,137 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    function mostrarDisponibilidadTodosTurnos(disponibilidad) {
-        for (const [turno, info] of Object.entries(disponibilidad)) {
+    function mostrarTodosHorariosTodosTurnos(disponibilidadTurnos, citasExistentes) {
+        // Primero, ocultar la sección de citas existentes ya que los horarios ocupados se muestran en la cuadrícula
+        document.getElementById('citasExistentesSection').classList.add('d-none');
+        
+        for (const [turno, info] of Object.entries(disponibilidadTurnos)) {
             const container = document.getElementById(`horarios${capitalizeFirstLetter(turno)}`);
             container.innerHTML = '';
             
-            if (info.ocupado) {
+            // Generar todos los horarios posibles para este turno
+            const todosHorarios = generarHorariosParaTurno(turno);
+            
+            if (info.ocupado && todosHorarios.length === 0) {
                 container.innerHTML = `
                     <div class="col-12">
-                        <div class="alert alert-danger">
-                            <i class="fas fa-times-circle me-2"></i>
-                            Turno completamente ocupado
+                        <div class="alert alert-danger d-flex align-items-center">
+                            <i class="fas fa-times-circle me-3 fs-4"></i>
+                            <div>
+                                <h6 class="mb-1">Turno completamente ocupado</h6>
+                                <p class="mb-0">Todos los horarios en este turno están reservados.</p>
+                            </div>
                         </div>
                     </div>
                 `;
-            } else {
+                continue;
+            }
+            
+            // Filtrar citas de este turno específico
+            const citasTurno = citasExistentes.filter(cita => {
+                const hora = parseInt(cita.hora_inicio.split(':')[0]);
+                return perteneceATurno(hora, turno);
+            });
+            
+            // Crear un mapa de horarios ocupados para este turno
+            const horariosOcupados = new Map();
+            citasTurno.forEach(cita => {
+                const horaInicio = cita.hora_inicio.substring(0, 5);
+                horariosOcupados.set(horaInicio, true);
+            });
+            
+            // Crear un mapa de horarios disponibles
+            const horariosDisponiblesMap = new Map();
+            if (info.horarios_disponibles) {
                 info.horarios_disponibles.forEach(horario => {
-                    const col = document.createElement('div');
-                    col.className = 'col-md-3 col-sm-4 col-6 mb-3';
-                    
-                    col.innerHTML = `
-                        <div class="card horario-disponible" data-hora-inicio="${horario.inicio}">
-                            <div class="card-body text-center p-3">
-                                <h6 class="card-title mb-2">${horario.formatted}</h6>
-                                <span class="badge bg-success">Disponible</span>
-                            </div>
-                        </div>
-                    `;
-                    
-                    container.appendChild(col);
+                    const horaInicio = horario.inicio.substring(0, 5);
+                    horariosDisponiblesMap.set(horaInicio, horario);
                 });
             }
+            
+            // Mostrar todos los horarios
+            todosHorarios.forEach(horario => {
+                const horaFormatted = formatHora(horario);
+                const estaOcupado = horariosOcupados.has(horario);
+                const estaDisponible = horariosDisponiblesMap.has(horario) && !estaOcupado;
+                
+                const col = document.createElement('div');
+                
+                // Determinar clase y estado
+                const estadoClase = estaOcupado ? 'ocupado' : 'disponible';
+                const estadoBadge = estaOcupado ? 'danger' : 'success';
+                const estadoTexto = estaOcupado ? 'Ocupado' : 'Disponible';
+                
+                col.innerHTML = `
+                    <div class="card horario-card ${estadoClase}" 
+                         data-hora="${horario}" 
+                         data-estado="${estadoClase}"
+                         ${estaOcupado ? 'style="cursor: not-allowed;"' : 'onclick="seleccionarHorario(\'' + horario + '\', this)"'}>
+                        <div class="card-body text-center">
+                            <div class="d-flex align-items-center justify-content-center mb-2">
+                                <i class="fas fa-clock me-2" style="color: ${estaOcupado ? 'var(--danger)' : 'var(--accent)'};"></i>
+                                <h6 class="card-title mb-0">${horaFormatted}</h6>
+                            </div>
+                            <span class="badge bg-${estadoBadge}">${estadoTexto}</span>
+                        </div>
+                    </div>
+                `;
+                
+                container.appendChild(col);
+            });
+        }
+    }
+    
+    function generarHorariosParaTurno(turno) {
+        const horarios = [];
+        let inicio, fin;
+        
+        switch(turno) {
+            case 'mañana':
+                inicio = 6;
+                fin = 12;
+                break;
+            case 'tarde':
+                inicio = 12;
+                fin = 18;
+                break;
+            case 'noche':
+                inicio = 18;
+                fin = 24;
+                break;
+            default:
+                return [];
+        }
+        
+        for (let hora = inicio; hora < fin; hora++) {
+            for (let minuto = 0; minuto < 60; minuto += 30) {
+                const horaStr = hora.toString().padStart(2, '0');
+                const minutoStr = minuto.toString().padStart(2, '0');
+                horarios.push(`${horaStr}:${minutoStr}`);
+            }
+        }
+        
+        return horarios;
+    }
+    
+    function formatHora(hora) {
+        // Convertir de formato 24h a 12h
+        const [hh, mm] = hora.split(':').map(Number);
+        const ampm = hh >= 12 ? 'PM' : 'AM';
+        const hora12 = hh % 12 || 12;
+        return `${hora12}:${mm.toString().padStart(2, '0')} ${ampm}`;
+    }
+    
+    function perteneceATurno(hora, turno) {
+        switch(turno) {
+            case 'mañana':
+                return hora >= 6 && hora < 12;
+            case 'tarde':
+                return hora >= 12 && hora < 18;
+            case 'noche':
+                return hora >= 18 && hora < 24;
+            default:
+                return false;
         }
     }
     
@@ -304,8 +1016,8 @@ document.addEventListener('DOMContentLoaded', function() {
         if (citas.length === 0) {
             tbody.innerHTML = `
                 <tr>
-                    <td colspan="3" class="text-center text-muted">
-                        No hay citas agendadas para esta fecha
+                    <td colspan="3" class="text-center py-4" style="color: var(--text-light);">
+                        <i class="fas fa-calendar-check me-2"></i>No hay citas agendadas para esta fecha
                     </td>
                 </tr>
             `;
@@ -321,20 +1033,23 @@ document.addEventListener('DOMContentLoaded', function() {
             let estadoBadge = '';
             switch(cita.estado) {
                 case 'agendada':
-                    estadoBadge = '<span class="badge bg-primary">Agendada</span>';
+                    estadoBadge = '<span class="badge bg-primary"><i class="fas fa-calendar me-1"></i>Agendada</span>';
                     break;
                 case 'confirmada':
-                    estadoBadge = '<span class="badge bg-success">Confirmada</span>';
+                    estadoBadge = '<span class="badge bg-success"><i class="fas fa-check-circle me-1"></i>Confirmada</span>';
                     break;
                 case 'en_progreso':
-                    estadoBadge = '<span class="badge bg-warning">En Progreso</span>';
+                    estadoBadge = '<span class="badge bg-warning"><i class="fas fa-spinner me-1"></i>En Progreso</span>';
                     break;
                 default:
-                    estadoBadge = `<span class="badge bg-secondary">${cita.estado}</span>`;
+                    estadoBadge = `<span class="badge bg-secondary"><i class="fas fa-question-circle me-1"></i>${cita.estado}</span>`;
             }
             
             row.innerHTML = `
-                <td>${cita.hora_inicio} - ${cita.hora_fin}</td>
+                <td>
+                    <i class="fas fa-clock me-2" style="color: var(--accent);"></i>
+                    ${cita.hora_inicio} - ${cita.hora_fin}
+                </td>
                 <td>${cita.paciente}</td>
                 <td>${estadoBadge}</td>
             `;
@@ -362,73 +1077,86 @@ document.addEventListener('DOMContentLoaded', function() {
         return cookieValue;
     }
 });
+
+// Función global para seleccionar horarios
+function seleccionarHorario(hora, elemento) {
+    // Solo permitir selección si no está ocupado
+    if (elemento.classList.contains('ocupado')) {
+        mostrarAlerta('Este horario está ocupado. Por favor, seleccione otro horario disponible.', 'warning');
+        return;
+    }
+    
+    // Remover selección previa
+    document.querySelectorAll('.horario-card.disponible').forEach(card => {
+        card.style.borderColor = '';
+        card.style.boxShadow = '';
+        card.style.transform = '';
+    });
+    
+    // Marcar como seleccionado
+    elemento.style.borderColor = 'var(--accent)';
+    elemento.style.boxShadow = '0 12px 25px rgba(0, 0, 0, 0.2)';
+    elemento.style.transform = 'translateY(-6px)';
+    
+    // Agregar animación de pulso
+    elemento.style.animation = 'pulse 0.5s';
+    setTimeout(() => {
+        elemento.style.animation = '';
+    }, 500);
+    
+    // Guardar la hora seleccionada para el agendamiento
+    sessionStorage.setItem('horaSeleccionada', hora);
+    
+    // Mostrar mensaje de confirmación
+    const horaFormateada = elemento.querySelector('.card-title').textContent;
+    mostrarAlerta(`Horario seleccionado: ${horaFormateada}. Haga clic en "Agendar Cita" para continuar.`, 'success');
+}
+
+// Función global para mostrar alertas
+function mostrarAlerta(mensaje, tipo) {
+    // Remover alertas existentes
+    const alertasExistentes = document.querySelectorAll('.alert-temporario');
+    alertasExistentes.forEach(alerta => alerta.remove());
+    
+    // Crear alerta temporal
+    const alerta = document.createElement('div');
+    alerta.className = `alert alert-${tipo} alert-temporario alert-dismissible fade show`;
+    alerta.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        max-width: 400px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        border-radius: var(--border-radius);
+    `;
+    alerta.innerHTML = `
+        <div class="d-flex align-items-center">
+            <i class="fas fa-${tipo === 'warning' ? 'exclamation-triangle' : tipo === 'danger' ? 'exclamation-circle' : 'check-circle'} me-2"></i>
+            <div>${mensaje}</div>
+        </div>
+        <button type="button" class="btn-close" onclick="this.parentElement.remove()"></button>
+    `;
+    
+    document.body.appendChild(alerta);
+    
+    // Auto-remover después de 5 segundos
+    setTimeout(() => {
+        if (alerta.parentNode) {
+            alerta.remove();
+        }
+    }, 5000);
+}
+
+// Añadir animación de pulso al CSS
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes pulse {
+        0% { transform: translateY(-6px) scale(1); }
+        50% { transform: translateY(-6px) scale(1.05); }
+        100% { transform: translateY(-6px) scale(1); }
+    }
+`;
+document.head.appendChild(style);
 </script>
-
-<style>
-.horario-disponible {
-    cursor: pointer;
-    transition: all 0.3s ease;
-    border: 2px solid transparent;
-}
-
-.horario-disponible:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    border-color: #198754;
-}
-
-.horario-disponible .card-body {
-    padding: 1rem !important;
-}
-
-.nav-tabs .nav-link {
-    color: #495057;
-    font-weight: 500;
-}
-
-.nav-tabs .nav-link.active {
-    color: #198754;
-    border-bottom-color: #198754;
-}
-
-.badge {
-    font-size: 0.75em;
-    padding: 0.35em 0.65em;
-}
-
-.alert {
-    border-radius: 8px;
-}
-
-.card {
-    border-radius: 10px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-}
-
-.card-header {
-    background-color: #f8f9fa;
-    border-bottom: 1px solid #dee2e6;
-}
-
-.table th {
-    border-top: none;
-    font-weight: 600;
-}
-
-@media (max-width: 768px) {
-    .col-6 {
-        padding-left: 5px;
-        padding-right: 5px;
-    }
-    
-    .horario-disponible .card-body {
-        padding: 0.75rem !important;
-    }
-    
-    .nav-tabs .nav-link {
-        font-size: 0.9rem;
-        padding: 0.5rem;
-    }
-}
-</style>
 {% endblock %}

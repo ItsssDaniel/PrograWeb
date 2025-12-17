@@ -291,5 +291,7 @@ class Cita(models.Model):
             
             if (inicio_actual < fin_conflicto and fin_actual > inicio_conflicto):
                 return True
-        
+    
+    
         return False
+    

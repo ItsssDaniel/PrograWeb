@@ -275,3 +275,4 @@ class DisponibilidadForm(forms.Form):
         required=False,
         widget=forms.Select(attrs={'class': 'form-control', 'id': 'turno_disponibilidad'})
     )
+

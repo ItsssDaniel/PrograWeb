@@ -5,37 +5,182 @@
     <div class="container main-content">
         <div class="section" id="editar-paciente">
             <h2>Modificar Paciente</h2>
-            <p>Editando paciente con ID: <strong>{{ paciente_id }}</strong></p>
+            <p>Editando paciente con ID: <strong>{{ paciente.id }}</strong></p>
             
-            <form class="formulario" action="#" method="post" onsubmit="actualizarPaciente(event); return false;">
-                <div class="campo-formulario">
-                    <label for="id">ID (No editable):</label>
-                    <input type="text" id="id" name="id" value="{{ paciente_id }}" readonly="readonly" class="campo-readonly" />
-                    <span class="texto-ayuda">El ID no se puede modificar</span>
+            {% if messages %}
+                <div class="messages">
+                    {% for message in messages %}
+                        <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
                 </div>
+            {% endif %}
+            
+            <form class="formulario" id="formEditarPaciente">
+                {% csrf_token %}
+                
+                <input type="hidden" id="id" name="id" value="{{ paciente.id }}" />
+                
+                <h3>Información Personal</h3>
                 
                 <div class="campo-formulario">
                     <label for="nombre">Nombre Completo:</label>
-                    <input type="text" id="nombre" name="nombre" value="{{ nombre }}" class="campo-requerido" />
+                    <input type="text" id="nombre" name="nombre" value="{{ paciente.nombre }}" required />
                     <span class="texto-ayuda">* Campo obligatorio</span>
                 </div>
                 
                 <div class="campo-formulario">
                     <label for="fecha_nacimiento">Fecha de Nacimiento:</label>
-                    <input type="text" id="fecha_nacimiento" name="fecha_nacimiento" value="{{ fecha_nacimiento }}" class="campo-requerido fecha"/>
-                    <span class="texto-ayuda">* Formato: AAAA-MM-DD</span>
+                    <input type="date" id="fecha_nacimiento" name="fecha_nacimiento" 
+                           value="{{ paciente.fecha_nacimiento|date:'Y-m-d' }}" required />
+                    <span class="texto-ayuda">* Campo obligatorio</span>
+                </div>
+                
+                <div class="campo-formulario">
+                    <label for="sexo">Sexo:</label>
+                    <select id="sexo" name="sexo" required>
+                        <option value="M" {% if paciente.sexo == 'M' %}selected{% endif %}>Masculino</option>
+                        <option value="F" {% if paciente.sexo == 'F' %}selected{% endif %}>Femenino</option>
+                        <option value="O" {% if paciente.sexo == 'O' %}selected{% endif %}>Otro</option>
+                    </select>
+                    <span class="texto-ayuda">* Campo obligatorio</span>
                 </div>
                 
                 <div class="campo-formulario">
                     <label for="email">Email:</label>
-                    <input type="text" id="email" name="email" value="{{ email }}" class="campo-requerido email" />
+                    <input type="email" id="email" name="email" value="{{ paciente.email }}" required />
                     <span class="texto-ayuda">* Campo obligatorio</span>
                 </div>
                 
                 <div class="campo-formulario">
                     <label for="telefono">Teléfono:</label>
-                    <input type="text" id="telefono" name="telefono" value="{{ telefono }}" class="campo-requerido telefono" />
+                    <input type="tel" id="telefono" name="telefono" value="{{ paciente.telefono }}" required />
                     <span class="texto-ayuda">* Campo obligatorio</span>
+                </div>
+                
+                <div class="campo-formulario">
+                    <label for="direccion">Dirección:</label>
+                    <textarea id="direccion" name="direccion" rows="3" required>{{ paciente.direccion }}</textarea>
+                    <span class="texto-ayuda">* Campo obligatorio</span>
+                </div>
+                
+                <h3>Información Médica</h3>
+                
+                <div class="campo-formulario">
+                    <label for="tipo_sangre">Tipo de Sangre:</label>
+                    <select id="tipo_sangre" name="tipo_sangre">
+                        <option value="">Seleccionar tipo de sangre</option>
+                        <option value="A+" {% if paciente.tipo_sangre == 'A+' %}selected{% endif %}>A+</option>
+                        <option value="A-" {% if paciente.tipo_sangre == 'A-' %}selected{% endif %}>A-</option>
+                        <option value="B+" {% if paciente.tipo_sangre == 'B+' %}selected{% endif %}>B+</option>
+                        <option value="B-" {% if paciente.tipo_sangre == 'B-' %}selected{% endif %}>B-</option>
+                        <option value="AB+" {% if paciente.tipo_sangre == 'AB+' %}selected{% endif %}>AB+</option>
+                        <option value="AB-" {% if paciente.tipo_sangre == 'AB-' %}selected{% endif %}>AB-</option>
+                        <option value="O+" {% if paciente.tipo_sangre == 'O+' %}selected{% endif %}>O+</option>
+                        <option value="O-" {% if paciente.tipo_sangre == 'O-' %}selected{% endif %}>O-</option>
+                    </select>
+                </div>
+                
+                <div class="campo-formulario-checkbox">
+                    <label>
+                        <input type="checkbox" id="diabetico" name="diabetico" value="true" 
+                               {% if paciente.diabetico %}checked{% endif %} />
+                        ¿Es diabético?
+                    </label>
+                </div>
+                
+                <div class="campo-formulario-checkbox">
+                    <label>
+                        <input type="checkbox" id="hipertenso" name="hipertenso" value="true" 
+                               {% if paciente.hipertenso %}checked{% endif %} />
+                        ¿Es hipertenso?
+                    </label>
+                </div>
+                
+                <div class="campo-formulario">
+                    <label for="alergias">Alergias:</label>
+                    <textarea id="alergias" name="alergias" rows="2">{{ paciente.alergias|default:'' }}</textarea>
+                </div>
+                
+                <div class="campo-formulario">
+                    <label for="medicamentos_actuales">Medicamentos Actuales:</label>
+                    <textarea id="medicamentos_actuales" name="medicamentos_actuales" rows="2">{{ paciente.medicamentos_actuales|default:'' }}</textarea>
+                </div>
+                
+                <div class="campo-formulario">
+                    <label for="enfermedades_cronicas">Enfermedades Crónicas:</label>
+                    <textarea id="enfermedades_cronicas" name="enfermedades_cronicas" rows="2">{{ paciente.enfermedades_cronicas|default:'' }}</textarea>
+                </div>
+                
+                <div class="campo-formulario">
+                    <label for="antecedentes_familiares">Antecedentes Familiares:</label>
+                    <textarea id="antecedentes_familiares" name="antecedentes_familiares" rows="2">{{ paciente.antecedentes_familiares|default:'' }}</textarea>
+                </div>
+                
+                <h3>Datos Físicos</h3>
+                
+                <div class="campo-formulario">
+                    <label for="altura">Altura (metros):</label>
+                    <input type="number" id="altura" name="altura" step="0.01" min="0.5" max="2.5" 
+                           value="{{ paciente.altura|default:'' }}" />
+                </div>
+                
+                <div class="campo-formulario">
+                    <label for="peso">Peso (kg):</label>
+                    <input type="number" id="peso" name="peso" step="0.1" min="1" max="300" 
+                           value="{{ paciente.peso|default:'' }}" />
+                </div>
+                
+                <div class="campo-formulario-checkbox">
+                    <label>
+                        <input type="checkbox" id="fumador" name="fumador" value="true" 
+                               {% if paciente.fumador %}checked{% endif %} />
+                        ¿Es fumador?
+                    </label>
+                </div>
+                
+                <div class="campo-formulario-checkbox">
+                    <label>
+                        <input type="checkbox" id="alcoholico" name="alcoholico" value="true" 
+                               {% if paciente.alcoholico %}checked{% endif %} />
+                        ¿Consume alcohol?
+                    </label>
+                </div>
+                
+                <h3>Contacto de Emergencia</h3>
+                
+                <div class="campo-formulario">
+                    <label for="contacto_emergencia_nombre">Nombre:</label>
+                    <input type="text" id="contacto_emergencia_nombre" name="contacto_emergencia_nombre" 
+                           value="{{ paciente.contacto_emergencia_nombre|default:'' }}" />
+                </div>
+                
+                <div class="campo-formulario">
+                    <label for="contacto_emergencia_telefono">Teléfono:</label>
+                    <input type="tel" id="contacto_emergencia_telefono" name="contacto_emergencia_telefono" 
+                           value="{{ paciente.contacto_emergencia_telefono|default:'' }}" />
+                </div>
+                
+                <div class="campo-formulario">
+                    <label for="contacto_emergencia_parentesco">Parentesco:</label>
+                    <input type="text" id="contacto_emergencia_parentesco" name="contacto_emergencia_parentesco" 
+                           value="{{ paciente.contacto_emergencia_parentesco|default:'' }}" />
+                </div>
+                
+                <h3>Otros Datos</h3>
+                
+                <div class="campo-formulario">
+                    <label for="observaciones">Observaciones:</label>
+                    <textarea id="observaciones" name="observaciones" rows="3">{{ paciente.observaciones|default:'' }}</textarea>
+                </div>
+                
+                <div class="campo-formulario">
+                    <label for="estado">Estado:</label>
+                    <select id="estado" name="estado">
+                        <option value="true" {% if paciente.estado %}selected{% endif %}>Activo</option>
+                        <option value="false" {% if not paciente.estado %}selected{% endif %}>Inactivo</option>
+                    </select>
                 </div>
                 
                 <div class="botones-formulario">
@@ -50,84 +195,94 @@
 
     <script type="text/javascript">
         //<![CDATA[
-        function validarEmail(email) {
-            var regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            return regex.test(email);
-        }
-        
-        function validarFecha(fecha) {
-            var regex = /^\d{4}-\d{2}-\d{2}$/;
-            if (!regex.test(fecha)) return false;
-            
-            var partes = fecha.split('-');
-            var anio = parseInt(partes[0], 10);
-            var mes = parseInt(partes[1], 10);
-            var dia = parseInt(partes[2], 10);
-            
-            var fechaObj = new Date(anio, mes - 1, dia);
-            return fechaObj.getFullYear() === anio && 
-                   fechaObj.getMonth() === mes - 1 && 
-                   fechaObj.getDate() === dia;
-        }
-        
-        function validarFormularioPaciente() {
-            var nombre = document.getElementById('nombre');
-            var fechaNacimiento = document.getElementById('fecha_nacimiento');
-            var email = document.getElementById('email');
-            var telefono = document.getElementById('telefono');
-            var valido = true;
-            
-            [nombre, fechaNacimiento, email, telefono].forEach(function(campo) {
-                campo.className = campo.className.replace(' campo-error', '');
-            });
-            
-            if (nombre.value.trim() === '') {
-                nombre.className += ' campo-error';
-                valido = false;
-            }
-            
-            if (fechaNacimiento.value.trim() === '' || !validarFecha(fechaNacimiento.value)) {
-                fechaNacimiento.className += ' campo-error';
-                valido = false;
-            }
-            
-            if (email.value.trim() === '' || !validarEmail(email.value)) {
-                email.className += ' campo-error';
-                valido = false;
-            }
-            
-            if (telefono.value.trim() === '') {
-                telefono.className += ' campo-error';
-                valido = false;
-            }
-            
-            return valido;
-        }
-        
-        function actualizarPaciente(event) {
+        async function actualizarPaciente(event) {
             event.preventDefault();
             
-            if (!validarFormularioPaciente()) {
-                alert('Por favor, complete todos los campos correctamente.');
+            // Validar campos requeridos
+            const camposRequeridos = ['nombre', 'fecha_nacimiento', 'sexo', 'email', 'telefono', 'direccion'];
+            let valido = true;
+            
+            camposRequeridos.forEach(campo => {
+                const elemento = document.getElementById(campo);
+                if (!elemento.value.trim()) {
+                    elemento.classList.add('campo-error');
+                    valido = false;
+                } else {
+                    elemento.classList.remove('campo-error');
+                }
+            });
+            
+            if (!valido) {
+                alert('Por favor, complete todos los campos obligatorios.');
                 return false;
             }
             
-            const id = document.getElementById('id').value;
-            const nombre = document.getElementById('nombre').value;
-            const fecha_nacimiento = document.getElementById('fecha_nacimiento').value;
-            const email = document.getElementById('email').value;
-            const telefono = document.getElementById('telefono').value;
+            const formData = {
+                id: document.getElementById('id').value,
+                nombre: document.getElementById('nombre').value,
+                fecha_nacimiento: document.getElementById('fecha_nacimiento').value,
+                sexo: document.getElementById('sexo').value,
+                email: document.getElementById('email').value,
+                telefono: document.getElementById('telefono').value,
+                direccion: document.getElementById('direccion').value,
+                tipo_sangre: document.getElementById('tipo_sangre').value,
+                diabetico: document.getElementById('diabetico').checked,
+                hipertenso: document.getElementById('hipertenso').checked,
+                alergias: document.getElementById('alergias').value,
+                medicamentos_actuales: document.getElementById('medicamentos_actuales').value,
+                enfermedades_cronicas: document.getElementById('enfermedades_cronicas').value,
+                antecedentes_familiares: document.getElementById('antecedentes_familiares').value,
+                altura: document.getElementById('altura').value,
+                peso: document.getElementById('peso').value,
+                fumador: document.getElementById('fumador').checked,
+                alcoholico: document.getElementById('alcoholico').checked,
+                contacto_emergencia_nombre: document.getElementById('contacto_emergencia_nombre').value,
+                contacto_emergencia_telefono: document.getElementById('contacto_emergencia_telefono').value,
+                contacto_emergencia_parentesco: document.getElementById('contacto_emergencia_parentesco').value,
+                observaciones: document.getElementById('observaciones').value,
+                estado: document.getElementById('estado').value
+            };
             
-            alert('Paciente actualizado con éxito!\n\n' +
-                  'ID: ' + id + '\n' +
-                  'Nombre: ' + nombre + '\n' +
-                  'Fecha Nacimiento: ' + fecha_nacimiento + '\n' +
-                  'Email: ' + email + '\n' +
-                  'Teléfono: ' + telefono);
+            // Mostrar mensaje de carga
+            const boton = document.querySelector('.btn-actualizar');
+            const textoOriginal = boton.innerHTML;
+            boton.innerHTML = 'Actualizando...';
+            boton.disabled = true;
             
-            setTimeout(function() {
-                window.location.href = "{% url 'paciente_modificar' %}";
-            }, 1500);
+            try {
+                // Enviar datos al servidor
+                const response = await fetch('{% url "paciente_editar" paciente.id %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert(data.message || '✅ Paciente actualizado con éxito!');
+                    
+                    // Redirigir después de 1 segundo
+                    setTimeout(function() {
+                        window.location.href = "{% url 'paciente_modificar' %}";
+                    }, 1000);
+                } else {
+                    alert('❌ ' + (data.message || 'Error al actualizar el paciente.'));
+                    boton.innerHTML = textoOriginal;
+                    boton.disabled = false;
+                }
+                
+            } catch (error) {
+                // Error de red
+                alert('❌ Error de conexión. Intente nuevamente.');
+                console.error('Error:', error);
+                boton.innerHTML = textoOriginal;
+                boton.disabled = false;
+            }
         }
         
         function cancelarEdicion() {
@@ -136,12 +291,39 @@
             }
         }
         
-        document.getElementById('id').addEventListener('input', function(e) {
-            this.value = '{{ paciente_id }}';
+        // Función para obtener el token CSRF
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        
+        // Asignar evento al formulario
+        document.getElementById('formEditarPaciente').addEventListener('submit', actualizarPaciente);
+        
+        // Limpiar errores al escribir
+        document.querySelectorAll('input, select, textarea').forEach(elemento => {
+            elemento.addEventListener('input', function() {
+                this.classList.remove('campo-error');
+            });
         });
         
-        document.getElementById('id').addEventListener('keydown', function(e) {
-            e.preventDefault();
+        // Validación en tiempo real para teléfonos
+        document.getElementById('telefono').addEventListener('input', function() {
+            this.value = this.value.replace(/[^0-9+\-\s]/g, '');
+        });
+        
+        document.getElementById('contacto_emergencia_telefono').addEventListener('input', function() {
+            this.value = this.value.replace(/[^0-9+\-\s]/g, '');
         });
         //]]>
     </script>

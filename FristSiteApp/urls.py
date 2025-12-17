@@ -23,13 +23,14 @@ urlpatterns = [
     path('medico/registros/', views.medico_registros, name='medico_registros'),
     path('medico/editar/', views.medico_editar, name='medico_editar'), 
 
-    # URLs para Paciente
+   # URLs para Paciente
     path('paciente/agregar/', views.paciente_agregar, name='paciente_agregar'),
     path('paciente/modificar/', views.paciente_modificar, name='paciente_modificar'),
+    path('paciente/editar/<int:id>/', views.paciente_editar, name='paciente_editar'),
     path('paciente/eliminar/', views.paciente_eliminar, name='paciente_eliminar'),
+    path('paciente/eliminar/<int:id>/', views.paciente_eliminar_por_id, name='paciente_eliminar_por_id'),
     path('paciente/registros/', views.paciente_registros, name='paciente_registros'),
-    path('paciente/editar/', views.paciente_editar, name='paciente_editar'),
-    
+        
     # URLs para Recepcionistas
     path('recepcionista/agregar/', views.recepcionista_agregar, name='recepcionista_agregar'),
      path('recepcionista/editar/<int:id>/', views.recepcionista_editar, name='recepcionista_editar'), 

@@ -117,3 +117,81 @@ class PersonalExtra(models.Model):
     
     def __str__(self):
         return f"{self.nombre} - {self.puesto}"
+    
+class Paciente(models.Model):
+    SEXO_CHOICES = [
+        ('M', 'Masculino'),
+        ('F', 'Femenino'),
+        ('O', 'Otro'),
+    ]
+    
+    TIPO_SANGRE_CHOICES = [
+        ('A+', 'A+'),
+        ('A-', 'A-'),
+        ('B+', 'B+'),
+        ('B-', 'B-'),
+        ('AB+', 'AB+'),
+        ('AB-', 'AB-'),
+        ('O+', 'O+'),
+        ('O-', 'O-'),
+    ]
+
+    nombre = models.CharField(max_length=200)
+    fecha_nacimiento = models.DateField()
+    sexo = models.CharField(max_length=1, choices=SEXO_CHOICES)
+    email = models.EmailField(unique=True)
+    telefono = models.CharField(max_length=20)
+    direccion = models.TextField()
+    
+    # Información médica
+    tipo_sangre = models.CharField(max_length=3, choices=TIPO_SANGRE_CHOICES, blank=True, null=True)
+    diabetico = models.BooleanField(default=False)
+    hipertenso = models.BooleanField(default=False)
+    alergias = models.TextField(blank=True, null=True)
+    medicamentos_actuales = models.TextField(blank=True, null=True)
+    enfermedades_cronicas = models.TextField(blank=True, null=True)
+    antecedentes_familiares = models.TextField(blank=True, null=True)
+    
+    # Contacto de emergencia
+    contacto_emergencia_nombre = models.CharField(max_length=200, blank=True, null=True)
+    contacto_emergencia_telefono = models.CharField(max_length=20, blank=True, null=True)
+    contacto_emergencia_parentesco = models.CharField(max_length=100, blank=True, null=True)
+    
+    # Datos adicionales
+    altura = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True, help_text="Altura en metros")
+    peso = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True, help_text="Peso en kg")
+    fumador = models.BooleanField(default=False)
+    alcoholico = models.BooleanField(default=False)
+    
+    # Registro
+    fecha_registro = models.DateTimeField(default=timezone.now)
+    estado = models.BooleanField(default=True)
+    observaciones = models.TextField(blank=True, null=True)
+    
+    objects = models.Manager()
+    
+    class Meta:
+        db_table = 'paciente'
+        verbose_name = 'Paciente'
+        verbose_name_plural = 'Pacientes'
+    
+    def __str__(self):
+        return f"{self.nombre} - {self.email}"
+    
+    def calcular_edad(self):
+        """Calcula la edad del paciente en años."""
+        import datetime
+        today = datetime.date.today()
+        
+        # Asegurarse de que fecha_nacimiento es un objeto date
+        if isinstance(self.fecha_nacimiento, datetime.date):
+            fecha_nac = self.fecha_nacimiento
+        else:
+            # Si es un string o otro tipo, convertirlo a date
+            fecha_nac = self.fecha_nacimiento.date() if hasattr(self.fecha_nacimiento, 'date') else datetime.datetime.strptime(str(self.fecha_nacimiento), '%Y-%m-%d').date()
+        
+        edad = today.year - fecha_nac.year
+        # Verificar si ya cumplió años este año
+        if (today.month, today.day) < (fecha_nac.month, fecha_nac.day):
+            edad -= 1
+        return edad

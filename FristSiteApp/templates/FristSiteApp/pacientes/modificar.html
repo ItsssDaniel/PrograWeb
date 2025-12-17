@@ -3,50 +3,75 @@
 
 {% block content %}
     <div class="container main-content">
-        <div class="section" id="tabla-pacientes">
-            <h2>Pacientes Registrados</h2>
+        <div class="section" id="tabla-pacientes-modificar">
+            <h2>Modificar Pacientes</h2>
             <p>Selecciona un paciente para modificar:</p>
             
-            <div class="contenedor-tabla">
-                <table class="tabla-datos">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Nombre</th>
-                            <th>Fecha Nacimiento</th>
-                            <th>Email</th>
-                            <th>Teléfono</th>
-                            <th>Acción</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>1</td>
-                            <td>Ana García López</td>
-                            <td>1990-05-15</td>
-                            <td>ana.garcia@email.com</td>
-                            <td>555-0101</td>
-                            <td>
-                                <button type="button" class="btn-modificar-tabla" onclick="modificarPaciente(1, 'Ana García López', '1990-05-15', 'ana.garcia@email.com', '555-0101')">
-                                    <span class="icono">✎</span>
-                                </button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>2</td>
-                            <td>Carlos Rodríguez</td>
-                            <td>1985-12-20</td>
-                            <td>c.rodriguez@email.com</td>
-                            <td>555-0102</td>
-                            <td>
-                                <button type="button" class="btn-modificar-tabla" onclick="modificarPaciente(2, 'Carlos Rodríguez', '1985-12-20', 'c.rodriguez@email.com', '555-0102')">
-                                    <span class="icono">✎</span>
-                                </button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+            {% if pacientes %}
+                <div class="contenedor-tabla">
+                    <table class="tabla-datos">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Edad</th>
+                                <th>Sexo</th>
+                                <th>Email</th>
+                                <th>Teléfono</th>
+                                <th>Tipo Sangre</th>
+                                <th>Diabético</th>
+                                <th>Estado</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for paciente in pacientes %}
+                            <tr>
+                                <td>{{ paciente.id }}</td>
+                                <td>{{ paciente.nombre }}</td>
+                                <td>{{ paciente.calcular_edad }} años</td>
+                                <td>
+                                    {% if paciente.sexo == 'M' %}
+                                        Masculino
+                                    {% elif paciente.sexo == 'F' %}
+                                        Femenino
+                                    {% else %}
+                                        Otro
+                                    {% endif %}
+                                </td>
+                                <td>{{ paciente.email|default:"-" }}</td>
+                                <td>{{ paciente.telefono|default:"-" }}</td>
+                                <td>{{ paciente.tipo_sangre|default:"-" }}</td>
+                                <td>
+                                    {% if paciente.diabetico %}
+                                        <span class="badge badge-danger">Sí</span>
+                                    {% else %}
+                                        <span class="badge badge-success">No</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if paciente.estado %}
+                                        <span class="estado-activo">Activo</span>
+                                    {% else %}
+                                        <span class="estado-inactivo">Inactivo</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <button type="button" class="btn-modificar-tabla" data-id="{{ paciente.id }}">
+                                        <span class="icono">✎</span>
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="mensaje-sin-datos">
+                    <p>No hay pacientes registrados en el sistema.</p>
+                    <p><a href="{% url 'paciente_agregar' %}" class="btn-agregar">Agregar Primer Paciente</a></p>
+                </div>
+            {% endif %}
 
             <div class="botones-volver">
                 <button type="button" class="btn-volver" onclick="window.location.href='/registro/'">
@@ -58,13 +83,23 @@
 
     <script type="text/javascript">
         //<![CDATA[
-        function modificarPaciente(id, nombre, fecha_nacimiento, email, telefono) {
-            window.location.href = "{% url 'paciente_editar' %}?id=" + id + 
-                                 "&nombre=" + encodeURIComponent(nombre) + 
-                                 "&fecha_nacimiento=" + encodeURIComponent(fecha_nacimiento) + 
-                                 "&email=" + encodeURIComponent(email) + 
-                                 "&telefono=" + encodeURIComponent(telefono);
+        // Función para modificar paciente
+        function modificarPaciente(id) {
+            // Redirigir a la página de edición con el ID
+            window.location.href = '/paciente/editar/' + id + '/';
         }
+        
+        // Asignar eventos a los botones
+        document.addEventListener('DOMContentLoaded', function() {
+            const botones = document.querySelectorAll('.btn-modificar-tabla');
+            
+            botones.forEach(function(boton) {
+                boton.addEventListener('click', function() {
+                    const pacienteId = this.getAttribute('data-id');
+                    modificarPaciente(pacienteId);
+                });
+            });
+        });
         //]]>
     </script>
 {% endblock %}

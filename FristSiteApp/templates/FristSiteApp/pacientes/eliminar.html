@@ -7,46 +7,71 @@
             <h2>Eliminar Pacientes</h2>
             <p>Selecciona un paciente para eliminar:</p>
             
-            <div class="contenedor-tabla">
-                <table class="tabla-datos">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Nombre</th>
-                            <th>Fecha Nacimiento</th>
-                            <th>Email</th>
-                            <th>Teléfono</th>
-                            <th>Acción</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>1</td>
-                            <td>Ana García López</td>
-                            <td>1990-05-15</td>
-                            <td>ana.garcia@email.com</td>
-                            <td>555-0101</td>
-                            <td>
-                                <button type="button" class="btn-eliminar-tabla" onclick="confirmarEliminacion(1)">
-                                    <span class="icono">×</span>
-                                </button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>2</td>
-                            <td>Carlos Rodríguez</td>
-                            <td>1985-12-20</td>
-                            <td>c.rodriguez@email.com</td>
-                            <td>555-0102</td>
-                            <td>
-                                <button type="button" class="btn-eliminar-tabla" onclick="confirmarEliminacion(2)">
-                                    <span class="icono">×</span>
-                                </button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+            {% if pacientes %}
+                <div class="contenedor-tabla">
+                    <table class="tabla-datos">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Edad</th>
+                                <th>Sexo</th>
+                                <th>Email</th>
+                                <th>Teléfono</th>
+                                <th>Tipo Sangre</th>
+                                <th>Diabético</th>
+                                <th>Estado</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for paciente in pacientes %}
+                            <tr>
+                                <td>{{ paciente.id }}</td>
+                                <td>{{ paciente.nombre }}</td>
+                                <td>{{ paciente.calcular_edad }} años</td>
+                                <td>
+                                    {% if paciente.sexo == 'M' %}
+                                        Masculino
+                                    {% elif paciente.sexo == 'F' %}
+                                        Femenino
+                                    {% else %}
+                                        Otro
+                                    {% endif %}
+                                </td>
+                                <td>{{ paciente.email|default:"-" }}</td>
+                                <td>{{ paciente.telefono|default:"-" }}</td>
+                                <td>{{ paciente.tipo_sangre|default:"-" }}</td>
+                                <td>
+                                    {% if paciente.diabetico %}
+                                        <span class="badge badge-danger">Sí</span>
+                                    {% else %}
+                                        <span class="badge badge-success">No</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if paciente.estado %}
+                                        <span class="estado-activo">Activo</span>
+                                    {% else %}
+                                        <span class="estado-inactivo">Inactivo</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <button type="button" class="btn-eliminar-tabla" data-id="{{ paciente.id }}" data-nombre="{{ paciente.nombre }}">
+                                        <span class="icono">×</span>
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="mensaje-sin-datos">
+                    <p>No hay pacientes registrados en el sistema.</p>
+                    <p><a href="{% url 'paciente_agregar' %}" class="btn-agregar">Agregar Primer Paciente</a></p>
+                </div>
+            {% endif %}
 
             <div class="botones-volver">
                 <button type="button" class="btn-volver" onclick="window.location.href='/registro/'">
@@ -58,11 +83,64 @@
 
     <script type="text/javascript">
         //<![CDATA[
-        function confirmarEliminacion(id) {
-            if (confirm('¿Estás seguro de que deseas eliminar este paciente? Esta acción no se puede deshacer.')) {
-                alert('Paciente con ID ' + id + ' eliminado');
+        // Función para confirmar y eliminar paciente
+        async function eliminarPaciente(id, nombre) {
+            if (confirm(`¿Estás seguro de que deseas eliminar al paciente ${nombre} (ID: ${id})?\n\n⚠️ Esta acción no se puede deshacer.`)) {
+                try {
+                    // Enviar solicitud DELETE al servidor
+                    const response = await fetch(`/paciente/eliminar/${id}/`, {
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRFToken': getCookie('csrftoken'),
+                        },
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        alert(data.message || '✅ Paciente eliminado exitosamente');
+                        // Recargar la página para actualizar la tabla
+                        setTimeout(function() {
+                            window.location.reload();
+                        }, 1000);
+                    } else {
+                        alert('❌ Error: ' + data.message);
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('❌ Error de conexión. Intente nuevamente.');
+                }
             }
         }
+
+        // Función para obtener el token CSRF
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // Asignar eventos a los botones de eliminar
+        document.addEventListener('DOMContentLoaded', function() {
+            const botones = document.querySelectorAll('.btn-eliminar-tabla');
+            
+            botones.forEach(function(boton) {
+                boton.addEventListener('click', function() {
+                    const id = this.getAttribute('data-id');
+                    const nombre = this.getAttribute('data-nombre');
+                    eliminarPaciente(id, nombre);
+                });
+            });
+        });
         //]]>
     </script>
 {% endblock %}

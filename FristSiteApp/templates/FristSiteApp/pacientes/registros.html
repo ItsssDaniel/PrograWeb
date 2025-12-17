@@ -7,39 +7,79 @@
             <h2>Registros de Pacientes</h2>
             <p>Lista completa de pacientes registrados en el sistema:</p>
             
+            {% if messages %}
+                <div class="messages">
+                    {% for message in messages %}
+                        <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            
             <div class="contenedor-tabla">
                 <table class="tabla-datos">
                     <thead>
                         <tr>
                             <th>ID</th>
                             <th>Nombre</th>
-                            <th>Fecha Nacimiento</th>
+                            <th>Edad</th>
+                            <th>Sexo</th>
                             <th>Email</th>
                             <th>Teléfono</th>
+                            <th>Tipo Sangre</th>
+                            <th>Diabético</th>
+                            <th>Hipertenso</th>
+                            <th>Estado</th>
                         </tr>
                     </thead>
                     <tbody>
+                        {% for paciente in pacientes %}
                         <tr>
-                            <td>1</td>
-                            <td>Ana García López</td>
-                            <td>1990-05-15</td>
-                            <td>ana.garcia@email.com</td>
-                            <td>555-0101</td>
+                            <td>{{ paciente.id }}</td>
+                            <td>{{ paciente.nombre }}</td>
+                            <td>{{ paciente.calcular_edad }} años</td>
+                            <td>
+                                {% if paciente.sexo == 'M' %}
+                                    Masculino
+                                {% elif paciente.sexo == 'F' %}
+                                    Femenino
+                                {% elif paciente.sexo == 'O' %}
+                                    Otro
+                                {% else %}
+                                    {{ paciente.sexo }}
+                                {% endif %}
+                            </td>
+                            <td>{{ paciente.email|default:"-" }}</td>
+                            <td>{{ paciente.telefono|default:"-" }}</td>
+                            <td>{{ paciente.tipo_sangre|default:"-" }}</td>
+                            <td>
+                                {% if paciente.diabetico %}
+                                    <span class="badge badge-danger">Sí</span>
+                                {% else %}
+                                    <span class="badge badge-success">No</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if paciente.hipertenso %}
+                                    <span class="badge badge-danger">Sí</span>
+                                {% else %}
+                                    <span class="badge badge-success">No</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if paciente.estado %}
+                                    <span class="estado-activo">Activo</span>
+                                {% else %}
+                                    <span class="estado-inactivo">Inactivo</span>
+                                {% endif %}
+                            </td>
                         </tr>
+                        {% empty %}
                         <tr>
-                            <td>2</td>
-                            <td>Carlos Rodríguez</td>
-                            <td>1985-12-20</td>
-                            <td>c.rodriguez@email.com</td>
-                            <td>555-0102</td>
+                            <td colspan="10" class="text-center">No hay pacientes registrados en el sistema.</td>
                         </tr>
-                        <tr>
-                            <td>3</td>
-                            <td>María Fernández</td>
-                            <td>1978-08-30</td>
-                            <td>m.fernandez@email.com</td>
-                            <td>555-0103</td>
-                        </tr>
+                        {% endfor %}
                     </tbody>
                 </table>
             </div>

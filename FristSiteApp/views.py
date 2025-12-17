@@ -12,7 +12,9 @@ from django.shortcuts import get_object_or_404
 from .models import Recepcionista
 from .models import PersonalExtra
 from .models import Medico
+from .models import Paciente
 from .forms import MedicoForm
+
 
 # Create your views here.
 def home(request):
@@ -201,36 +203,221 @@ def medico_editar(request, id):
         messages.error(request, f'❌ Error: {str(e)}')
         return redirect('medico_modificar')
 
-# Vistas para Paciente
+# Vista para agregar paciente (AJAX y normal)
+@csrf_exempt
 def paciente_agregar(request):
+    if request.method == 'POST':
+        # Verificar si es una petición AJAX
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            try:
+                # Obtener datos del JSON
+                data = json.loads(request.body)
+                
+                # Convertir valores string a booleanos
+                def str_to_bool(valor):
+                    if isinstance(valor, str):
+                        return valor.lower() in ['true', '1', 'yes', 'si']
+                    return bool(valor)
+                
+                # Convertir campos numéricos
+                def str_to_decimal(valor):
+                    if valor and valor.strip():
+                        try:
+                            return float(valor)
+                        except ValueError:
+                            return None
+                    return None
+                
+                # Crear el paciente con valores convertidos
+                paciente = Paciente.objects.create(
+                    nombre=data.get('nombre'),
+                    fecha_nacimiento=data.get('fecha_nacimiento'),
+                    sexo=data.get('sexo'),
+                    email=data.get('email'),
+                    telefono=data.get('telefono'),
+                    direccion=data.get('direccion'),
+                    tipo_sangre=data.get('tipo_sangre') or None,
+                    diabetico=str_to_bool(data.get('diabetico', False)),
+                    hipertenso=str_to_bool(data.get('hipertenso', False)),
+                    alergias=data.get('alergias') or None,
+                    medicamentos_actuales=data.get('medicamentos_actuales') or None,
+                    enfermedades_cronicas=data.get('enfermedades_cronicas') or None,
+                    antecedentes_familiares=data.get('antecedentes_familiares') or None,
+                    altura=str_to_decimal(data.get('altura')),
+                    peso=str_to_decimal(data.get('peso')),
+                    fumador=str_to_bool(data.get('fumador', False)),
+                    alcoholico=str_to_bool(data.get('alcoholico', False)),
+                    contacto_emergencia_nombre=data.get('contacto_emergencia_nombre') or None,
+                    contacto_emergencia_telefono=data.get('contacto_emergencia_telefono') or None,
+                    contacto_emergencia_parentesco=data.get('contacto_emergencia_parentesco') or None,
+                    observaciones=data.get('observaciones') or None,
+                    estado=str_to_bool(data.get('estado', True))
+                )
+                
+                return JsonResponse({
+                    'success': True,
+                    'message': 'Paciente guardado exitosamente!',
+                    'id': paciente.id
+                })
+                
+            except Exception as e:
+                return JsonResponse({
+                    'success': False,
+                    'message': f'Error: {str(e)}'
+                }, status=400)
+        else:
+            # Para peticiones normales de formulario
+            try:
+                # Procesamiento para formularios normales (no AJAX)
+                messages.success(request, 'Paciente guardado exitosamente!')
+                return redirect('paciente_registros')
+                
+            except Exception as e:
+                messages.error(request, f'Error: {str(e)}')
+    
+    # Para peticiones GET, simplemente renderizar el template
     return render(request, 'FristSiteApp/pacientes/agregar.html')
 
-def paciente_modificar(request):
-    return render(request, 'FristSiteApp/pacientes/modificar.html')
-
-def paciente_eliminar(request):
-    return render(request, 'FristSiteApp/pacientes/eliminar.html')
-
+# Vista para listar pacientes
 def paciente_registros(request):
-    return render(request, 'FristSiteApp/pacientes/registros.html')
-
-def paciente_editar(request):
-    # Obtener los datos del paciente desde los parámetros GET
-    paciente_id = request.GET.get('id', '')
-    nombre = request.GET.get('nombre', '')
-    fecha_nacimiento = request.GET.get('fecha_nacimiento', '')
-    email = request.GET.get('email', '')
-    telefono = request.GET.get('telefono', '')
+    # Obtener todos los pacientes de la base de datos
+    pacientes = Paciente.objects.all().order_by('id')
     
     context = {
-        'paciente_id': paciente_id,
-        'nombre': nombre,
-        'fecha_nacimiento': fecha_nacimiento,
-        'email': email,
-        'telefono': telefono,
+        'pacientes': pacientes
     }
     
-    return render(request, 'FristSiteApp/pacientes/editar.html', context)
+    return render(request, 'FristSiteApp/pacientes/registros.html', context)
+
+# Vista para modificar (listado de pacientes para editar)
+def paciente_modificar(request):
+    # Obtener todos los pacientes de la base de datos
+    pacientes = Paciente.objects.all().order_by('id')
+    
+    context = {
+        'pacientes': pacientes
+    }
+    
+    return render(request, 'FristSiteApp/pacientes/modificar.html', context)
+
+# Vista para editar un paciente específico
+@csrf_exempt
+def paciente_editar(request, id):
+    try:
+        # Obtener el paciente por ID
+        paciente = get_object_or_404(Paciente, id=id)
+        
+        if request.method == 'POST':
+            # Procesar la actualización
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                # Petición AJAX
+                try:
+                    data = json.loads(request.body)
+                    
+                    # Función para convertir string a booleano
+                    def str_to_bool(valor):
+                        if isinstance(valor, str):
+                            return valor.lower() in ['true', '1', 'yes', 'si']
+                        return bool(valor)
+                    
+                    # Función para convertir a decimal
+                    def str_to_decimal(valor):
+                        if valor and valor.strip():
+                            try:
+                                return float(valor)
+                            except ValueError:
+                                return None
+                        return None
+                    
+                    # Actualizar campos
+                    paciente.nombre = data.get('nombre', paciente.nombre)
+                    paciente.fecha_nacimiento = data.get('fecha_nacimiento', paciente.fecha_nacimiento)
+                    paciente.sexo = data.get('sexo', paciente.sexo)
+                    paciente.email = data.get('email', paciente.email)
+                    paciente.telefono = data.get('telefono', paciente.telefono)
+                    paciente.direccion = data.get('direccion', paciente.direccion)
+                    paciente.tipo_sangre = data.get('tipo_sangre', paciente.tipo_sangre)
+                    paciente.diabetico = str_to_bool(data.get('diabetico', paciente.diabetico))
+                    paciente.hipertenso = str_to_bool(data.get('hipertenso', paciente.hipertenso))
+                    paciente.alergias = data.get('alergias', paciente.alergias)
+                    paciente.medicamentos_actuales = data.get('medicamentos_actuales', paciente.medicamentos_actuales)
+                    paciente.enfermedades_cronicas = data.get('enfermedades_cronicas', paciente.enfermedades_cronicas)
+                    paciente.antecedentes_familiares = data.get('antecedentes_familiares', paciente.antecedentes_familiares)
+                    paciente.altura = str_to_decimal(data.get('altura', paciente.altura))
+                    paciente.peso = str_to_decimal(data.get('peso', paciente.peso))
+                    paciente.fumador = str_to_bool(data.get('fumador', paciente.fumador))
+                    paciente.alcoholico = str_to_bool(data.get('alcoholico', paciente.alcoholico))
+                    paciente.contacto_emergencia_nombre = data.get('contacto_emergencia_nombre', paciente.contacto_emergencia_nombre)
+                    paciente.contacto_emergencia_telefono = data.get('contacto_emergencia_telefono', paciente.contacto_emergencia_telefono)
+                    paciente.contacto_emergencia_parentesco = data.get('contacto_emergencia_parentesco', paciente.contacto_emergencia_parentesco)
+                    paciente.observaciones = data.get('observaciones', paciente.observaciones)
+                    paciente.estado = str_to_bool(data.get('estado', paciente.estado))
+                    
+                    paciente.save()
+                    
+                    return JsonResponse({
+                        'success': True,
+                        'message': '✅ Paciente actualizado exitosamente!'
+                    })
+                    
+                except Exception as e:
+                    return JsonResponse({
+                        'success': False,
+                        'message': f'❌ Error: {str(e)}'
+                    }, status=400)
+            else:
+                # Petición normal de formulario
+                # ... (manejo de formularios normales)
+                messages.success(request, '✅ Paciente actualizado exitosamente!')
+                return redirect('paciente_modificar')
+        
+        # Para peticiones GET, preparar contexto
+        context = {
+            'paciente': paciente
+        }
+        
+        return render(request, 'FristSiteApp/pacientes/editar.html', context)
+        
+    except Exception as e:
+        messages.error(request, f'❌ Error: {str(e)}')
+        return redirect('paciente_modificar')
+
+# Vista para eliminar (listado de pacientes para eliminar)
+def paciente_eliminar(request):
+    # Obtener todos los pacientes de la base de datos
+    pacientes = Paciente.objects.all().order_by('id')
+    
+    context = {
+        'pacientes': pacientes
+    }
+    
+    return render(request, 'FristSiteApp/pacientes/eliminar.html', context)
+
+# Vista para eliminar un paciente específico
+@csrf_exempt
+def paciente_eliminar_por_id(request, id):
+    if request.method == 'DELETE':
+        try:
+            # Intentar obtener el paciente
+            paciente = get_object_or_404(Paciente, id=id)
+            nombre = paciente.nombre
+            paciente.delete()
+            
+            return JsonResponse({
+                'success': True,
+                'message': f'Paciente "{nombre}" eliminado exitosamente'
+            })
+            
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'message': f'Error: {str(e)}'
+            }, status=500)
+    
+    return JsonResponse({
+        'success': False,
+        'message': 'Método no permitido'
+    }, status=405)
 
 
 

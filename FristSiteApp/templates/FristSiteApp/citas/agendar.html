@@ -7,100 +7,271 @@
             <h2>Agendar Nueva Cita</h2>
             <p>Complete los datos para programar una nueva cita médica</p>
             
-            <form class="formulario" onsubmit="agendarCita(event); return false;">
+            {% if messages %}
+                <div class="messages">
+                    {% for message in messages %}
+                        <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            
+            <form class="formulario" id="formCita" method="POST">
+                {% csrf_token %}
+                
                 <div class="campos-duales">
                     <div class="campo-formulario">
                         <label for="paciente">Seleccionar Paciente:</label>
-                        <select id="paciente" name="paciente" required="required">
+                        <select id="paciente" name="paciente" required>
                             <option value="">Seleccionar paciente</option>
-                            <option value="1">Ana García López</option>
-                            <option value="2">Carlos Rodríguez</option>
-                            <option value="3">María Fernández</option>
-                            <option value="4">Roberto Sánchez</option>
+                            {% for paciente in pacientes %}
+                                <option value="{{ paciente.id }}">{{ paciente.nombre }} - {{ paciente.email }}</option>
+                            {% endfor %}
                         </select>
+                        <div id="paciente-info" style="display: none; margin-top: 5px; font-size: 0.9em; color: #666;"></div>
                     </div>
                     
                     <div class="campo-formulario">
                         <label for="medico">Seleccionar Médico:</label>
-                        <select id="medico" name="medico" required="required">
+                        <select id="medico" name="medico" required>
                             <option value="">Seleccionar médico</option>
-                            <option value="1">Dr. Juan Pérez - Cardiología</option>
-                            <option value="2">Dra. María López - Pediatría</option>
-                            <option value="3">Dr. Roberto Sánchez - Medicina General</option>
+                            {% for medico in medicos %}
+                                <option value="{{ medico.id }}">{{ medico.nombre }} - {{ medico.especialidad }}</option>
+                            {% endfor %}
+                        </select>
+                        <div id="medico-info" style="display: none; margin-top: 5px; font-size: 0.9em; color: #666;"></div>
+                    </div>
+                </div>
+                
+                <div class="campos-duales">
+                    <div class="campo-formulario">
+                        <label for="fecha">Fecha de la Cita:</label>
+                        <input type="date" id="fecha" name="fecha" required min="{{ hoy|date:'Y-m-d' }}" />
+                        <small class="texto-ayuda">* No se pueden agendar citas en fechas pasadas</small>
+                    </div>
+                    
+                    <div class="campo-formulario">
+                        <label for="turno">Turno:</label>
+                        <select id="turno" name="turno" required>
+                            <option value="">Seleccionar turno</option>
+                            <option value="mañana">Mañana (6:00 AM - 12:00 PM)</option>
+                            <option value="tarde">Tarde (12:00 PM - 6:00 PM)</option>
+                            <option value="noche">Noche (6:00 PM - 12:00 AM)</option>
                         </select>
                     </div>
                 </div>
                 
                 <div class="campos-duales">
                     <div class="campo-formulario">
-                        <label for="recepcionista">Recepcionista:</label>
-                        <select id="recepcionista" name="recepcionista" required="required">
-                            <option value="">Seleccionar recepcionista</option>
-                            <option value="1">Ana García López</option>
-                            <option value="2">Carlos Rodríguez</option>
-                        </select>
+                        <label for="hora_inicio">Hora de Inicio:</label>
+                        <input type="time" id="hora_inicio" name="hora_inicio" required step="1800" />
+                        <small class="texto-ayuda">* Intervalos de 30 minutos</small>
                     </div>
                     
                     <div class="campo-formulario">
-                        <label for="tipo_cita">Tipo de Cita:</label>
-                        <select id="tipo_cita" name="tipo_cita" required="required">
+                        <label for="hora_fin">Hora de Fin:</label>
+                        <input type="time" id="hora_fin" name="hora_fin" required step="1800" />
+                        <small class="texto-ayuda">* Intervalos de 30 minutos</small>
+                    </div>
+                </div>
+                
+                <div class="campo-formulario">
+                    <div class="disponibilidad-container" id="disponibilidad-container" style="display: none;">
+                        <h4>📅 Verificar Disponibilidad</h4>
+                        <button type="button" class="btn-verificar" onclick="verificarDisponibilidad()">
+                            Verificar Disponibilidad del Médico
+                        </button>
+                        <div id="resultado-disponibilidad" class="resultado-disponibilidad"></div>
+                    </div>
+                </div>
+                
+                <div class="campos-duales">
+                    <div class="campo-formulario">
+                        <label for="tipo_consulta">Tipo de Consulta:</label>
+                        <select id="tipo_consulta" name="tipo_consulta" required>
                             <option value="">Seleccionar tipo</option>
-                            <option value="consulta">Consulta General</option>
-                            <option value="especialidad">Especialidad</option>
+                            <option value="general">Consulta General</option>
+                            <option value="especialidad">Consulta de Especialidad</option>
+                            <option value="seguimiento">Consulta de Seguimiento</option>
                             <option value="emergencia">Emergencia</option>
-                            <option value="seguimiento">Seguimiento</option>
+                            <option value="examen">Examen</option>
+                            <option value="terapia">Terapia</option>
                         </select>
-                    </div>
-                </div>
-                
-                <div class="campos-duales">
-                    <div class="campo-formulario">
-                        <label for="fecha_cita">Fecha de la Cita:</label>
-                        <input type="date" id="fecha_cita" name="fecha_cita" required="required" />
                     </div>
                     
                     <div class="campo-formulario">
-                        <label for="hora_cita">Hora de la Cita:</label>
-                        <input type="time" id="hora_cita" name="hora_cita" required="required" />
+                        <label for="prioridad">Prioridad:</label>
+                        <select id="prioridad" name="prioridad" required>
+                            <option value="normal">Normal</option>
+                            <option value="urgente">Urgente</option>
+                            <option value="emergencia">Emergencia</option>
+                        </select>
                     </div>
                 </div>
                 
                 <div class="campo-formulario">
                     <label for="motivo">Motivo de la Consulta:</label>
-                    <textarea id="motivo" name="motivo" rows="4" required="required" placeholder="Describa el motivo de la consulta..."></textarea>
+                    <textarea id="motivo" name="motivo" rows="3" required placeholder="Describa el motivo de la consulta..."></textarea>
+                </div>
+                
+                <div class="campos-duales">
+                    <div class="campo-formulario">
+                        <label for="sintomas">Síntomas (opcional):</label>
+                        <textarea id="sintomas" name="sintomas" rows="2" placeholder="Describa los síntomas..."></textarea>
+                    </div>
+                    
+                    <div class="campo-formulario">
+                        <label for="diagnostico_previo">Diagnóstico Previo (opcional):</label>
+                        <textarea id="diagnostico_previo" name="diagnostico_previo" rows="2" placeholder="Diagnósticos anteriores conocidos..."></textarea>
+                    </div>
                 </div>
                 
                 <div class="campo-formulario">
-                    <label for="notas">Notas Adicionales:</label>
-                    <textarea id="notas" name="notas" rows="3" placeholder="Notas adicionales (opcional)..."></textarea>
+                    <label for="notas_internas">Notas Internas (opcional):</label>
+                    <textarea id="notas_internas" name="notas_internas" rows="2" placeholder="Notas para el médico..."></textarea>
                 </div>
                 
                 <div class="botones-formulario">
                     <button type="submit" class="btn-guardar">Agendar Cita</button>
-                    <button type="button" class="btn-volver" onclick="window.location.href='/citas/'">
+                     <button type="button" class="btn-volver" onclick="window.location.href='/citas/'">
                         Cancelar
                     </button>
-                </div>
+                    <button type="button" class="btn btn-secondary" onclick="window.location.href='/citas/disponibilidad/'">
+                                        <i class="fas fa-search me-2"></i>Ver Disponibilidad
+                                    </button>
             </form>
         </div>
     </div>
 
     <script type="text/javascript">
         //<![CDATA[
-        function agendarCita(event) {
+        // Función para obtener el token CSRF
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        
+        // Establecer fecha mínima como hoy
+        document.getElementById('fecha').min = new Date().toISOString().split('T')[0];
+        
+        // Mostrar información del paciente seleccionado
+        document.getElementById('paciente').addEventListener('change', function() {
+            const pacienteInfo = document.getElementById('paciente-info');
+            if (this.value) {
+                // Aquí podrías hacer una petición AJAX para obtener más info del paciente
+                pacienteInfo.textContent = 'Paciente seleccionado';
+                pacienteInfo.style.display = 'block';
+            } else {
+                pacienteInfo.style.display = 'none';
+            }
+        });
+        
+        // Mostrar información del médico seleccionado
+        document.getElementById('medico').addEventListener('change', function() {
+            const medicoInfo = document.getElementById('medico-info');
+            const disponibilidadContainer = document.getElementById('disponibilidad-container');
+            
+            if (this.value) {
+                medicoInfo.textContent = 'Médico seleccionado';
+                medicoInfo.style.display = 'block';
+                disponibilidadContainer.style.display = 'block';
+            } else {
+                medicoInfo.style.display = 'none';
+                disponibilidadContainer.style.display = 'none';
+            }
+        });
+        
+        // Función para verificar disponibilidad
+        async function verificarDisponibilidad() {
+            const fecha = document.getElementById('fecha').value;
+            const medico = document.getElementById('medico').value;
+            const turno = document.getElementById('turno').value;
+            const horaInicio = document.getElementById('hora_inicio').value;
+            const horaFin = document.getElementById('hora_fin').value;
+            
+            if (!fecha || !medico) {
+                alert('Por favor, seleccione fecha y médico primero.');
+                return;
+            }
+            
+            if (!horaInicio || !horaFin) {
+                alert('Por favor, seleccione hora de inicio y fin.');
+                return;
+            }
+            
+            const resultadoDiv = document.getElementById('resultado-disponibilidad');
+            resultadoDiv.innerHTML = '<div class="loading">Verificando disponibilidad...</div>';
+            
+            try {
+                const response = await fetch('{% url "api_disponibilidad" %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({
+                        fecha: fecha,
+                        medico_id: medico,
+                        hora_inicio: horaInicio,
+                        hora_fin: horaFin
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    resultadoDiv.innerHTML = `<div class="error">❌ ${data.error}</div>`;
+                } else {
+                    if (data.disponible) {
+                        resultadoDiv.innerHTML = `
+                            <div class="success">
+                                ✅ <strong>Horario Disponible</strong><br>
+                                ${data.mensaje || 'El médico está disponible en este horario.'}
+                            </div>
+                        `;
+                    } else {
+                        resultadoDiv.innerHTML = `
+                            <div class="error">
+                                ❌ <strong>Horario No Disponible</strong><br>
+                                ${data.mensaje || 'El médico no está disponible en este horario.'}
+                                ${data.citas_conflicto ? `<br><small>Citas conflictivas: ${data.citas_conflicto}</small>` : ''}
+                            </div>
+                        `;
+                    }
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+                resultadoDiv.innerHTML = '<div class="error">❌ Error al verificar disponibilidad</div>';
+            }
+        }
+        
+        // Manejar el envío del formulario
+        document.getElementById('formCita').addEventListener('submit', async function(event) {
             event.preventDefault();
             
-            // Validar que todos los campos estén llenos
-            const campos = ['paciente', 'medico', 'recepcionista', 'tipo_cita', 'fecha_cita', 'hora_cita', 'motivo'];
+            // Validar campos requeridos
+            const camposRequeridos = ['paciente', 'medico', 'fecha', 'turno', 'hora_inicio', 'hora_fin', 'tipo_consulta', 'motivo'];
             let valido = true;
             
-            campos.forEach(campo => {
+            camposRequeridos.forEach(campo => {
                 const elemento = document.getElementById(campo);
                 if (!elemento.value) {
-                    elemento.className += ' campo-error';
+                    elemento.classList.add('campo-error');
                     valido = false;
                 } else {
-                    elemento.className = elemento.className.replace(' campo-error', '');
+                    elemento.classList.remove('campo-error');
                 }
             });
             
@@ -109,16 +280,357 @@
                 return false;
             }
             
-            // Simular agendado exitoso
-            alert('¡Cita agendada exitosamente!\n\nSe ha programado la cita y se notificará a los involucrados.');
+            // Validar que la hora de inicio sea menor que la hora de fin
+            const horaInicio = document.getElementById('hora_inicio').value;
+            const horaFin = document.getElementById('hora_fin').value;
             
-            setTimeout(function() {
-                window.location.href = "{% url 'citas' %}";
-            }, 1500);
-        }
+            if (horaInicio >= horaFin) {
+                alert('La hora de inicio debe ser anterior a la hora de fin.');
+                document.getElementById('hora_inicio').classList.add('campo-error');
+                document.getElementById('hora_fin').classList.add('campo-error');
+                return false;
+            }
+            
+            // Mostrar mensaje de carga
+            const boton = document.querySelector('.btn-guardar');
+            const textoOriginal = boton.innerHTML;
+            boton.innerHTML = 'Agendando...';
+            boton.disabled = true;
+            
+            try {
+                // Crear FormData para enviar
+                const formData = new FormData(this);
+                
+                // Enviar datos al servidor
+                const response = await fetch('{% url "citas_agendar" %}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken'),
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Éxito - MOSTRAR SOLO EL MENSAJE DE TEXTO, NO EL OBJETO
+                    alert(data.message || '✅ Cita agendada con éxito!');
+                    
+                    // Redirigir después de 1 segundo
+                    setTimeout(function() {
+                        window.location.href = "{% url 'citas' %}";
+                    }, 1000);
+                } else {
+                    // Error - MOSTRAR SOLO EL MENSAJE DE TEXTO, NO EL OBJETO
+                    let errorMsg = data.message;
+                    
+                    // Si el mensaje es un objeto, convertirlo a string
+                    if (typeof errorMsg === 'object') {
+                        errorMsg = JSON.stringify(errorMsg);
+                    }
+                    
+                    alert('❌ ' + (errorMsg || 'Error al agendar la cita.'));
+                    boton.innerHTML = textoOriginal;
+                    boton.disabled = false;
+                }
+                
+            } catch (error) {
+                // Error de red
+                alert('❌ Error de conexión. Intente nuevamente.');
+                console.error('Error:', error);
+                boton.innerHTML = textoOriginal;
+                boton.disabled = false;
+            }
+        });
         
-        // Establecer fecha mínima como hoy
-        document.getElementById('fecha_cita').min = new Date().toISOString().split('T')[0];
+        // Auto-completar hora_fin basado en hora_inicio (30 minutos después por defecto)
+        document.getElementById('hora_inicio').addEventListener('change', function() {
+            const horaInicio = this.value;
+            if (horaInicio) {
+                const [horas, minutos] = horaInicio.split(':').map(Number);
+                let nuevasHoras = horas;
+                let nuevosMinutos = minutos + 30;
+                
+                if (nuevosMinutos >= 60) {
+                    nuevasHoras += 1;
+                    nuevosMinutos -= 60;
+                }
+                
+                // Formatear a HH:MM
+                const horaFin = `${nuevasHoras.toString().padStart(2, '0')}:${nuevosMinutos.toString().padStart(2, '0')}`;
+                document.getElementById('hora_fin').value = horaFin;
+            }
+        });
+        
+        // Cambiar opciones de hora según el turno seleccionado
+        document.getElementById('turno').addEventListener('change', function() {
+            const turno = this.value;
+            const horaInicio = document.getElementById('hora_inicio');
+            const horaFin = document.getElementById('hora_fin');
+            
+            if (turno === 'mañana') {
+                horaInicio.min = '06:00';
+                horaInicio.max = '11:30';
+                horaFin.min = '06:30';
+                horaFin.max = '12:00';
+            } else if (turno === 'tarde') {
+                horaInicio.min = '12:00';
+                horaInicio.max = '17:30';
+                horaFin.min = '12:30';
+                horaFin.max = '18:00';
+            } else if (turno === 'noche') {
+                horaInicio.min = '18:00';
+                horaInicio.max = '23:30';
+                horaFin.min = '18:30';
+                horaFin.max = '23:59';
+            }
+        });
         //]]>
     </script>
+
+    <style>
+        .alert {
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            border: 1px solid transparent;
+        }
+        
+        .alert-success {
+            color: #0f5132;
+            background-color: #d1e7dd;
+            border-color: #badbcc;
+        }
+        
+        .alert-error {
+            color: #842029;
+            background-color: #f8d7da;
+            border-color: #f5c2c7;
+        }
+        
+        .alert-warning {
+            color: #856404;
+            background-color: #fff3cd;
+            border-color: #ffeeba;
+        }
+        
+        .campos-duales {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .campos-duales {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .campo-formulario {
+            margin-bottom: 20px;
+        }
+        
+        .campo-formulario label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .campo-formulario input,
+        .campo-formulario select,
+        .campo-formulario textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background-color: #fff;
+        }
+        
+        .campo-formulario input:focus,
+        .campo-formulario select:focus,
+        .campo-formulario textarea:focus {
+            border-color: #4a90e2;
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+            outline: none;
+        }
+        
+        .campo-formulario textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        .texto-ayuda {
+            color: #666;
+            font-size: 0.875em;
+            margin-top: 5px;
+            display: block;
+        }
+        
+        .campo-error {
+            border-color: #dc3545 !important;
+            background-color: #fff8f8;
+        }
+        
+        .disponibilidad-container {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+            margin-top: 20px;
+        }
+        
+        .disponibilidad-container h4 {
+            margin-top: 0;
+            color: #495057;
+            font-size: 1.1em;
+        }
+        
+        .btn-verificar {
+            background-color: #17a2b8;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+        
+        .btn-verificar:hover {
+            background-color: #138496;
+        }
+        
+        .resultado-disponibilidad {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 6px;
+            font-size: 0.9em;
+        }
+        
+        .resultado-disponibilidad .loading {
+            color: #6c757d;
+            font-style: italic;
+        }
+        
+        .resultado-disponibilidad .success {
+            color: #155724;
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            padding: 12px;
+            border-radius: 6px;
+        }
+        
+        .resultado-disponibilidad .error {
+            color: #721c24;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            padding: 12px;
+            border-radius: 6px;
+        }
+        
+        .botones-formulario {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .btn-guardar {
+            flex: 2;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn-guardar:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-guardar:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .btn-volver {
+            flex: 1;
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+        
+        .btn-volver:hover {
+            background-color: #5a6268;
+        }
+        
+        .btn-disponibilidad {
+            flex: 1;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+        
+        .btn-disponibilidad:hover {
+            background-color: #218838;
+        }
+        
+        /* Modern select styling */
+        select {
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23333%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px top 50%;
+            background-size: 12px auto;
+            padding-right: 40px !important;
+        }
+        
+        /* Modern date and time inputs */
+        input[type="date"],
+        input[type="time"] {
+            font-family: inherit;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .botones-formulario {
+                flex-direction: column;
+            }
+            
+            .btn-guardar,
+            .btn-volver,
+            .btn-disponibilidad {
+                width: 100%;
+            }
+            
+            .disponibilidad-container {
+                padding: 15px;
+            }
+        }
+    </style>
 {% endblock %}

@@ -1,0 +1,270 @@
+{% extends 'FristSiteApp/base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="container main-content">
+        <div class="section" id="editar-cita">
+            <h2>Modificar Cita</h2>
+            <p>Editando cita con ID: <strong>CIT-{{ cita.id|stringformat:"03d" }}</strong></p>
+            
+            {% if messages %}
+                <div class="messages">
+                    {% for message in messages %}
+                        <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            
+            <form class="formulario" id="formEditarCita">
+                {% csrf_token %}
+                
+                <input type="hidden" id="id" name="id" value="{{ cita.id }}" />
+                
+                <div class="campo-formulario">
+                    <label for="paciente">Paciente:</label>
+                    <select id="paciente" name="paciente" required>
+                        <option value="">Seleccionar Paciente</option>
+                        {% for paciente in pacientes %}
+                            <option value="{{ paciente.id }}" {% if paciente.id == cita.paciente.id %}selected{% endif %}>{{ paciente.nombre }}</option>
+                        {% endfor %}
+                    </select>
+                    <span class="texto-ayuda">* Campo obligatorio</span>
+                </div>
+                
+                <div class="campo-formulario">
+                    <label for="medico">Médico:</label>
+                    <select id="medico" name="medico" required>
+                        <option value="">Seleccionar Médico</option>
+                        {% for medico in medicos %}
+                            <option value="{{ medico.id }}" {% if medico.id == cita.medico.id %}selected{% endif %}>{{ medico.nombre }} - {{ medico.especialidad }}</option>
+                        {% endfor %}
+                    </select>
+                    <span class="texto-ayuda">* Campo obligatorio</span>
+                </div>
+                
+                <div class="campo-formulario">
+                    <label for="fecha">Fecha:</label>
+                    <input type="date" id="fecha" name="fecha" value="{{ cita.fecha|date:'Y-m-d' }}" required />
+                    <span class="texto-ayuda">* Formato: AAAA-MM-DD</span>
+                </div>
+                
+                <div class="campo-formulario">
+                    <label for="hora_inicio">Hora de Inicio:</label>
+                    <input type="time" id="hora_inicio" name="hora_inicio" value="{{ cita.hora_inicio|time:'H:i' }}" required />
+                    <span class="texto-ayuda">* Formato: HH:MM</span>
+                </div>
+                
+                <div class="campo-formulario">
+                    <label for="hora_fin">Hora de Fin:</label>
+                    <input type="time" id="hora_fin" name="hora_fin" value="{{ cita.hora_fin|time:'H:i' }}" required />
+                    <span class="texto-ayuda">* Formato: HH:MM</span>
+                </div>
+                
+                <div class="campo-formulario">
+                    <label for="tipo_consulta">Tipo de Consulta:</label>
+                    <select id="tipo_consulta" name="tipo_consulta" required>
+                        <option value="general" {% if cita.tipo_consulta == 'general' %}selected{% endif %}>Consulta General</option>
+                        <option value="especialidad" {% if cita.tipo_consulta == 'especialidad' %}selected{% endif %}>Consulta de Especialidad</option>
+                        <option value="seguimiento" {% if cita.tipo_consulta == 'seguimiento' %}selected{% endif %}>Consulta de Seguimiento</option>
+                        <option value="emergencia" {% if cita.tipo_consulta == 'emergencia' %}selected{% endif %}>Emergencia</option>
+                        <option value="examen" {% if cita.tipo_consulta == 'examen' %}selected{% endif %}>Examen</option>
+                        <option value="terapia" {% if cita.tipo_consulta == 'terapia' %}selected{% endif %}>Terapia</option>
+                    </select>
+                    <span class="texto-ayuda">* Campo obligatorio</span>
+                </div>
+                
+                <div class="campo-formulario">
+                    <label for="turno">Turno:</label>
+                    <select id="turno" name="turno" required>
+                        <option value="mañana" {% if cita.turno == 'mañana' %}selected{% endif %}>Mañana (6:00 AM - 12:00 PM)</option>
+                        <option value="tarde" {% if cita.turno == 'tarde' %}selected{% endif %}>Tarde (12:00 PM - 6:00 PM)</option>
+                        <option value="noche" {% if cita.turno == 'noche' %}selected{% endif %}>Noche (6:00 PM - 12:00 AM)</option>
+                    </select>
+                    <span class="texto-ayuda">* Campo obligatorio</span>
+                </div>
+                
+                <div class="campo-formulario">
+                    <label for="motivo">Motivo de la Consulta:</label>
+                    <textarea id="motivo" name="motivo" rows="3" required>{{ cita.motivo }}</textarea>
+                    <span class="texto-ayuda">* Campo obligatorio</span>
+                </div>
+                
+                <div class="campo-formulario">
+                    <label for="sintomas">Síntomas (opcional):</label>
+                    <textarea id="sintomas" name="sintomas" rows="2">{{ cita.sintomas|default:'' }}</textarea>
+                </div>
+                
+                <div class="campo-formulario">
+                    <label for="estado">Estado de la Cita:</label>
+                    <select id="estado" name="estado" required>
+                        <option value="agendada" {% if cita.estado == 'agendada' %}selected{% endif %}>Agendada</option>
+                        <option value="confirmada" {% if cita.estado == 'confirmada' %}selected{% endif %}>Confirmada</option>
+                        <option value="en_progreso" {% if cita.estado == 'en_progreso' %}selected{% endif %}>En Progreso</option>
+                        <option value="completada" {% if cita.estado == 'completada' %}selected{% endif %}>Completada</option>
+                        <option value="cancelada" {% if cita.estado == 'cancelada' %}selected{% endif %}>Cancelada</option>
+                        <option value="no_asistio" {% if cita.estado == 'no_asistio' %}selected{% endif %}>No Asistió</option>
+                    </select>
+                </div>
+                
+                <div class="campo-formulario">
+                    <label for="prioridad">Prioridad:</label>
+                    <select id="prioridad" name="prioridad" required>
+                        <option value="normal" {% if cita.prioridad == 'normal' %}selected{% endif %}>Normal</option>
+                        <option value="urgente" {% if cita.prioridad == 'urgente' %}selected{% endif %}>Urgente</option>
+                        <option value="emergencia" {% if cita.prioridad == 'emergencia' %}selected{% endif %}>Emergencia</option>
+                    </select>
+                </div>
+                
+                <div class="campo-formulario">
+                    <label for="notas_internas">Notas Internas (opcional):</label>
+                    <textarea id="notas_internas" name="notas_internas" rows="2">{{ cita.notas_internas|default:'' }}</textarea>
+                </div>
+                
+                <div class="botones-formulario">
+                    <button type="submit" class="btn-actualizar">Actualizar Cita</button>
+                    <button type="button" class="btn-volver" onclick="cancelarEdicion()">
+                        Cancelar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        //<![CDATA[
+        async function actualizarCita(event) {
+            event.preventDefault();
+            
+            // Validar campos requeridos
+            const camposRequeridos = ['paciente', 'medico', 'fecha', 'hora_inicio', 'hora_fin', 'tipo_consulta', 'turno', 'motivo'];
+            let valido = true;
+            
+            camposRequeridos.forEach(campo => {
+                const elemento = document.getElementById(campo);
+                if (!elemento.value.trim()) {
+                    elemento.classList.add('campo-error');
+                    valido = false;
+                } else {
+                    elemento.classList.remove('campo-error');
+                }
+            });
+            
+            if (!valido) {
+                alert('Por favor, complete todos los campos obligatorios.');
+                return false;
+            }
+            
+            const formData = {
+                id: document.getElementById('id').value,
+                paciente: document.getElementById('paciente').value,
+                medico: document.getElementById('medico').value,
+                fecha: document.getElementById('fecha').value,
+                hora_inicio: document.getElementById('hora_inicio').value,
+                hora_fin: document.getElementById('hora_fin').value,
+                tipo_consulta: document.getElementById('tipo_consulta').value,
+                turno: document.getElementById('turno').value,
+                motivo: document.getElementById('motivo').value,
+                sintomas: document.getElementById('sintomas').value,
+                estado: document.getElementById('estado').value,
+                prioridad: document.getElementById('prioridad').value,
+                notas_internas: document.getElementById('notas_internas').value
+            };
+            
+            // Mostrar mensaje de carga
+            const boton = document.querySelector('.btn-actualizar');
+            const textoOriginal = boton.innerHTML;
+            boton.innerHTML = 'Actualizando...';
+            boton.disabled = true;
+            
+            try {
+                // Enviar datos al servidor
+                const response = await fetch('{% url "citas_modificar_id" cita.id %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert(data.message || '✅ Cita actualizada con éxito!');
+                    
+                    // Redirigir después de 1 segundo
+                    setTimeout(function() {
+                        window.location.href = "{% url 'citas' %}";
+                    }, 1000);
+                } else {
+                    alert('❌ ' + (data.message || 'Error al actualizar la cita.'));
+                    boton.innerHTML = textoOriginal;
+                    boton.disabled = false;
+                }
+                
+            } catch (error) {
+                // Error de red
+                alert('❌ Error de conexión. Intente nuevamente.');
+                console.error('Error:', error);
+                boton.innerHTML = textoOriginal;
+                boton.disabled = false;
+            }
+        }
+        
+        function cancelarEdicion() {
+            if (confirm('¿Estás seguro de que deseas cancelar? Los cambios no guardados se perderán.')) {
+                window.location.href = "{% url 'citas' %}";
+            }
+        }
+        
+        // Función para obtener el token CSRF
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        
+        // Asignar evento al formulario
+        document.getElementById('formEditarCita').addEventListener('submit', actualizarCita);
+        
+        // Limpiar errores al escribir
+        document.querySelectorAll('input, select, textarea').forEach(elemento => {
+            elemento.addEventListener('input', function() {
+                this.classList.remove('campo-error');
+            });
+        });
+        
+        // Validar que hora_fin sea mayor que hora_inicio
+        document.getElementById('hora_inicio').addEventListener('change', validarHoras);
+        document.getElementById('hora_fin').addEventListener('change', validarHoras);
+        
+        function validarHoras() {
+            const horaInicio = document.getElementById('hora_inicio').value;
+            const horaFin = document.getElementById('hora_fin').value;
+            
+            if (horaInicio && horaFin) {
+                if (horaInicio >= horaFin) {
+                    alert('La hora de fin debe ser mayor que la hora de inicio');
+                    document.getElementById('hora_fin').classList.add('campo-error');
+                    return false;
+                } else {
+                    document.getElementById('hora_fin').classList.remove('campo-error');
+                }
+            }
+            return true;
+        }
+        //]]>
+    </script>
+{% endblock %}

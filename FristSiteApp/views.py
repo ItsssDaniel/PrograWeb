@@ -5,15 +5,17 @@ from django.db import connections
 from django.core.exceptions import ObjectDoesNotExist
 from .forms import RecepcionistaForm
 from django.contrib import messages
+from django.db.models import Q
 import json
-from datetime import datetime
+from datetime import datetime, time, timedelta
 from django.shortcuts import get_object_or_404
 
 from .models import Recepcionista
 from .models import PersonalExtra
 from .models import Medico
 from .models import Paciente
-from .forms import MedicoForm
+from .models import Cita
+from .forms import MedicoForm, CitaForm, FiltroCitasForm, DisponibilidadForm
 
 
 # Create your views here.
@@ -910,22 +912,559 @@ def login_view(request):
     return render(request, 'FristSiteApp/login.html')
 
 def citas_view(request):
-    return render(request, 'FristSiteApp/citas.html')
+    form_filtro = FiltroCitasForm(request.GET or None)
+    
+    # Obtener citas futuras y de hoy, ordenadas por fecha y hora
+    citas = Cita.objects.filter(
+        fecha__gte=datetime.now().date()
+    ).order_by('fecha', 'hora_inicio')[:10]  # Limitar a 10 citas para la vista principal
+    
+    # Aplicar filtros (si se usan, aunque en la vista principal quizá no se muestren)
+    if form_filtro.is_valid():
+        fecha_inicio = form_filtro.cleaned_data.get('fecha_inicio')
+        fecha_fin = form_filtro.cleaned_data.get('fecha_fin')
+        medico = form_filtro.cleaned_data.get('medico')
+        paciente = form_filtro.cleaned_data.get('paciente')
+        estado = form_filtro.cleaned_data.get('estado')
+        
+        if fecha_inicio:
+            citas = citas.filter(fecha__gte=fecha_inicio)
+        if fecha_fin:
+            citas = citas.filter(fecha__lte=fecha_fin)
+        if medico:
+            citas = citas.filter(medico=medico)
+        if paciente:
+            citas = citas.filter(paciente=paciente)
+        if estado:
+            citas = citas.filter(estado=estado)
+    
+    context = {
+        'citas': citas,
+        'form_filtro': form_filtro,
+        'total_citas': citas.count(),
+        'citas_hoy': Cita.objects.filter(fecha=datetime.now().date()).count(),
+        'citas_proximas': Cita.objects.filter(
+            fecha__gte=datetime.now().date(),
+            estado__in=['agendada', 'confirmada']
+        ).count(),
+    }
+    
+    return render(request, 'FristSiteApp/citas.html', context)
 
 def contacto_view(request):
     return render(request, 'FristSiteApp/contacto.html')
 
+@csrf_exempt
 def citas_agendar(request):
-    return render(request, 'FristSiteApp/citas/agendar.html')
+    if request.method == 'POST':
+        form = CitaForm(request.POST)
+        if form.is_valid():
+            cita = form.save(commit=False)
+            
+            # Si es una petición AJAX
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                try:
+                    cita.save()
+                    return JsonResponse({
+                        'success': True,
+                        'message': '✅ Cita agendada exitosamente!',
+                        'id': cita.id
+                    })
+                except Exception as e:
+                    return JsonResponse({
+                        'success': False,
+                        'message': f'❌ Error: {str(e)}'
+                    }, status=400)
+            else:
+                # Petición normal
+                cita.save()
+                messages.success(request, '✅ Cita agendada exitosamente!')
+                return redirect('citas')
+        else:
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({
+                    'success': False,
+                    'message': form.errors.as_json()
+                }, status=400)
+            else:
+                messages.error(request, '❌ Por favor corrija los errores en el formulario.')
+    
+    else:
+        form = CitaForm(initial={
+            'recepcionista': request.user if request.user.is_authenticated else None,
+            'fecha': datetime.now().date(),
+            'hora_inicio': time(9, 0),  # 9:00 AM por defecto
+            'hora_fin': time(10, 0),    # 10:00 AM por defecto
+        })
+    
+    # Obtener datos para el template
+    pacientes = Paciente.objects.filter(estado=True).order_by('nombre')
+    medicos = Medico.objects.filter(estado=True).order_by('nombre')
+    recepcionistas = Recepcionista.objects.filter(is_active=True).order_by('nombre')
+    
+    context = {
+        'form': form,
+        'pacientes': pacientes,
+        'medicos': medicos,
+        'recepcionistas': recepcionistas,
+    }
+    
+    return render(request, 'FristSiteApp/citas/agendar.html', context)
+@csrf_exempt
+def ver_disponibilidad(request):
+    if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        try:
+            data = json.loads(request.body)
+            fecha_str = data.get('fecha')
+            medico_id = data.get('medico')
+            turno = data.get('turno')
+            
+            if not fecha_str or not medico_id:
+                return JsonResponse({
+                    'success': False,
+                    'message': 'Fecha y médico son requeridos'
+                }, status=400)
+            
+            fecha = datetime.strptime(fecha_str, '%Y-%m-%d').date()
+            medico = get_object_or_404(Medico, id=medico_id)
+            
+            # Definir los turnos
+            turnos = {
+                'mañana': {'inicio': time(6, 0), 'fin': time(12, 0)},
+                'tarde': {'inicio': time(12, 0), 'fin': time(18, 0)},
+                'noche': {'inicio': time(18, 0), 'fin': time(23, 59)},
+            }
+            
+            # Obtener citas existentes para esa fecha y médico
+            citas_existentes = Cita.objects.filter(
+                medico=medico,
+                fecha=fecha,
+                estado__in=['agendada', 'confirmada', 'en_progreso']
+            ).order_by('hora_inicio')
+            
+            # Si se especificó un turno, filtrar por él
+            if turno and turno in turnos:
+                turno_info = turnos[turno]
+                citas_existentes = citas_existentes.filter(
+                    hora_inicio__gte=turno_info['inicio'],
+                    hora_fin__lte=turno_info['fin']
+                )
+                
+                # Generar horarios disponibles para el turno específico
+                horarios_disponibles = generar_horarios_disponibles(
+                    turno_info['inicio'], turno_info['fin'], citas_existentes
+                )
+                
+                return JsonResponse({
+                    'success': True,
+                    'medico': medico.nombre,
+                    'fecha': fecha_str,
+                    'turno': turno,
+                    'horarios_disponibles': horarios_disponibles,
+                    'citas_existentes': [
+                        {
+                            'hora_inicio': c.hora_inicio.strftime('%H:%M'),
+                            'hora_fin': c.hora_fin.strftime('%H:%M'),
+                            'paciente': c.paciente.nombre,
+                            'estado': c.estado
+                        }
+                        for c in citas_existentes
+                    ]
+                })
+            else:
+                # Si no se especificó turno, mostrar disponibilidad de todos los turnos
+                disponibilidad_turnos = {}
+                for nombre_turno, horario in turnos.items():
+                    citas_turno = citas_existentes.filter(
+                        hora_inicio__gte=horario['inicio'],
+                        hora_fin__lte=horario['fin']
+                    )
+                    horarios_disponibles = generar_horarios_disponibles(
+                        horario['inicio'], horario['fin'], citas_turno
+                    )
+                    
+                    disponibilidad_turnos[nombre_turno] = {
+                        'horarios_disponibles': horarios_disponibles,
+                        'ocupado': len(horarios_disponibles) == 0,
+                        'citas_count': citas_turno.count()
+                    }
+                
+                return JsonResponse({
+                    'success': True,
+                    'medico': medico.nombre,
+                    'fecha': fecha_str,
+                    'disponibilidad_turnos': disponibilidad_turnos
+                })
+                
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'message': f'Error: {str(e)}'
+            }, status=500)
+    
+    else:
+        form = DisponibilidadForm()
+        medicos = Medico.objects.filter(estado=True).order_by('nombre')
+        
+        context = {
+            'form': form,
+            'medicos': medicos,
+        }
+        
+        return render(request, 'FristSiteApp/citas/disponibilidad.html', context)
+
+def generar_horarios_disponibles(inicio_turno, fin_turno, citas_existentes):
+    """Genera una lista de horarios disponibles basados en citas existentes."""
+    # Intervalo de 30 minutos
+    intervalo = timedelta(minutes=30)
+    
+    # Convertir a datetime para cálculos
+    inicio = datetime.combine(datetime.today().date(), inicio_turno)
+    fin = datetime.combine(datetime.today().date(), fin_turno)
+    
+    # Crear lista de todos los posibles intervalos
+    horarios = []
+    current = inicio
+    
+    while current + intervalo <= fin:
+        horarios.append({
+            'inicio': current.time(),
+            'fin': (current + intervalo).time()
+        })
+        current += intervalo
+    
+    # Eliminar horarios que coincidan con citas existentes
+    for cita in citas_existentes:
+        cita_inicio = datetime.combine(datetime.today().date(), cita.hora_inicio)
+        cita_fin = datetime.combine(datetime.today().date(), cita.hora_fin)
+        
+        horarios = [h for h in horarios if not (
+            datetime.combine(datetime.today().date(), h['inicio']) < cita_fin and
+            datetime.combine(datetime.today().date(), h['fin']) > cita_inicio
+        )]
+    
+    # Convertir a formato legible
+    return [
+        {
+            'inicio': h['inicio'].strftime('%H:%M'),
+            'fin': h['fin'].strftime('%H:%M'),
+            'formatted': f"{h['inicio'].strftime('%I:%M %p')} - {h['fin'].strftime('%I:%M %p')}"
+        }
+        for h in horarios
+    ]
 
 def citas_consultar(request):
-    return render(request, 'FristSiteApp/citas/consultar.html')
+    # Citas activas (agendadas, confirmadas, en progreso)
+    citas_activas = Cita.objects.filter(
+        estado__in=['agendada', 'confirmada', 'en_progreso']
+    ).order_by('fecha', 'hora_inicio')
+    
+    # Historial (completadas y canceladas)
+    citas_historial = Cita.objects.filter(
+        estado__in=['completada', 'cancelada']
+    ).order_by('-fecha', '-hora_inicio')
+    
+    # Citas completadas para recetas
+    citas_completadas = Cita.objects.filter(
+        estado='completada'
+    ).order_by('-fecha', '-hora_inicio')
+    
+    context = {
+        'citas_activas': citas_activas,
+        'citas_historial': citas_historial,
+        'citas_completadas': citas_completadas,
+    }
+    
+    return render(request, 'FristSiteApp/citas/consultar.html', context)
+
+# ===========================================
+# VISTAS PARA MODIFICAR CITAS
+# ===========================================
 
 def citas_modificar(request):
-    return render(request, 'FristSiteApp/citas/modificar.html')
+    """
+    Vista para mostrar la lista de citas disponibles para modificar
+    (se usa cuando se accede a /citas/modificar/ sin ID)
+    """
+    # Solo citas futuras o del día actual que no estén canceladas o completadas
+    citas = Cita.objects.filter(
+        fecha__gte=datetime.now().date(),
+        estado__in=['agendada', 'confirmada', 'en_progreso']
+    ).order_by('fecha', 'hora_inicio')
+    
+    context = {
+        'citas': citas
+    }
+    
+    return render(request, 'FristSiteApp/citas/modificar.html', context)
 
-def citas_cancelar(request):
-    return render(request, 'FristSiteApp/citas/cancelar.html')
+@csrf_exempt
+def citas_modificar_id(request, id):
+    """
+    Vista para editar una cita específica
+    (se usa cuando se accede a /citas/modificar/<id>/)
+    """
+    cita = get_object_or_404(Cita, id=id)
+    
+    if request.method == 'POST':
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            # Petición AJAX
+            try:
+                data = json.loads(request.body)
+                
+                # Actualizar campos de la cita
+                cita.paciente_id = data.get('paciente')
+                cita.medico_id = data.get('medico')
+                cita.fecha = data.get('fecha')
+                cita.hora_inicio = data.get('hora_inicio')
+                cita.hora_fin = data.get('hora_fin')
+                cita.tipo_consulta = data.get('tipo_consulta')
+                cita.turno = data.get('turno')
+                cita.motivo = data.get('motivo')
+                cita.sintomas = data.get('sintomas')
+                cita.estado = data.get('estado')
+                cita.prioridad = data.get('prioridad')
+                cita.notas_internas = data.get('notas_internas')
+                
+                cita.save()
+                
+                return JsonResponse({
+                    'success': True,
+                    'message': '✅ Cita actualizada exitosamente!'
+                })
+                
+            except Exception as e:
+                return JsonResponse({
+                    'success': False,
+                    'message': f'❌ Error: {str(e)}'
+                }, status=400)
+        else:
+            # Petición normal de formulario
+            form = CitaForm(request.POST, instance=cita)
+            if form.is_valid():
+                form.save()
+                messages.success(request, '✅ Cita actualizada exitosamente!')
+                return redirect('citas_modificar')
+            else:
+                messages.error(request, '❌ Por favor corrija los errores en el formulario.')
+    
+    # Para peticiones GET, preparar contexto
+    pacientes = Paciente.objects.filter(estado=True).order_by('nombre')
+    medicos = Medico.objects.filter(estado=True).order_by('nombre')
+    
+    context = {
+        'cita': cita,
+        'pacientes': pacientes,
+        'medicos': medicos,
+    }
+    
+    return render(request, 'FristSiteApp/citas/editar.html', context)
+
+# ===========================================
+# VISTAS PARA CANCELAR CITAS
+# ===========================================
+
+@csrf_exempt
+def citas_cancelar(request, id=None):
+    if id:
+        cita = get_object_or_404(Cita, id=id)
+        
+        if request.method == 'DELETE':
+            # Esta es la petición AJAX desde consultar.html
+            try:
+                nombre_paciente = cita.paciente.nombre
+                
+                # Verificar que la cita se puede cancelar
+                if cita.estado in ['cancelada', 'completada']:
+                    return JsonResponse({
+                        'success': False,
+                        'message': f'No se puede cancelar una cita en estado: {cita.estado}'
+                    }, status=400)
+                
+                # Cancelar la cita
+                cita.estado = 'cancelada'
+                cita.notas_internas = f"Cita cancelada desde consultar.html\n{cita.notas_internas or ''}"
+                cita.save()
+                
+                return JsonResponse({
+                    'success': True,
+                    'message': f'✅ Cita de {nombre_paciente} cancelada exitosamente!'
+                })
+                
+            except Exception as e:
+                return JsonResponse({
+                    'success': False,
+                    'message': f'❌ Error: {str(e)}'
+                }, status=500)
+        
+        elif request.method == 'POST':
+            # Esta es la petición normal del formulario
+            try:
+                motivo = request.POST.get('motivo', 'Sin motivo especificado')
+                cita.estado = 'cancelada'
+                cita.notas_internas = f"Cita cancelada. Motivo: {motivo}\n{cita.notas_internas or ''}"
+                cita.save()
+                
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return JsonResponse({
+                        'success': True,
+                        'message': '✅ Cita cancelada exitosamente!'
+                    })
+                else:
+                    messages.success(request, '✅ Cita cancelada exitosamente!')
+                    return redirect('citas')
+                    
+            except Exception as e:
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return JsonResponse({
+                        'success': False,
+                        'message': f'❌ Error: {str(e)}'
+                    }, status=500)
+                else:
+                    messages.error(request, f'❌ Error: {str(e)}')
+                    return redirect('citas')
+        else:
+            # Método GET - mostrar página de confirmación
+            return render(request, 'FristSiteApp/citas/cancelar_confirmar.html', {
+                'cita': cita
+            })
+    else:
+        # Sin ID - mostrar lista de citas para cancelar
+        citas = Cita.objects.filter(
+            fecha__gte=datetime.now().date(),
+            estado__in=['agendada', 'confirmada']
+        ).order_by('fecha', 'hora_inicio')
+        
+        return render(request, 'FristSiteApp/citas/cancelar.html', {
+            'citas': citas
+        })
+
+def detalles_cita(request, id):
+    """
+    Vista para mostrar todos los detalles de una cita específica
+    """
+    cita = get_object_or_404(Cita, id=id)
+    
+    # Calcular duración de la cita
+    duracion_minutos = cita.calcular_duracion() if hasattr(cita, 'calcular_duracion') else 0
+    
+    # Obtener el recepcionista que agendó la cita
+    recepcionista = cita.recepcionista if cita.recepcionista else None
+    
+    context = {
+        'cita': cita,
+        'duracion_minutos': duracion_minutos,
+        'recepcionista': recepcionista,
+    }
+    
+    return render(request, 'FristSiteApp/citas/detalles.html', context)
+
+@csrf_exempt
+def citas_cancelar_directo(request, id):
+    """
+    Vista para cancelar una cita directamente (sin formulario de confirmación)
+    Se usa en la página de consultar.html
+    """
+    if request.method == 'DELETE':
+        try:
+            cita = get_object_or_404(Cita, id=id)
+            nombre_paciente = cita.paciente.nombre
+            
+            cita.estado = 'cancelada'
+            cita.notas_internas = f"Cita cancelada desde consultar.html\n{cita.notas_internas or ''}"
+            cita.save()
+            
+            return JsonResponse({
+                'success': True,
+                'message': f'✅ Cita de {nombre_paciente} cancelada exitosamente!'
+            })
+            
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'message': f'❌ Error: {str(e)}'
+            }, status=500)
+    
+    return JsonResponse({
+        'success': False,
+        'message': 'Método no permitido'
+    }, status=405)
+
+# ... (mantén el resto del código sin cambios)
+    
+@csrf_exempt
+def api_disponibilidad(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            fecha_str = data.get('fecha')
+            medico_id = data.get('medico_id')
+            hora_inicio_str = data.get('hora_inicio')
+            hora_fin_str = data.get('hora_fin')
+            
+            if not fecha_str or not medico_id:
+                return JsonResponse({'error': 'Fecha y médico son requeridos'}, status=400)
+            
+            fecha = datetime.strptime(fecha_str, '%Y-%m-%d').date()
+            medico = get_object_or_404(Medico, id=medico_id)
+            
+            # Obtener citas existentes para esa fecha y médico
+            citas_existentes = Cita.objects.filter(
+                medico=medico,
+                fecha=fecha,
+                estado__in=['agendada', 'confirmada', 'en_progreso']
+            )
+            
+            # Si se proporcionaron horas específicas, verificar disponibilidad
+            if hora_inicio_str and hora_fin_str:
+                hora_inicio = datetime.strptime(hora_inicio_str, '%H:%M').time()
+                hora_fin = datetime.strptime(hora_fin_str, '%H:%M').time()
+                
+                # Verificar conflictos
+                conflictos = []
+                for cita in citas_existentes:
+                    if (hora_inicio < cita.hora_fin and hora_fin > cita.hora_inicio):
+                        conflictos.append({
+                            'hora_inicio': cita.hora_inicio.strftime('%H:%M'),
+                            'hora_fin': cita.hora_fin.strftime('%H:%M'),
+                            'paciente': cita.paciente.nombre
+                        })
+                
+                if conflictos:
+                    return JsonResponse({
+                        'disponible': False,
+                        'mensaje': 'El médico tiene citas programadas en ese horario.',
+                        'citas_conflicto': ', '.join([f"{c['hora_inicio']}-{c['hora_fin']}" for c in conflictos])
+                    })
+                else:
+                    return JsonResponse({
+                        'disponible': True,
+                        'mensaje': f'El Dr. {medico.nombre} está disponible el {fecha_str} de {hora_inicio_str} a {hora_fin_str}.'
+                    })
+            
+            # Si no se proporcionaron horas, mostrar todas las citas del día
+            else:
+                citas_info = [
+                    {
+                        'hora_inicio': cita.hora_inicio.strftime('%H:%M'),
+                        'hora_fin': cita.hora_fin.strftime('%H:%M'),
+                        'paciente': cita.paciente.nombre,
+                        'estado': cita.estado
+                    }
+                    for cita in citas_existentes
+                ]
+                
+                return JsonResponse({
+                    'medico': medico.nombre,
+                    'fecha': fecha_str,
+                    'citas_del_dia': citas_info,
+                    'total_citas': len(citas_info)
+                })
+                
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+    
+    return JsonResponse({'error': 'Método no permitido'}, status=405)
 
 def ver_receta(request):
     return render(request, 'FristSiteApp/vista_extras/ver_receta.html')

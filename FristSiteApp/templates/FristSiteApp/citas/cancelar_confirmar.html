@@ -1,0 +1,162 @@
+{% extends 'FristSiteApp/base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="container main-content">
+        <div class="section" id="confirmar-cancelacion">
+            <h2>Confirmar Cancelación de Cita</h2>
+            
+            <div class="info-cita">
+                <h3>Detalles de la Cita</h3>
+                <table class="tabla-info">
+                    <tr>
+                        <th>ID Cita:</th>
+                        <td>CIT-{{ cita.id|stringformat:"03d" }}</td>
+                    </tr>
+                    <tr>
+                        <th>Paciente:</th>
+                        <td>{{ cita.paciente.nombre }}</td>
+                    </tr>
+                    <tr>
+                        <th>Médico:</th>
+                        <td>{{ cita.medico.nombre }}</td>
+                    </tr>
+                    <tr>
+                        <th>Fecha:</th>
+                        <td>{{ cita.fecha|date:"Y-m-d" }}</td>
+                    </tr>
+                    <tr>
+                        <th>Hora:</th>
+                        <td>{{ cita.hora_inicio|time:"H:i" }} - {{ cita.hora_fin|time:"H:i" }}</td>
+                    </tr>
+                    <tr>
+                        <th>Estado Actual:</th>
+                        <td><span class="estado">{{ cita.estado|title }}</span></td>
+                    </tr>
+                </table>
+            </div>
+            
+            <form class="formulario" id="formCancelarCita">
+                {% csrf_token %}
+                <input type="hidden" id="id" name="id" value="{{ cita.id }}" />
+                
+                <div class="campo-formulario">
+                    <label for="motivo_cancelacion">Motivo de Cancelación:</label>
+                    <select id="motivo_cancelacion" name="motivo_cancelacion" required>
+                        <option value="">Seleccionar motivo</option>
+                        <option value="paciente_no_puede_asistir">Paciente no puede asistir</option>
+                        <option value="medico_no_disponible">Médico no disponible</option>
+                        <option value="emergencia">Emergencia médica</option>
+                        <option value="cita_duplicada">Cita duplicada</option>
+                        <option value="error_agendamiento">Error en agendamiento</option>
+                        <option value="otro">Otro</option>
+                    </select>
+                    <span class="texto-ayuda">* Campo obligatorio</span>
+                </div>
+                
+                <div class="campo-formulario">
+                    <label for="detalles">Detalles Adicionales:</label>
+                    <textarea id="detalles" name="detalles" rows="3" placeholder="Proporciona más detalles sobre la cancelación..."></textarea>
+                </div>
+                
+                <div class="botones-formulario">
+                    <button type="submit" class="btn-confirmar-cancelar">Confirmar Cancelación</button>
+                    <button type="button" class="btn-volver" onclick="volverAtras()">
+                        Volver Atrás
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        //<![CDATA[
+        async function confirmarCancelacion(event) {
+            event.preventDefault();
+            
+            const motivo = document.getElementById('motivo_cancelacion').value;
+            const detalles = document.getElementById('detalles').value;
+            
+            if (!motivo) {
+                alert('Por favor, selecciona un motivo de cancelación.');
+                document.getElementById('motivo_cancelacion').classList.add('campo-error');
+                return false;
+            }
+            
+            if (!confirm('¿Estás seguro de que deseas cancelar esta cita?\n\n⚠️ Esta acción no se puede deshacer.')) {
+                return false;
+            }
+            
+            const formData = {
+                id: document.getElementById('id').value,
+                motivo_cancelacion: motivo,
+                detalles: detalles
+            };
+            
+            const boton = document.querySelector('.btn-confirmar-cancelar');
+            const textoOriginal = boton.innerHTML;
+            boton.innerHTML = 'Cancelando...';
+            boton.disabled = true;
+            
+            try {
+                const response = await fetch('{% url "citas_cancelar_id" cita.id %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert(data.message || '✅ Cita cancelada exitosamente');
+                    // Redirigir después de 1 segundo
+                    setTimeout(function() {
+                        window.location.href = "{% url 'citas' %}";
+                    }, 1000);
+                } else {
+                    alert('❌ ' + (data.message || 'Error al cancelar la cita.'));
+                    boton.innerHTML = textoOriginal;
+                    boton.disabled = false;
+                }
+                
+            } catch (error) {
+                alert('❌ Error de conexión. Intente nuevamente.');
+                console.error('Error:', error);
+                boton.innerHTML = textoOriginal;
+                boton.disabled = false;
+            }
+        }
+        
+        function volverAtras() {
+            window.history.back();
+        }
+        
+        // Función para obtener el token CSRF
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        
+        // Asignar evento al formulario
+        document.getElementById('formCancelarCita').addEventListener('submit', confirmarCancelacion);
+        
+        // Limpiar errores al seleccionar
+        document.getElementById('motivo_cancelacion').addEventListener('change', function() {
+            this.classList.remove('campo-error');
+        });
+        //]]>
+    </script>
+{% endblock %}

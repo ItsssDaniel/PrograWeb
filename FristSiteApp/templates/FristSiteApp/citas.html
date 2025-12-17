@@ -7,6 +7,22 @@
             <h2>Gestión de Citas Médicas</h2>
             <p>Programa y gestiona tus citas médicas de manera eficiente</p>
             
+            <!-- Resumen de citas -->
+            <div class="resumen-citas">
+                <div class="resumen-card">
+                    <h3>Total de Citas</h3>
+                    <p class="resumen-numero">{{ total_citas }}</p>
+                </div>
+                <div class="resumen-card">
+                    <h3>Citas Hoy</h3>
+                    <p class="resumen-numero">{{ citas_hoy }}</p>
+                </div>
+                <div class="resumen-card">
+                    <h3>Citas Próximas</h3>
+                    <p class="resumen-numero">{{ citas_proximas }}</p>
+                </div>
+            </div>
+            
             <div class="citas-actions">
                 <div class="action-card">
                     <div class="action-icon">📅</div>
@@ -39,7 +55,7 @@
 
             <!-- Sección de citas recientes -->
             <div class="citas-recientes">
-                <h3>Citas Programadas</h3>
+                <h3>Citas Programadas (Próximas)</h3>
                 <div class="contenedor-tabla">
                     <table class="tabla-datos">
                         <thead>
@@ -50,34 +66,33 @@
                                 <th>Fecha</th>
                                 <th>Hora</th>
                                 <th>Estado</th>
-                                <!-- Columna de Acciones eliminada -->
                             </tr>
                         </thead>
                         <tbody>
+                            {% for cita in citas %}
                             <tr>
-                                <td>CIT-001</td>
-                                <td>Ana García López</td>
-                                <td>Dr. Juan Pérez</td>
-                                <td>2024-01-15</td>
-                                <td>10:00 AM</td>
-                                <td>Confirmada</td>
+                                <td>CIT-{{ cita.id|stringformat:"03d" }}</td>
+                                <td>{{ cita.paciente.nombre }}</td>
+                                <td>{{ cita.medico.nombre }}</td>
+                                <td>{{ cita.fecha|date:"Y-m-d" }}</td>
+                                <td>{{ cita.hora_inicio|time:"H:i" }}</td>
+                                <td>
+                                    <span class="estado 
+                                        {% if cita.estado == 'confirmada' %}confirmada
+                                        {% elif cita.estado == 'agendada' %}agendada
+                                        {% elif cita.estado == 'completada' %}completada
+                                        {% elif cita.estado == 'cancelada' %}cancelada
+                                        {% elif cita.estado == 'en_progreso' %}en-progreso
+                                        {% else %}agendada{% endif %}">
+                                        {{ cita.estado|title }}
+                                    </span>
+                                </td>
                             </tr>
+                            {% empty %}
                             <tr>
-                                <td>CIT-002</td>
-                                <td>Carlos Rodríguez</td>
-                                <td>Dra. María López</td>
-                                <td>2024-01-16</td>
-                                <td>03:30 PM</td>
-                                <td>Pendiente</td>
+                                <td colspan="6" style="text-align: center;">No hay citas programadas</td>
                             </tr>
-                            <tr>
-                                <td>CIT-003</td>
-                                <td>María Fernández</td>
-                                <td>Dr. Roberto Sánchez</td>
-                                <td>2024-01-17</td>
-                                <td>09:15 AM</td>
-                                <td>Confirmada</td>
-                            </tr>
+                            {% endfor %}
                         </tbody>
                     </table>
                 </div>
@@ -92,6 +107,36 @@
     </div>
 
     <style type="text/css">
+        .resumen-citas {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+        
+        .resumen-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border: 1px solid var(--border);
+        }
+        
+        .resumen-card h3 {
+            margin-top: 0;
+            color: var(--text-light);
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .resumen-numero {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin: 0;
+        }
+        
         .citas-actions {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -161,7 +206,44 @@
             padding-bottom: 0.5rem;
         }
         
+        .estado {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .estado.agendada {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+        
+        .estado.confirmada {
+            background: #e8f5e8;
+            color: #2e7d32;
+        }
+        
+        .estado.completada {
+            background: #f3e5f5;
+            color: #7b1fa2;
+        }
+        
+        .estado.cancelada {
+            background: #ffebee;
+            color: #c62828;
+        }
+        
+        .estado.en-progreso {
+            background: #fff3e0;
+            color: #ef6c00;
+        }
+        
         @media (max-width: 768px) {
+            .resumen-citas {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            
             .citas-actions {
                 grid-template-columns: 1fr;
                 gap: 1.5rem;

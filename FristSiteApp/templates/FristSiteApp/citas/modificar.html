@@ -3,113 +3,105 @@
 
 {% block content %}
     <div class="container main-content">
-        <div class="section" id="modificar-cita">
-            <h2>Modificar Cita</h2>
-            <p>Busque una cita para modificar sus datos</p>
+        <div class="section" id="tabla-citas">
+            <h2>Citas para Modificar</h2>
+            <p>Selecciona una cita para modificar:</p>
             
-            <!-- Búsqueda de cita -->
-            <div class="busqueda-cita">
-                <div class="campo-formulario">
-                    <label for="buscar_cita">Buscar Cita por ID:</label>
-                    <input type="text" id="buscar_cita" placeholder="Ej: CIT-001" />
-                    <button type="button" class="btn-guardar" onclick="buscarCita()" style="margin-top: 0.5rem;">
-                        Buscar Cita
-                    </button>
+            {% if citas %}
+                <div class="contenedor-tabla">
+                    <table class="tabla-datos">
+                        <thead>
+                            <tr>
+                                <th>ID Cita</th>
+                                <th>Paciente</th>
+                                <th>Médico</th>
+                                <th>Fecha</th>
+                                <th>Hora</th>
+                                <th>Tipo Consulta</th>
+                                <th>Estado</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for cita in citas %}
+                            <tr>
+                                <td>CIT-{{ cita.id|stringformat:"03d" }}</td>
+                                <td>{{ cita.paciente.nombre }}</td>
+                                <td>{{ cita.medico.nombre }}</td>
+                                <td>{{ cita.fecha|date:"Y-m-d" }}</td>
+                                <td>{{ cita.hora_inicio|time:"H:i" }}</td>
+                                <td>
+                                    {% if cita.tipo_consulta == "general" %}
+                                        Consulta General
+                                    {% elif cita.tipo_consulta == "especialidad" %}
+                                        Especialidad
+                                    {% elif cita.tipo_consulta == "seguimiento" %}
+                                        Seguimiento
+                                    {% elif cita.tipo_consulta == "emergencia" %}
+                                        Emergencia
+                                    {% elif cita.tipo_consulta == "examen" %}
+                                        Examen
+                                    {% elif cita.tipo_consulta == "terapia" %}
+                                        Terapia
+                                    {% else %}
+                                        {{ cita.tipo_consulta }}
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="estado 
+                                        {% if cita.estado == 'confirmada' %}confirmada
+                                        {% elif cita.estado == 'agendada' %}programada
+                                        {% elif cita.estado == 'completada' %}completada
+                                        {% elif cita.estado == 'cancelada' %}cancelada
+                                        {% elif cita.estado == 'en_progreso' %}en-progreso
+                                        {% else %}programada{% endif %}">
+                                        {{ cita.estado|title }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <button type="button" class="btn-modificar-tabla" data-id="{{ cita.id }}">
+                                        <span class="icono">✎</span>
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
-            </div>
-            
-            <!-- Formulario de modificación (inicialmente oculto) -->
-            <div id="formulario-modificacion" style="display: none;">
-                <h3>Modificar Datos de la Cita</h3>
-                
-                <form class="formulario" onsubmit="actualizarCita(event); return false;">
-                    <div class="campos-duales">
-                        <div class="campo-formulario">
-                            <label for="cita_id">ID Cita:</label>
-                            <input type="text" id="cita_id" readonly="readonly" class="campo-readonly" />
-                        </div>
-                        
-                        <div class="campo-formulario">
-                            <label for="cita_estado">Estado:</label>
-                            <select id="cita_estado">
-                                <option value="programada">Programada</option>
-                                <option value="confirmada">Confirmada</option>
-                                <option value="completada">Completada</option>
-                                <option value="cancelada">Cancelada</option>
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <div class="campos-duales">
-                        <div class="campo-formulario">
-                            <label for="cita_fecha">Nueva Fecha:</label>
-                            <input type="date" id="cita_fecha" />
-                        </div>
-                        
-                        <div class="campo-formulario">
-                            <label for="cita_hora">Nueva Hora:</label>
-                            <input type="time" id="cita_hora" />
-                        </div>
-                    </div>
-                    
-                    <div class="campo-formulario">
-                        <label for="cita_motivo">Motivo Actualizado:</label>
-                        <textarea id="cita_motivo" rows="3"></textarea>
-                    </div>
-                    
-                    <div class="campo-formulario">
-                        <label for="cita_notas">Notas Adicionales:</label>
-                        <textarea id="cita_notas" rows="2" placeholder="Agregar notas adicionales..."></textarea>
-                    </div>
-                    
-                    <div class="botones-formulario">
-                        <button type="submit" class="btn-actualizar">Actualizar Cita</button>
-                        <button type="button" class="btn-volver" onclick="cancelarModificacion()">
-                            Cancelar
-                        </button>
-                    </div>
-                </form>
+            {% else %}
+                <div class="mensaje-sin-datos">
+                    <p>No hay citas registradas en el sistema.</p>
+                    <p><a href="{% url 'citas_agendar' %}" class="btn-agregar">Agendar Primera Cita</a></p>
+                </div>
+            {% endif %}
+
+            <div class="botones-volver">
+                <button type="button" class="btn-volver" onclick="window.location.href='/citas/'">
+                    Volver a Citas
+                </button>
             </div>
         </div>
     </div>
 
     <script type="text/javascript">
         //<![CDATA[
-        function buscarCita() {
-            const idBuscar = document.getElementById('buscar_cita').value;
-            
-            if (!idBuscar) {
-                alert('Por favor, ingrese un ID de cita.');
-                return;
-            }
-            
-            // Simular búsqueda exitosa
-            document.getElementById('formulario-modificacion').style.display = 'block';
-            document.getElementById('cita_id').value = idBuscar;
-            document.getElementById('cita_fecha').value = '2024-01-15';
-            document.getElementById('cita_hora').value = '10:00';
-            document.getElementById('cita_motivo').value = 'Consulta de seguimiento por tratamiento médico';
-            document.getElementById('cita_notas').value = 'Paciente requiere estudios previos';
-            
-            alert('Cita ' + idBuscar + ' encontrada. Puede modificar los datos.');
+        // Función para modificar cita
+        function modificarCita(id) {
+            // Redirigir a la página de edición con el ID
+            window.location.href = '/citas/modificar/' + id + '/';
         }
         
-        function actualizarCita(event) {
-            event.preventDefault();
+        // Asignar eventos a los botones
+        document.addEventListener('DOMContentLoaded', function() {
+            const botones = document.querySelectorAll('.btn-modificar-tabla');
             
-            const idCita = document.getElementById('cita_id').value;
-            alert('Cita ' + idCita + ' actualizada exitosamente.');
-            
-            setTimeout(function() {
-                window.location.href = "{% url 'citas' %}";
-            }, 1500);
-        }
-        
-        function cancelarModificacion() {
-            if (confirm('¿Está seguro de que desea cancelar la modificación?')) {
-                window.location.href = "{% url 'citas' %}";
-            }
-        }
+            botones.forEach(function(boton) {
+                boton.addEventListener('click', function() {
+                    const citaId = this.getAttribute('data-id');
+                    modificarCita(citaId);
+                });
+            });
+        });
         //]]>
     </script>
 {% endblock %}

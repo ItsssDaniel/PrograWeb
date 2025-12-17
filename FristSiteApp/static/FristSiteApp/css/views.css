@@ -669,3 +669,29 @@ input.telefono {
 [data-tema="oscuro"] #registro p {
     color: var(--text-light);
 }
+
+
+.estado.agendada {
+    background: #e3f2fd;
+    color: #1976d2;
+}
+
+.estado.confirmada {
+    background: #e8f5e8;
+    color: #2e7d32;
+}
+
+.estado.en_progreso {
+    background: #fff3e0;
+    color: #ef6c00;
+}
+
+.estado.completada {
+    background: #f3e5f5;
+    color: #7b1fa2;
+}
+
+.estado.cancelada {
+    background: #ffebee;
+    color: #c62828;
+}

@@ -1,0 +1,341 @@
+{% extends 'FristSiteApp/base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="container main-content">
+        <div class="section" id="detalles-cita">
+            <h2>Detalles de la Cita</h2>
+            
+            <div class="detalles-container">
+                <!-- Información principal -->
+                <div class="info-card">
+                    <h3>Información de la Cita</h3>
+                    <table class="tabla-detalles">
+                        <tr>
+                            <th>ID Cita:</th>
+                            <td>CIT-{{ cita.id|stringformat:"03d" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Fecha:</th>
+                            <td>{{ cita.fecha|date:"d/m/Y" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Horario:</th>
+                            <td>{{ cita.hora_inicio|time:"H:i" }} - {{ cita.hora_fin|time:"H:i" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Duración:</th>
+                            <td>{{ duracion_minutos }} minutos</td>
+                        </tr>
+                        <tr>
+                            <th>Turno:</th>
+                            <td>
+                                {% if cita.turno == 'mañana' %}Mañana (6:00 AM - 12:00 PM)
+                                {% elif cita.turno == 'tarde' %}Tarde (12:00 PM - 6:00 PM)
+                                {% elif cita.turno == 'noche' %}Noche (6:00 PM - 12:00 AM)
+                                {% else %}{{ cita.turno }}{% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Tipo de Consulta:</th>
+                            <td>{{ cita.tipo_consulta|title }}</td>
+                        </tr>
+                        <tr>
+                            <th>Estado:</th>
+                            <td>
+                                <span class="estado 
+                                    {% if cita.estado == 'confirmada' %}confirmada
+                                    {% elif cita.estado == 'agendada' %}agendada
+                                    {% elif cita.estado == 'completada' %}completada
+                                    {% elif cita.estado == 'cancelada' %}cancelada
+                                    {% elif cita.estado == 'en_progreso' %}en-progreso
+                                    {% else %}agendada{% endif %}">
+                                    {{ cita.estado|title }}
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Prioridad:</th>
+                            <td>{{ cita.prioridad|title }}</td>
+                        </tr>
+                        <tr>
+                            <th>Motivo:</th>
+                            <td>{{ cita.motivo }}</td>
+                        </tr>
+                        {% if cita.sintomas %}
+                        <tr>
+                            <th>Síntomas:</th>
+                            <td>{{ cita.sintomas }}</td>
+                        </tr>
+                        {% endif %}
+                        {% if cita.diagnostico_previo %}
+                        <tr>
+                            <th>Diagnóstico Previo:</th>
+                            <td>{{ cita.diagnostico_previo }}</td>
+                        </tr>
+                        {% endif %}
+                        <tr>
+                            <th>Fecha de Creación:</th>
+                            <td>{{ cita.fecha_creacion|date:"d/m/Y H:i" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Última Modificación:</th>
+                            <td>{{ cita.fecha_modificacion|date:"d/m/Y H:i" }}</td>
+                        </tr>
+                        {% if cita.recordatorio_enviado %}
+                        <tr>
+                            <th>Recordatorio:</th>
+                            <td><span class="estado confirmada">Enviado</span></td>
+                        </tr>
+                        {% endif %}
+                    </table>
+                </div>
+                
+                <!-- Información del Paciente -->
+                <div class="info-card">
+                    <h3>Información del Paciente</h3>
+                    <table class="tabla-detalles">
+                        <tr>
+                            <th>Nombre:</th>
+                            <td>{{ cita.paciente.nombre }}</td>
+                        </tr>
+                        <tr>
+                            <th>Email:</th>
+                            <td>{{ cita.paciente.email }}</td>
+                        </tr>
+                        <tr>
+                            <th>Teléfono:</th>
+                            <td>{{ cita.paciente.telefono }}</td>
+                        </tr>
+                        <tr>
+                            <th>Dirección:</th>
+                            <td>{{ cita.paciente.direccion }}</td>
+                        </tr>
+                        {% if cita.paciente.tipo_sangre %}
+                        <tr>
+                            <th>Tipo de Sangre:</th>
+                            <td>{{ cita.paciente.tipo_sangre }}</td>
+                        </tr>
+                        {% endif %}
+                        <tr>
+                            <th>Condiciones:</th>
+                            <td>
+                                {% if cita.paciente.diabetico %}Diabetes {% endif %}
+                                {% if cita.paciente.hipertenso %}Hipertensión {% endif %}
+                                {% if cita.paciente.fumador %}Fumador {% endif %}
+                                {% if not cita.paciente.diabetico and not cita.paciente.hipertenso and not cita.paciente.fumador %}
+                                    Ninguna
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% if cita.paciente.alergias %}
+                        <tr>
+                            <th>Alergias:</th>
+                            <td>{{ cita.paciente.alergias }}</td>
+                        </tr>
+                        {% endif %}
+                    </table>
+                </div>
+                
+                <!-- Información del Médico -->
+                <div class="info-card">
+                    <h3>Información del Médico</h3>
+                    <table class="tabla-detalles">
+                        <tr>
+                            <th>Nombre:</th>
+                            <td>Dr. {{ cita.medico.nombre }}</td>
+                        </tr>
+                        <tr>
+                            <th>Especialidad:</th>
+                            <td>{{ cita.medico.especialidad }}</td>
+                        </tr>
+                        <tr>
+                            <th>Cédula Profesional:</th>
+                            <td>{{ cita.medico.cedula_profesional }}</td>
+                        </tr>
+                        <tr>
+                            <th>Email:</th>
+                            <td>{{ cita.medico.email }}</td>
+                        </tr>
+                        <tr>
+                            <th>Teléfono:</th>
+                            <td>{{ cita.medico.telefono }}</td>
+                        </tr>
+                        <tr>
+                            <th>Consultorio:</th>
+                            <td>{{ cita.medico.direccion_consultorio }}</td>
+                        </tr>
+                        <tr>
+                            <th>Horario de Atención:</th>
+                            <td>{{ cita.medico.horario_atencion }}</td>
+                        </tr>
+                    </table>
+                </div>
+                
+                <!-- Información Adicional -->
+                <div class="info-card">
+                    <h3>Información Adicional</h3>
+                    <table class="tabla-detalles">
+                        {% if recepcionista %}
+                        <tr>
+                            <th>Recepcionista que agendó:</th>
+                            <td>{{ recepcionista.nombre }}</td>
+                        </tr>
+                        {% endif %}
+                        {% if cita.notas_internas %}
+                        <tr>
+                            <th>Notas Internas:</th>
+                            <td class="notas-internas">{{ cita.notas_internas|linebreaks }}</td>
+                        </tr>
+                        {% endif %}
+                    </table>
+                </div>
+            </div>
+            
+            <div class="botones-detalles">
+                <button type="button" class="btn-volver" onclick="window.history.back()">
+                    Volver Atrás
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <style type="text/css">
+        .detalles-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .info-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border: 1px solid var(--border);
+        }
+        
+        .info-card h3 {
+            margin-top: 0;
+            margin-bottom: 1rem;
+            color: var(--primary);
+            border-bottom: 2px solid var(--primary-light);
+            padding-bottom: 0.5rem;
+        }
+        
+        .tabla-detalles {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .tabla-detalles tr {
+            border-bottom: 1px solid var(--border-light);
+        }
+        
+        .tabla-detalles tr:last-child {
+            border-bottom: none;
+        }
+        
+        .tabla-detalles th {
+            text-align: left;
+            padding: 0.75rem 0.5rem 0.75rem 0;
+            font-weight: 600;
+            color: var(--text);
+            white-space: nowrap;
+            width: 35%;
+        }
+        
+        .tabla-detalles td {
+            padding: 0.75rem 0;
+            color: var(--text-light);
+        }
+        
+        .notas-internas {
+            white-space: pre-wrap;
+            font-style: italic;
+            background: #f9f9f9;
+            padding: 0.5rem;
+            border-radius: 4px;
+            border-left: 3px solid var(--primary);
+        }
+        
+        .botones-detalles {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 2px solid var(--border);
+        }
+        
+        .btn-volver, .btn-modificar, .btn-eliminar {
+            padding: 0.75rem 2rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-volver {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-modificar {
+            background: #FF9800;
+            color: white;
+        }
+        
+        .btn-eliminar {
+            background: #F44336;
+            color: white;
+        }
+        
+        .btn-volver:hover {
+            background: #5a6268;
+        }
+        
+        .btn-modificar:hover {
+            background: #e68900;
+        }
+        
+        .btn-eliminar:hover {
+            background: #d32f2f;
+        }
+        
+        .estado {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+        
+        .estado.agendada {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+        
+        .estado.confirmada {
+            background: #e8f5e8;
+            color: #2e7d32;
+        }
+        
+        .estado.completada {
+            background: #f3e5f5;
+            color: #7b1fa2;
+        }
+        
+        .estado.cancelada {
+            background: #ffebee;
+            color: #c62828;
+        }
+        
+        .estado.en-progreso {
+            background: #fff3e0;
+            color: #ef6c00;
+        }
+    </style>
+{% endblock %}

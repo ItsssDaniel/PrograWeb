@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.utils import timezone
-from datetime import date
+from datetime import date, datetime
 
 def default_fecha_contratacion():
     return date.today()
@@ -195,3 +195,101 @@ class Paciente(models.Model):
         if (today.month, today.day) < (fecha_nac.month, fecha_nac.day):
             edad -= 1
         return edad
+    
+class Cita(models.Model):
+    ESTADO_CHOICES = [
+        ('agendada', 'Agendada'),
+        ('confirmada', 'Confirmada'),
+        ('en_progreso', 'En Progreso'),
+        ('completada', 'Completada'),
+        ('cancelada', 'Cancelada'),
+        ('no_asistio', 'No Asistió'),
+    ]
+    
+    TURNO_CHOICES = [
+        ('mañana', 'Mañana (6:00 AM - 12:00 PM)'),
+        ('tarde', 'Tarde (12:00 PM - 6:00 PM)'),
+        ('noche', 'Noche (6:00 PM - 12:00 AM)'),
+    ]
+    
+    # Relaciones
+    paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE, related_name='citas')
+    medico = models.ForeignKey(Medico, on_delete=models.CASCADE, related_name='citas')
+    recepcionista = models.ForeignKey(Recepcionista, on_delete=models.SET_NULL, null=True, blank=True, related_name='citas_agendadas')
+    
+    # Información de la cita
+    fecha = models.DateField()
+    turno = models.CharField(max_length=10, choices=TURNO_CHOICES)
+    hora_inicio = models.TimeField()
+    hora_fin = models.TimeField()
+    
+    # Detalles de la consulta
+    tipo_consulta = models.CharField(max_length=50, choices=[
+        ('general', 'Consulta General'),
+        ('especialidad', 'Consulta de Especialidad'),
+        ('seguimiento', 'Consulta de Seguimiento'),
+        ('emergencia', 'Emergencia'),
+        ('examen', 'Examen'),
+        ('terapia', 'Terapia'),
+    ])
+    
+    motivo = models.TextField()
+    sintomas = models.TextField(blank=True, null=True)
+    diagnostico_previo = models.TextField(blank=True, null=True)
+    
+    # Estado y seguimiento
+    estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='agendada')
+    prioridad = models.CharField(max_length=20, choices=[
+        ('normal', 'Normal'),
+        ('urgente', 'Urgente'),
+        ('emergencia', 'Emergencia'),
+    ], default='normal')
+    
+    # Registro
+    fecha_creacion = models.DateTimeField(default=timezone.now)
+    fecha_modificacion = models.DateTimeField(auto_now=True)
+    notas_internas = models.TextField(blank=True, null=True)
+    recordatorio_enviado = models.BooleanField(default=False)
+    
+    objects = models.Manager()
+    
+    class Meta:
+        db_table = 'cita'
+        verbose_name = 'Cita'
+        verbose_name_plural = 'Citas'
+        ordering = ['fecha', 'hora_inicio']
+        unique_together = ['medico', 'fecha', 'hora_inicio']
+    
+    def __str__(self):
+        # Usa pk (primary key) en lugar de id
+        paciente_nombre = getattr(self.paciente, 'nombre', 'Paciente desconocido')
+        medico_nombre = getattr(self.medico, 'nombre', 'Médico desconocido')
+        return f"Cita #{self.pk}: {paciente_nombre} con Dr. {medico_nombre} - {self.fecha} {self.hora_inicio}"
+    
+    def calcular_duracion(self):
+        """Calcula la duración de la cita en minutos."""
+        # Convierte las horas a objetos datetime para calcular la diferencia
+        inicio_dt = datetime.combine(datetime.today(), self.hora_inicio)
+        fin_dt = datetime.combine(datetime.today(), self.hora_fin)
+        duracion = fin_dt - inicio_dt
+        return int(duracion.total_seconds() / 60)
+    
+    def esta_ocupada(self):
+        """Verifica si la cita está en un horario ocupado."""
+        citas_conflictivas = Cita.objects.filter(
+            medico=self.medico,
+            fecha=self.fecha,
+            estado__in=['agendada', 'confirmada', 'en_progreso']
+        ).exclude(pk=self.pk)
+        
+        for cita in citas_conflictivas:
+            # Verificar superposición de horarios convirtiendo a objetos datetime
+            inicio_actual = datetime.combine(self.fecha, self.hora_inicio)
+            fin_actual = datetime.combine(self.fecha, self.hora_fin)
+            inicio_conflicto = datetime.combine(cita.fecha, cita.hora_inicio)
+            fin_conflicto = datetime.combine(cita.fecha, cita.hora_fin)
+            
+            if (inicio_actual < fin_conflicto and fin_actual > inicio_conflicto):
+                return True
+        
+        return False

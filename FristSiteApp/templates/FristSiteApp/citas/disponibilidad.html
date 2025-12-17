@@ -1,0 +1,434 @@
+{% extends 'FristSiteApp/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container main-content">
+    <div class="section" id="disponibilidad-citas">
+        <h2>Ver Disponibilidad de Citas</h2>
+        <p>Consulta los horarios disponibles para agendar citas médicas</p>
+        
+        <!-- Formulario de búsqueda de disponibilidad -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <form id="formDisponibilidad" class="row g-3">
+                    {% csrf_token %}
+                    <div class="col-md-4">
+                        <label for="medico_disponibilidad" class="form-label">Médico</label>
+                        <select id="medico_disponibilidad" class="form-select" required>
+                            <option value="">Seleccionar médico</option>
+                            {% for medico in medicos %}
+                            <option value="{{ medico.id }}">{{ medico.nombre }} - {{ medico.especialidad }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="fecha_disponibilidad" class="form-label">Fecha</label>
+                        <input type="date" id="fecha_disponibilidad" class="form-control" 
+                               min="{% now 'Y-m-d' %}" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="turno_disponibilidad" class="form-label">Turno (Opcional)</label>
+                        <select id="turno_disponibilidad" class="form-select">
+                            <option value="">Todos los turnos</option>
+                            <option value="mañana">Mañana (6:00 AM - 12:00 PM)</option>
+                            <option value="tarde">Tarde (12:00 PM - 6:00 PM)</option>
+                            <option value="noche">Noche (6:00 PM - 12:00 AM)</option>
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-primary" id="btnBuscarDisponibilidad">
+                            <i class="fas fa-search me-2"></i>Buscar Disponibilidad
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Resultados de disponibilidad -->
+        <div id="resultadosDisponibilidad" class="d-none">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Resultados de Disponibilidad</h5>
+                </div>
+                <div class="card-body">
+                    <div id="infoMedicoFecha" class="alert alert-info mb-4">
+                        <strong id="medicoNombre"></strong> - <span id="fechaSeleccionada"></span>
+                    </div>
+
+                    <!-- Tabs para diferentes turnos -->
+                    <ul class="nav nav-tabs mb-4" id="turnosTab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="mañana-tab" data-bs-toggle="tab" 
+                                    data-bs-target="#mañana" type="button" role="tab">
+                                <i class="fas fa-sun me-2"></i>Mañana (6:00 AM - 12:00 PM)
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="tarde-tab" data-bs-toggle="tab" 
+                                    data-bs-target="#tarde" type="button" role="tab">
+                                <i class="fas fa-cloud-sun me-2"></i>Tarde (12:00 PM - 6:00 PM)
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="noche-tab" data-bs-toggle="tab" 
+                                    data-bs-target="#noche" type="button" role="tab">
+                                <i class="fas fa-moon me-2"></i>Noche (6:00 PM - 12:00 AM)
+                            </button>
+                        </li>
+                    </ul>
+
+                    <!-- Contenido de los tabs -->
+                    <div class="tab-content" id="turnosTabContent">
+                        <!-- Turno Mañana -->
+                        <div class="tab-pane fade show active" id="mañana" role="tabpanel">
+                            <div class="row" id="horariosMañana">
+                                <!-- Los horarios disponibles se cargarán aquí dinámicamente -->
+                            </div>
+                        </div>
+
+                        <!-- Turno Tarde -->
+                        <div class="tab-pane fade" id="tarde" role="tabpanel">
+                            <div class="row" id="horariosTarde">
+                                <!-- Los horarios disponibles se cargarán aquí dinámicamente -->
+                            </div>
+                        </div>
+
+                        <!-- Turno Noche -->
+                        <div class="tab-pane fade" id="noche" role="tabpanel">
+                            <div class="row" id="horariosNoche">
+                                <!-- Los horarios disponibles se cargarán aquí dinámicamente -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Citas existentes -->
+                    <div class="mt-5" id="citasExistentesSection">
+                        <h6 class="mb-3"><i class="fas fa-calendar-times me-2"></i>Citas ya agendadas</h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm" id="tablaCitasExistentes">
+                                <thead>
+                                    <tr>
+                                        <th>Hora</th>
+                                        <th>Paciente</th>
+                                        <th>Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Las citas existentes se cargarán aquí -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <button class="btn btn-success" id="btnAgendarDesdeDisponibilidad">
+                        <i class="fas fa-calendar-plus me-2"></i>Agendar Cita con estos datos
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const formDisponibilidad = document.getElementById('formDisponibilidad');
+    const resultadosDiv = document.getElementById('resultadosDisponibilidad');
+    const btnBuscar = document.getElementById('btnBuscarDisponibilidad');
+    
+    // Establecer fecha mínima como hoy
+    const fechaInput = document.getElementById('fecha_disponibilidad');
+    const today = new Date().toISOString().split('T')[0];
+    fechaInput.value = today;
+    fechaInput.min = today;
+    
+    formDisponibilidad.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const medicoId = document.getElementById('medico_disponibilidad').value;
+        const fecha = document.getElementById('fecha_disponibilidad').value;
+        const turno = document.getElementById('turno_disponibilidad').value;
+        
+        if (!medicoId || !fecha) {
+            alert('Por favor, seleccione un médico y una fecha.');
+            return;
+        }
+        
+        // Cambiar texto del botón
+        btnBuscar.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Buscando...';
+        btnBuscar.disabled = true;
+        
+        try {
+            const response = await fetch('{% url "ver_disponibilidad" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({
+                    medico: medicoId,
+                    fecha: fecha,
+                    turno: turno
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                mostrarResultados(data);
+                resultadosDiv.classList.remove('d-none');
+            } else {
+                alert('Error: ' + data.message);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error al buscar disponibilidad. Intente nuevamente.');
+        } finally {
+            btnBuscar.innerHTML = '<i class="fas fa-search me-2"></i>Buscar Disponibilidad';
+            btnBuscar.disabled = false;
+        }
+    });
+    
+    function mostrarResultados(data) {
+        // Actualizar información del médico y fecha
+        document.getElementById('medicoNombre').textContent = data.medico;
+        document.getElementById('fechaSeleccionada').textContent = data.fecha;
+        
+        if (data.turno) {
+            // Solo mostrar un turno específico
+            const turnoTab = document.getElementById(`${data.turno}-tab`);
+            if (turnoTab) {
+                turnoTab.click(); // Activar el tab correspondiente
+            }
+            
+            // Mostrar horarios en el turno específico
+            mostrarHorariosEnTurno(data.turno, data.horarios_disponibles);
+            
+            // Mostrar citas existentes
+            mostrarCitasExistentes(data.citas_existentes);
+            
+            // Ocultar otros tabs
+            ['mañana', 'tarde', 'noche'].forEach(t => {
+                if (t !== data.turno) {
+                    const tabBtn = document.getElementById(`${t}-tab`);
+                    const tabPane = document.getElementById(t);
+                    if (tabBtn) tabBtn.classList.add('d-none');
+                    if (tabPane) tabPane.classList.add('d-none');
+                }
+            });
+        } else {
+            // Mostrar todos los turnos
+            mostrarDisponibilidadTodosTurnos(data.disponibilidad_turnos);
+        }
+        
+        // Configurar botón para agendar cita
+        document.getElementById('btnAgendarDesdeDisponibilidad').onclick = function() {
+            const medicoId = document.getElementById('medico_disponibilidad').value;
+            const fecha = document.getElementById('fecha_disponibilidad').value;
+            window.location.href = `{% url 'citas_agendar' %}?medico=${medicoId}&fecha=${fecha}`;
+        };
+    }
+    
+    function mostrarHorariosEnTurno(turnoId, horarios) {
+        const container = document.getElementById(`horarios${capitalizeFirstLetter(turnoId)}`);
+        container.innerHTML = '';
+        
+        if (horarios.length === 0) {
+            container.innerHTML = `
+                <div class="col-12">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        No hay horarios disponibles en este turno.
+                    </div>
+                </div>
+            `;
+            return;
+        }
+        
+        horarios.forEach(horario => {
+            const col = document.createElement('div');
+            col.className = 'col-md-3 col-sm-4 col-6 mb-3';
+            
+            col.innerHTML = `
+                <div class="card horario-disponible" data-hora-inicio="${horario.inicio}">
+                    <div class="card-body text-center p-3">
+                        <h6 class="card-title mb-2">${horario.formatted}</h6>
+                        <span class="badge bg-success">Disponible</span>
+                    </div>
+                </div>
+            `;
+            
+            container.appendChild(col);
+        });
+    }
+    
+    function mostrarDisponibilidadTodosTurnos(disponibilidad) {
+        for (const [turno, info] of Object.entries(disponibilidad)) {
+            const container = document.getElementById(`horarios${capitalizeFirstLetter(turno)}`);
+            container.innerHTML = '';
+            
+            if (info.ocupado) {
+                container.innerHTML = `
+                    <div class="col-12">
+                        <div class="alert alert-danger">
+                            <i class="fas fa-times-circle me-2"></i>
+                            Turno completamente ocupado
+                        </div>
+                    </div>
+                `;
+            } else {
+                info.horarios_disponibles.forEach(horario => {
+                    const col = document.createElement('div');
+                    col.className = 'col-md-3 col-sm-4 col-6 mb-3';
+                    
+                    col.innerHTML = `
+                        <div class="card horario-disponible" data-hora-inicio="${horario.inicio}">
+                            <div class="card-body text-center p-3">
+                                <h6 class="card-title mb-2">${horario.formatted}</h6>
+                                <span class="badge bg-success">Disponible</span>
+                            </div>
+                        </div>
+                    `;
+                    
+                    container.appendChild(col);
+                });
+            }
+        }
+    }
+    
+    function mostrarCitasExistentes(citas) {
+        const tbody = document.querySelector('#tablaCitasExistentes tbody');
+        tbody.innerHTML = '';
+        
+        if (citas.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="3" class="text-center text-muted">
+                        No hay citas agendadas para esta fecha
+                    </td>
+                </tr>
+            `;
+            document.getElementById('citasExistentesSection').classList.add('d-none');
+            return;
+        }
+        
+        document.getElementById('citasExistentesSection').classList.remove('d-none');
+        
+        citas.forEach(cita => {
+            const row = document.createElement('tr');
+            
+            let estadoBadge = '';
+            switch(cita.estado) {
+                case 'agendada':
+                    estadoBadge = '<span class="badge bg-primary">Agendada</span>';
+                    break;
+                case 'confirmada':
+                    estadoBadge = '<span class="badge bg-success">Confirmada</span>';
+                    break;
+                case 'en_progreso':
+                    estadoBadge = '<span class="badge bg-warning">En Progreso</span>';
+                    break;
+                default:
+                    estadoBadge = `<span class="badge bg-secondary">${cita.estado}</span>`;
+            }
+            
+            row.innerHTML = `
+                <td>${cita.hora_inicio} - ${cita.hora_fin}</td>
+                <td>${cita.paciente}</td>
+                <td>${estadoBadge}</td>
+            `;
+            
+            tbody.appendChild(row);
+        });
+    }
+    
+    function capitalizeFirstLetter(string) {
+        return string.charAt(0).toUpperCase() + string.slice(1);
+    }
+    
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+});
+</script>
+
+<style>
+.horario-disponible {
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.horario-disponible:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    border-color: #198754;
+}
+
+.horario-disponible .card-body {
+    padding: 1rem !important;
+}
+
+.nav-tabs .nav-link {
+    color: #495057;
+    font-weight: 500;
+}
+
+.nav-tabs .nav-link.active {
+    color: #198754;
+    border-bottom-color: #198754;
+}
+
+.badge {
+    font-size: 0.75em;
+    padding: 0.35em 0.65em;
+}
+
+.alert {
+    border-radius: 8px;
+}
+
+.card {
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.table th {
+    border-top: none;
+    font-weight: 600;
+}
+
+@media (max-width: 768px) {
+    .col-6 {
+        padding-left: 5px;
+        padding-right: 5px;
+    }
+    
+    .horario-disponible .card-body {
+        padding: 0.75rem !important;
+    }
+    
+    .nav-tabs .nav-link {
+        font-size: 0.9rem;
+        padding: 0.5rem;
+    }
+}
+</style>
+{% endblock %}

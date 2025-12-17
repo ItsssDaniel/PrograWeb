@@ -49,12 +49,23 @@ urlpatterns = [
     path('personal_extra/modificar/', views.personal_extra_modificar, name='personal_extra_modificar'),
     path('personal_extra/registros/', views.personal_extra_registros, name='personal_extra_registros'),
 
-    # URLs para Citas (mantener estas)
+    # URLs para Citas (actualizadas)
+    path('citas/', views.citas_view, name='citas'),
     path('citas/agendar/', views.citas_agendar, name='citas_agendar'),
+    path('citas/disponibilidad/', views.ver_disponibilidad, name='ver_disponibilidad'),
     path('citas/consultar/', views.citas_consultar, name='citas_consultar'),
-    path('citas/modificar/', views.citas_modificar, name='citas_modificar'),
-    path('citas/cancelar/', views.citas_cancelar, name='citas_cancelar'),
-
+    
+    # Modificar citas
+    path('citas/modificar/', views.citas_modificar, name='citas_modificar'),  # Lista
+    path('citas/modificar/<int:id>/', views.citas_modificar_id, name='citas_modificar_id'),  # Editar específica
+    path('citas/detalles/<int:id>/', views.detalles_cita, name='detalles_cita'),
+    # Cancelar citas
+    path('citas/cancelar/', views.citas_cancelar, name='citas_cancelar'),  # Lista
+    path('citas/cancelar/<int:id>/', views.citas_cancelar, name='citas_cancelar_id'),  # Confirmar cancelación
+    path('citas/cancelar_directo/<int:id>/', views.citas_cancelar_directo, name='citas_cancelar_directo'),  # Cancelación directa
+    
+    path('api/disponibilidad/', views.api_disponibilidad, name='api_disponibilidad'),
+    
     # URLs para vistas extras (sin duplicados)
     path('registro_solicitud/', views.registro_solicitud_view, name='registro_solicitud'),
     path('recuperar_contrasena/', views.recuperar_contrasena_view, name='recuperar_contrasena'),
